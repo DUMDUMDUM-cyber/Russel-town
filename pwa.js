@@ -20,8 +20,8 @@ $('play').addEventListener('click', () => {
 
 // Saat aplikasi ditinggalkan, musik dan suara ikut berhenti; lanjut lagi saat dibuka kembali
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) { Talk.cancel(); if (Snd.ctx) Snd.ctx.suspend(); }
-  else if (Snd.ctx) Snd.ctx.resume();
+  if (document.hidden) { Talk.cancel(); if (Snd.ctx) Snd.ctx.suspend(); if (Snd.keepAlive) Snd.keepAlive.pause(); }
+  else { Snd.wake(); if (Snd.keepAlive) Snd.keepAlive.play().catch(() => {}); }
 });
 
 // Tahan lama pada gambar tidak memunculkan menu "simpan gambar"
@@ -42,7 +42,7 @@ refit();
   document.querySelector('#p-parent .settings').appendChild(p);
   const show = () => {
     const b = $('box').getBoundingClientRect(), vv = window.visualViewport;
-    p.textContent = `Versi aa78108733 · layar ${innerWidth}×${innerHeight}` + (vv ? ` · terlihat ${Math.round(vv.width)}×${Math.round(vv.height)}` : '') +
+    p.textContent = `Versi 87abb1a0b4 · layar ${innerWidth}×${innerHeight}` + (vv ? ` · terlihat ${Math.round(vv.width)}×${Math.round(vv.height)}` : '') +
       ` · game ${Math.round(b.width)}×${Math.round(b.height)} mulai y ${Math.round(b.top)}`;
   };
   setInterval(() => { if (G.panel === 'parent') show(); }, 1000);

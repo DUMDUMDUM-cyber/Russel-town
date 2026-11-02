@@ -2,7 +2,7 @@
 
 LOOKS.stationmaster = { skin: '#efbf94', hair: '#2a1d18', style: 'cap', cap: '#2f4a7a', capD: '#1f3258', shirt: '#3f5f9a', shirtD: '#2f4a7a', tie: '#e2483d', pants: '#2a3450', shoes: '#1f1a16' };
 
-const TRAIN_DEST = { mountain: [300, 140], beach: [20, 140], school: [16, 150], office: [20, 140], sushibar: [18, 152], carnival: [160, 80] };
+const TRAIN_DEST = { mountain: [300, 140], beach: [20, 140], school: [16, 150], office: [20, 140], sushibar: [18, 152], carnival: [160, 80], zoo: [160, 128] };
 G.ticket = null;
 
 // ================= GAMBAR KECIL =================
@@ -19,6 +19,7 @@ function stationIcon(c, x, y, dest) {
   else if (dest === 'school') { px(c, x - 6, y - 5, 12, 5, '#fbefd0'); px(c, x - 7, y - 8, 14, 3, '#3f9a9a'); px(c, x - 1, y - 3, 2, 3, PAL.wood); px(c, x + 6, y - 11, 1, 6, '#a9a6a0'); px(c, x + 7, y - 11, 3, 2, '#e2483d'); }
   else if (dest === 'sushibar') { px(c, x - 5, y - 4, 10, 4, '#fbfaf2'); px(c, x - 6, y - 7, 12, 3, '#f59a6a'); px(c, x - 3, y - 7, 1, 3, '#ffc9a8'); px(c, x + 2, y - 7, 1, 3, '#ffc9a8'); }
   else if (dest === 'carnival') { px(c, x, y - 9, 1, 9, '#7d8a98'); for (let k = 0; k < 8; k++) { const a = k * 0.785; px(c, x + Math.round(Math.cos(a) * 5), y - 6 + Math.round(Math.sin(a) * 5), 2, 2, ['#e2483d', '#f4cf3a', '#4f86e0', '#58a84a'][k % 4]); } }
+  else if (dest === 'zoo') { for (let k = 0; k < 7; k++) px(c, x - 3 + Math.round(k * 0.4), y - 4 - k, 3, 1, '#f4cf3a'); px(c, x - 1, y - 13, 6, 3, '#f4cf3a'); px(c, x + 2, y - 12, 1, 1, '#2a1d18'); px(c, x - 1, y - 15, 1, 2, '#a8642a'); px(c, x - 6, y - 4, 8, 4, '#f4cf3a'); disc(c, x - 3, y - 2, 1, '#a8642a'); }
   else { px(c, x - 4, y - 10, 8, 10, '#a9b6c4'); for (let k = 0; k < 3; k++) { px(c, x - 3, y - 9 + k * 3, 2, 2, '#e8f6fc'); px(c, x + 1, y - 9 + k * 3, 2, 2, '#e8f6fc'); } }
 }
 
@@ -32,7 +33,7 @@ PANELS.ticket.addEventListener('pointerdown', e => { if (e.target === PANELS.tic
 function tkOption(k, onClick, big) {
   const w = word(k), b = document.createElement('button');
   b.type = 'button'; b.className = 'tile proc-btn' + (big ? ' big' : ''); b.setAttribute('aria-label', w.id);
-  b.innerHTML = `<img src="${stickerCanvas(k)}" alt=""><span class="tile-zh">${rubyHTML(w.zh, w.py)}</span>`;
+  b.innerHTML = `<img src="${stickerCanvas(k)}" alt=""><span class="tile-zh${LANG === 'ja' && [...w.zh].length > 4 ? ' long' : ''}">${rubyHTML(w.zh, w.py)}</span>`;
   b.addEventListener('click', onClick);
   return b;
 }
@@ -347,6 +348,10 @@ function rideView(c, t) {
     else if (k === 'school') drawHouse(c, x - 24, 50, 48, 34, { roof: '#3f9a9a', roofD: '#2a7272', roofL: '#5cb8b8', wall: '#fbefd0', wallD: '#ecdcb4', door: 17, night: N });
     else if (k === 'office') { px(c, x - 14, 36, 28, 50, '#a9b6c4'); for (let wy = 40; wy < 82; wy += 6) for (let wxx = 3; wxx < 25; wxx += 7) px(c, x - 14 + wxx, wy, 4, 4, N ? '#ffd96a' : '#e8f6fc'); }
     else if (k === 'sushibar') drawHouse(c, x - 22, 54, 44, 30, { roof: '#2f4a7a', roofD: '#1f3258', roofL: '#4f6f9f', wall: '#e8d8b4', wallD: '#d4c098', door: 14, night: N });
+    else if (k === 'zoo') {
+      drawGiraffe(c, x + 8, 84, -1, t); drawElephant(c, x - 26, 86, 1, t, false);
+      for (let fx0 = x - 46; fx0 < x + 30; fx0 += 6) px(c, fx0, 78, 2, 8, PAL.woodD); px(c, x - 46, 80, 76, 2, PAL.wood);
+    }
     else if (k === 'carnival') {
       px(c, x - 1, 62, 2, 24, RB_MD);
       for (let i = 0; i < 8; i++) { const a = i * 0.785 + t * 0.5; px(c, x + Math.round(Math.cos(a) * 18) - 2, 58 + Math.round(Math.sin(a) * 18) - 2, 5, 4, ['#e2483d', '#f4cf3a', '#4f86e0', '#58a84a'][i % 4]); }

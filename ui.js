@@ -10,6 +10,7 @@ function openPanel(name, arg) {
   if (name === 'flower') flowerOpen(arg);
   if (name === 'mirror') mirrorOpen(arg);
   if (name === 'count') countMode(CT.mode);
+  if (name === 'map') requestAnimationFrame(fitMapLabels);
   if (name === 'parent') { syncParentSettings(); const st = Talk.status(); $('voice-status').textContent = st.text; $('voice-status').classList.toggle('warn', !st.ok); }
 }
 function closePanel(silent) {
@@ -54,13 +55,23 @@ function goPlace(key) {
   Object.entries(MAP_SPOTS).forEach(([key, [x, y]]) => {
     const w = word(key), b = document.createElement('button');
     b.type = 'button'; b.className = 'map-label';
-    b.style.left = (x / 160 * 100) + '%'; b.style.top = ((y + 6) / 90 * 100) + '%';
+    const [lx, ly] = MAP_LABEL_AT[key] || [x, y + 6];
+    b.style.left = (lx / 160 * 100) + '%'; b.style.top = (ly / 90 * 100) + '%';
     b.innerHTML = rubyHTML(w.zh, w.py); b.dataset.key = key;
     b.setAttribute('aria-label', w.id);
     b.addEventListener('click', () => goPlace(key));
     box.appendChild(b);
   });
 })();
+// label panjang (English/Jepang) di tepi peta digeser masuk supaya tidak terpotong
+function fitMapLabels() {
+  const st = $('map-labels').getBoundingClientRect();
+  document.querySelectorAll('.map-label').forEach(b => {
+    b.style.marginLeft = '0px';
+    const r = b.getBoundingClientRect();
+    b.style.marginLeft = (r.right > st.right ? st.right - r.right : r.left < st.left ? st.left - r.left : 0) + 'px';
+  });
+}
 MP.cv.addEventListener('pointerdown', e => {
   const [x, y] = cvPoint(MP.cv, e).map(v => v / 2);
   let best = null, bd = 18;

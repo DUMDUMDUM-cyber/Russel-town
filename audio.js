@@ -6,10 +6,13 @@ const Snd = {
   melodyIdx: 4, timer: null,
 
   init() {
-    if (this.ctx) { if (this.ctx.state === 'suspended') this.ctx.resume(); return; }
+    if (this.ctx) { this.wake(); return; }
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return;
+    // iPhone/iPad: tanpa ini musik ikut dibisukan oleh tombol senyap, padahal suara tokoh (TTS) tetap terdengar
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; else this.unlockIOS(); } catch (e) {}
     const c = this.ctx = new AC();
+    c.onstatechange = () => { if (c.state !== 'running' && !document.hidden) setTimeout(() => this.wake(), 300); };
     this.master = c.createGain(); this.master.gain.value = 0.9; this.master.connect(c.destination);
 
     // Musik: kering + gema lembut
@@ -57,15 +60,36 @@ const Snd = {
     this.loop();
   },
 
+  // Lanjutkan suara yang berhenti sendiri (iOS menghentikannya setelah telepon, notifikasi, atau suara TTS)
+  wake() {
+    const c = this.ctx;
+    if (c && c.state !== 'running' && !document.hidden) c.resume().catch(() => {});
+  },
+  // iOS lama (belum punya navigator.audioSession): audio HTML senyap yang diputar berulang
+  // membuat iPhone memperlakukan game seperti pemutar musik, jadi tombol senyap tidak membisukannya
+  unlockIOS() {
+    const ios = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (!ios || this.keepAlive) return;
+    const rate = 8000, n = rate / 2, buf = new ArrayBuffer(44 + n), v = new DataView(buf);
+    const str = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+    str(0, 'RIFF'); v.setUint32(4, 36 + n, true); str(8, 'WAVEfmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, rate, true); v.setUint32(28, rate, true); v.setUint16(32, 1, true); v.setUint16(34, 8, true); str(36, 'data'); v.setUint32(40, n, true);
+    for (let i = 0; i < n; i++) v.setUint8(44 + i, 128);
+    const a = this.keepAlive = document.createElement('audio');
+    a.src = URL.createObjectURL(new Blob([buf], { type: 'audio/wav' }));
+    a.loop = true; a.setAttribute('playsinline', ''); a.setAttribute('x-webkit-airplay', 'deny');
+    a.play().catch(() => {});
+  },
+
   setMusic(on) {
     this.on = on;
     if (!this.ctx) return;
-    this.music.gain.setTargetAtTime(on ? this.vol * 0.5 : 0, this.ctx.currentTime, 0.6);
+    this.music.gain.setTargetAtTime(on ? this.vol * 1.1 : 0, this.ctx.currentTime, 0.6);
   },
 
   duck(d) {
     if (!this.ctx || !this.on) return;
-    this.music.gain.setTargetAtTime(this.vol * (d ? 0.18 : 0.5), this.ctx.currentTime, d ? 0.08 : 0.8);
+    this.music.gain.setTargetAtTime(this.vol * (d ? 0.4 : 1.1), this.ctx.currentTime, d ? 0.08 : 0.8);
   },
 
   mood(o) { Object.assign(this, o); this.applyMood(); },
@@ -111,7 +135,7 @@ const Snd = {
     const o = c.createOscillator(); o.type = 'sine'; o.frequency.value = f; o.detune.value = (Math.random() - 0.5) * 8;
     const o2 = c.createOscillator(); o2.type = 'triangle'; o2.frequency.value = f * 2;
     const env = c.createGain(); env.gain.value = 0;
-    const g2 = c.createGain(); g2.gain.value = 0.12;
+    const g2 = c.createGain(); g2.gain.value = 0.22; // nada atas sedikit lebih kuat supaya terdengar di speaker HP
     o.connect(env); o2.connect(g2); g2.connect(env); env.connect(this.music);
     env.gain.setValueAtTime(0, t);
     env.gain.linearRampToValueAtTime(g, t + 0.03);
@@ -199,6 +223,9 @@ const VOICE_ROLE = {
   robot: { pitch: 0.45, rate: 0.92 }, parrot: { pitch: 1.95, rate: 1.1 },
 };
 const MALE_VOICE = /\bmale\b|yunxi|yunyang|yunjian|yunxia|kangkang|keita|daichi|naoki|ichiro|otoya|hattori|guy|david|mark|davis|tony|andrew|brian|christopher|eric|roger|steffan|alex|daniel|fred|aaron|arthur/i;
+
+// Setiap sentuhan menghidupkan lagi musik yang dihentikan iPhone/iPad (setelah telepon, notifikasi, atau TTS)
+['pointerup', 'touchend', 'keydown'].forEach(ev => document.addEventListener(ev, () => Snd.wake(), { capture: true, passive: true }));
 
 // Suara Mandarin / English / Jepang memakai mesin suara perangkat (Web Speech).
 const Talk = {

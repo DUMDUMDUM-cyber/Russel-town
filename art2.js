@@ -131,9 +131,12 @@ function drawCity(c, x, y, w, h, night) {
 
 // ---------- Peta (kanvas 160x90) ----------
 const MAP_SPOTS = {
-  mountain: [26, 30], home: [62, 22], farm: [62, 56], village: [100, 46], school: [136, 18], office: [148, 46], beach: [126, 76],
-  station: [94, 16], salon: [84, 34], workshop: [148, 66], sushibar: [100, 72], carnival: [122, 46], rocketbase: [22, 70],
+  mountain: [26, 30], home: [62, 22], farm: [62, 56], village: [100, 46], school: [136, 18], office: [148, 46], beach: [124, 76],
+  station: [94, 16], salon: [84, 34], workshop: [153, 66], sushibar: [100, 72], carnival: [123, 50], rocketbase: [22, 70],
+  church: [112, 36], zoo: [137, 62],
 };
+// label yang tidak muat di bawah ikonnya: [x tengah, y atas]
+const MAP_LABEL_AT = { church: [112, 11], zoo: [137, 64] };
 function drawMap(c, cur, t) {
   px(c, 0, 0, 160, 90, '#8fd06a');
   groundPatches(c, 0, 0, 160, 90, 78, '#84c75f', 0.55);
@@ -151,7 +154,7 @@ function drawMap(c, cur, t) {
     for (let i = 0; i <= n; i++) px(c, x1 + (x2 - x1) * i / n - w / 2, y1 + (y2 - y1) * i / n - w / 2, w, w, col);
   };
   const ROADS = [['mountain', 'farm'], ['home', 'farm'], ['farm', 'village'], ['village', 'school'], ['school', 'office'], ['village', 'beach'],
-    ['village', 'station'], ['village', 'salon'], ['office', 'workshop'], ['beach', 'sushibar'], ['school', 'carnival'], ['mountain', 'rocketbase']];
+    ['village', 'station'], ['village', 'salon'], ['office', 'workshop'], ['beach', 'sushibar'], ['school', 'carnival'], ['mountain', 'rocketbase'], ['village', 'church'], ['carnival', 'zoo']];
   // laut di pojok kanan bawah
   for (let y = 66; y < 90; y += 0.5) {
     const x0 = 166 - (y - 66) * 3;
@@ -161,7 +164,7 @@ function drawMap(c, cur, t) {
   ROADS.forEach(([a, b]) => roadLine(a, b, 4, '#c9a46a'));
   ROADS.forEach(([a, b]) => roadLine(a, b, 3, '#e8cf98'));
   // pohon kecil
-  [[44, 68], [76, 6], [118, 6], [108, 30], [44, 82], [78, 74], [154, 28], [8, 46]].forEach(([a, b]) => {
+  [[44, 68], [76, 6], [118, 6], [44, 82], [78, 74], [154, 28], [8, 46]].forEach(([a, b]) => {
     oval(c, a, b + 0.5, 3, 1, 'rgba(30,45,20,0.22)'); px(c, a - 0.5, b - 2, 1, 2, '#7d5230');
     disc(c, a, b - 4, 3, PAL.leafD); disc(c, a - 0.5, b - 4.5, 2.5, PAL.leaf); disc(c, a - 1, b - 5.5, 1, PAL.leafL);
   });
@@ -169,8 +172,6 @@ function drawMap(c, cur, t) {
   oval(c, bx, by + 4, 10, 3, '#f2dca0');
   for (let dy = -4; dy <= 0; dy++) { const w = Math.floor(7 * Math.sqrt(1 - dy * dy / 16)); for (let i = -w; i <= w; i++) px(c, bx - 4 + i, by - 6 + dy, 1, 1, Math.floor((i + 8) / 3) % 2 ? '#ffffff' : '#e2483d'); }
   px(c, bx - 4, by - 6, 1, 10, '#e8e2d6');
-  for (let k = 0; k < 9; k++) px(c, bx + 6 + Math.round(k / 3), by + 3 - k, 2, 1, '#a8743c');
-  for (const [dx, dy] of [[-4, 1], [4, 1], [-3, -2], [3, -2]]) px(c, bx + 9 + dx, by - 6 + dy, 3, 1, '#4a9a3a');
   // ikon tempat
   const [mx, my] = S.mountain;
   for (const [ox, h, col] of [[-8, 16, '#8a8fb0'], [6, 13, '#9da2c2'], [-1, 20, '#7a7fa2']]) {
@@ -201,6 +202,16 @@ function drawMap(c, cur, t) {
   { const [x, y] = S.carnival; px(c, x - 0.5, y - 6, 1, 9, '#7d8a98'); for (let k = 0; k < 24; k++) { const a = k / 24 * 6.283 + t * 0.5; px(c, x + Math.cos(a) * 7, y - 6 + Math.sin(a) * 7, 1, 1, ['#e2483d', '#f4cf3a', '#4f86e0', '#58a84a'][k % 4]); } disc(c, x, y - 6, 1, '#f4cf3a'); }
   { const [x, y] = S.rocketbase; px(c, x - 7, y + 2, 14, 2, '#a9a6a0'); px(c, x - 2, y - 10, 4, 12, '#ffffff'); for (let k = 0; k < 4; k++) px(c, x - 2 + k * 0.5, y - 14 + k, 4 - k, 1, '#e2483d'); px(c, x - 4, y - 1, 2, 3, '#e2483d'); px(c, x + 2, y - 1, 2, 3, '#e2483d'); disc(c, x, y - 6, 1, '#4f86e0');
     if (Math.floor(t * 3) % 2) { px(c, x - 1, y + 2, 2, 2, '#ffd84a'); } }
+  { const [x, y] = S.church; px(c, x - 5, y - 8, 10, 9, '#f4f0e6'); px(c, x - 5, y - 8, 10, 1, '#e6dfcf');
+    for (let k = 0; k < 4; k++) px(c, x - 1.5 - k * 1.5, y - 12 + k, 3 + k * 3, 1, '#a8352b');
+    px(c, x - 1, y - 16, 2, 5, '#f4f0e6'); px(c, x - 0.5, y - 19, 1, 3, '#f4cf3a'); px(c, x - 1.5, y - 18, 3, 1, '#f4cf3a');
+    px(c, x - 1, y - 4, 2, 5, PAL.wood); px(c, x - 4, y - 6, 2, 3, '#4f86e0'); px(c, x + 2, y - 6, 2, 3, '#4f86e0'); }
+  { const [x, y] = S.zoo;
+    px(c, x - 3, y - 9, 6, 3, '#f4cf3a'); px(c, x - 3, y - 6, 1, 5, '#d9b02a'); px(c, x + 2, y - 6, 1, 5, '#d9b02a');
+    for (let k = 0; k < 6; k++) px(c, x - 3 - k * 0.3, y - 10 - k, 1.5, 1, '#f4cf3a');
+    px(c, x - 5.5, y - 17, 3, 2, '#f4cf3a'); px(c, x - 5, y - 16.5, 0.5, 0.5, '#2a1d18'); px(c, x - 4, y - 18, 0.5, 1, '#a8642a');
+    disc(c, x - 1, y - 8, 0.5, '#a8642a'); disc(c, x + 1.5, y - 8, 0.5, '#a8642a');
+    for (let k = -5; k <= 5; k += 2.5) px(c, x + k, y - 3, 1, 4, PAL.woodD); px(c, x - 5, y - 2, 11, 1, PAL.wood); }
   // penanda posisi Russel
   if (S[cur]) {
     const [px0, py0] = S[cur], b = Math.round(Math.abs(Math.sin(t * 4)) * 3);
