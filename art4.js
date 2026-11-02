@@ -135,20 +135,26 @@ function drawDogTrick(c, x, y, dir, f, state, t) {
 }
 
 // ---------- Robot & mesin kopi (kantor Ayah) ----------
-function drawRobot(c, x, y, dir, t, carry, moving) {
+// carry: true = kopi, 'milk' = susu; dance: melompat sambil mengangkat tangan bergantian
+function drawRobot(c, x, y, dir, t, carry, moving, dance) {
   x = Math.round(x); y = Math.round(y);
   shadow(c, x, y, 7);
-  const bob = moving && Math.floor(t * 8) % 2 ? 1 : 0, blink = Math.floor(t * 2) % 7 === 0;
-  px(c, x - 5, y - 3, 4, 3, '#4a4a52'); px(c, x + 1, y - 3, 4, 3, '#4a4a52'); px(c, x - 5, y - 2, 4, 1, '#7d8a98'); px(c, x + 1, y - 2, 4, 1, '#7d8a98');
+  const swing = Math.floor(t * 6) % 2;
+  const bob = dance ? (swing ? 3 : 0) : moving && Math.floor(t * 8) % 2 ? 1 : 0, blink = Math.floor(t * 2) % 7 === 0;
+  px(c, x - 5, y - 3 - bob, 4, 3 + bob, '#4a4a52'); px(c, x + 1, y - 3 - bob, 4, 3 + bob, '#4a4a52'); px(c, x - 5, y - 2, 4, 1, '#7d8a98'); px(c, x + 1, y - 2, 4, 1, '#7d8a98');
   const by = y - bob;
   px(c, x - 6, by - 14, 12, 11, '#c9d4e0'); px(c, x - 6, by - 14, 12, 1, '#e8eef2'); px(c, x - 6, by - 4, 12, 1, '#9aa8b8');
   px(c, x - 4, by - 12, 8, 5, '#4f86e0'); px(c, x - 3, by - 11, 2, 1, Math.floor(t * 3) % 2 ? '#8fe07a' : '#2f5bab'); px(c, x + 1, by - 11, 2, 1, Math.floor(t * 3) % 2 ? '#2f5bab' : '#ffd84a');
   if (carry) {
     px(c, x + dir * 5 - (dir < 0 ? 4 : 0), by - 11, 5, 2, '#9aa8b8');
     const cx = x + dir * 9 - (dir < 0 ? 4 : 0);
-    px(c, cx, by - 15, 4, 4, '#ffffff'); px(c, cx, by - 15, 4, 1, '#7d5230'); px(c, cx + (dir > 0 ? 4 : -1), by - 14, 1, 2, '#ffffff');
-    if (Math.floor(t * 4) % 2) px(c, cx + 1, by - 18, 1, 2, 'rgba(255,255,255,0.8)');
+    px(c, cx, by - 15, 4, 4, '#ffffff'); px(c, cx, by - 15, 4, 1, carry === 'milk' ? '#dfe8f0' : '#7d5230'); px(c, cx + (dir > 0 ? 4 : -1), by - 14, 1, 2, '#ffffff');
+    if (carry !== 'milk' && Math.floor(t * 4) % 2) px(c, cx + 1, by - 18, 1, 2, 'rgba(255,255,255,0.8)');
     px(c, x - dir * 6 - (dir > 0 ? 2 : 0), by - 12, 2, 6, '#9aa8b8');
+  } else if (dance) {
+    [[x - 8, swing], [x + 6, !swing]].forEach(([ax, up]) => {
+      px(c, ax, by - (up ? 19 : 12), 2, up ? 7 : 6, '#9aa8b8'); px(c, ax, by - (up ? 20 : 6), 2, 1, '#4a4a52');
+    });
   } else { px(c, x - 8, by - 12, 2, 6, '#9aa8b8'); px(c, x + 6, by - 12, 2, 6, '#9aa8b8'); px(c, x - 8, by - 6, 2, 1, '#4a4a52'); px(c, x + 6, by - 6, 2, 1, '#4a4a52'); }
   px(c, x - 6, by - 26, 12, 11, '#e8eef2'); px(c, x - 5, by - 27, 10, 1, '#e8eef2'); px(c, x - 6, by - 16, 12, 1, '#c9d4e0');
   px(c, x - 4, by - 24, 8, 6, '#2a3a4a');
@@ -158,12 +164,12 @@ function drawRobot(c, x, y, dir, t, carry, moving) {
   px(c, x - 7, by - 23, 1, 3, '#9aa8b8'); px(c, x + 6, by - 23, 1, 3, '#9aa8b8');
   px(c, x, by - 31, 1, 4, '#7d8a98'); disc(c, x, by - 32, 1, Math.floor(t * 2) % 2 ? '#e2483d' : '#ff9a8a');
 }
-function drawCoffeeMachine(c, x, y, brewing, t) {
+function drawCoffeeMachine(c, x, y, brewing, t, noCup) {
   x = Math.round(x); y = Math.round(y);
   px(c, x - 16, y - 14, 32, 14, '#d9b98a'); px(c, x - 16, y - 14, 32, 2, '#ead2a8'); px(c, x - 16, y - 2, 32, 2, '#a8865a');
   px(c, x - 9, y - 34, 16, 20, '#3a3f4a'); px(c, x - 9, y - 34, 16, 2, '#5a6070'); px(c, x - 6, y - 30, 10, 5, '#7d8a98');
   px(c, x - 5, y - 29, 2, 2, brewing ? '#8fe07a' : '#e2483d'); px(c, x - 2, y - 24, 4, 2, '#2a2a2e');
-  px(c, x - 3, y - 19, 6, 5, '#ffffff'); px(c, x - 3, y - 19, 6, 1, '#7d5230');
+  if (!noCup) { px(c, x - 3, y - 19, 6, 5, '#ffffff'); px(c, x - 3, y - 19, 6, 1, '#7d5230'); }
   if (brewing) { if (Math.floor(t * 8) % 2) px(c, x - 1, y - 22, 1, 3, '#7d5230'); for (let k = 0; k < 2; k++) px(c, x - 2 + k * 3, y - 24 - ((t * 10 + k * 3) % 6), 1, 2, 'rgba(255,255,255,0.75)'); }
   px(c, x + 9, y - 22, 6, 8, '#7d5230'); px(c, x + 9, y - 22, 6, 2, '#a8743c');
 }

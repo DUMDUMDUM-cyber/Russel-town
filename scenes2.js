@@ -246,21 +246,37 @@ SCENES.office = (() => {
     lines: [[{ k: 'auntie', zh: '阿姨好！', by: 'me' }, { k: 'q_son', by: 'np' }, { k: 'a_son', by: 'me' }], [{ k: 'q_howru', by: 'np' }, { k: 'a_howru', by: 'me' }]] }));
   S.objs.push(npc('uncle', 220, 92, 'down', { lines: [[{ k: 'uncle', zh: '叔叔好！', by: 'me' }, { k: 'q_name', by: 'np' }, { k: 'a_name', by: 'me' }]] }));
 
-  // mesin kopi & robot: diketuk → robot ke mesin, membuat kopi, mengantarkannya ke Ayah (malam: ke Om)
-  const machine = { x: 218, y: 58, brewing: false, hit: [202, 26, 34, 32], go: [218, 68],
-    draw(c, t) { drawCoffeeMachine(c, 218, 58, this.brewing, t); }, tap() { say([{ k: 'coffeemachine' }]); } };
+  // mesin kopi: Russel bisa mengambil kopi sendiri, lalu memberikannya ke Ayah
+  const machine = { x: 218, y: 58, brewing: false, own: 0, noCup: 0, hit: [202, 26, 34, 32], go: [218, 68],
+    draw(c, t) { drawCoffeeMachine(c, 218, 58, this.brewing, t, this.noCup > 0); },
+    update(dt) {
+      if (this.noCup > 0) this.noCup -= dt;
+      if (this.own <= 0) return;
+      this.own -= dt;
+      if (Math.random() < dt * 3) fx('steam', 218, 34, 1);
+      if (this.own <= 0) {
+        this.brewing = false;
+        if (bagAdd('coffee', 218, 44, true)) { this.noCup = 4; say([{ k: 'coffee' }, { k: 'givedad' }]); }
+      }
+    },
+    tap() { say([{ k: 'coffeemachine' }]); },
+    arrive() {
+      if (this.brewing) return;
+      doAct(G.boy, 'wash', 1.2); sfx('bubbles'); this.brewing = true; this.own = 1.6; this.noCup = 0;
+    } };
   S.blocks.push([202, 44, 34, 14]);
   S.objs.push(machine);
   const uncle = S.objs.find(o => o.look === 'uncle');
+  // robot: diketuk → pilih gambar: buat kopi (untuk Russel), buat susu, menari, atau ikuti Russel
   const robot = {
-    x: 150, y: 120, dir: 1, st: 'patrol', pi: 0, wait: 0, carry: false, moving: false, route: [], timer: 0,
+    voice: 'robot', x: 150, y: 120, dir: 1, st: 'patrol', pi: 0, wait: 0, carry: false, moving: false, route: [], timer: 0, what: 'coffee',
     patrol: [[150, 120], [250, 118], [250, 168], [150, 168]],
     get hit() { return [this.x - 9, this.y - 33, 18, 33]; }, get go() { return [this.x + (G.boy.x < this.x ? -16 : 16), this.y + 2]; },
-    draw(c, t) { drawRobot(c, this.x, this.y, this.dir, t, this.carry, this.moving); },
-    step(tx, ty, dt) {
+    draw(c, t) { drawRobot(c, this.x, this.y, this.dir, t, this.carry, this.moving, this.st === 'dance'); },
+    step(tx, ty, dt, sp = 24) {
       const dx = tx - this.x, dy = ty - this.y, d = Math.hypot(dx, dy);
       if (d < 1) { this.moving = false; return true; }
-      const s = Math.min(d, 24 * dt); this.x += dx / d * s; this.y += dy / d * s; this.moving = true;
+      const s = Math.min(d, sp * dt); this.x += dx / d * s; this.y += dy / d * s; this.moving = true;
       if (Math.abs(dx) > 0.5) this.dir = dx > 0 ? 1 : -1;
       return false;
     },
@@ -271,17 +287,37 @@ SCENES.office = (() => {
         const [tx, ty] = this.patrol[this.pi];
         if (this.step(tx, ty, dt)) { this.pi = (this.pi + 1) % this.patrol.length; this.wait = 1.2; }
       } else if (this.st === 'toMachine') {
-        if (this.follow(dt)) { this.st = 'brew'; this.timer = 3; machine.brewing = true; sfx('bubbles'); this.dir = 1; }
+        if (this.follow(dt)) { this.st = 'brew'; this.timer = 3; machine.brewing = true; machine.own = 0; machine.noCup = 0; sfx('bubbles'); this.dir = 1; }
       } else if (this.st === 'brew') {
         this.timer -= dt;
         if (Math.random() < dt * 3) fx('steam', 218, 34, 1);
         if (this.timer <= 0) {
-          machine.brewing = false; this.carry = true; sfx('chime');
-          say([{ k: 'coffee' }]);
-          this.target = dad.hidden ? uncle : dad;
-          this.route = this.target === dad ? [[200, 70], [60, 70], [58, 98]] : [[262, 70], [262, 98]];
-          this.st = 'deliver';
+          machine.brewing = false; this.carry = this.what === 'milk' ? 'milk' : true; sfx('chime');
+          say([{ k: this.what }]);
+          this.route = [[218, 76]];
+          this.st = 'toBoy';
         }
+      } else if (this.st === 'toBoy') {
+        // membawa minuman ke Russel, di mana pun dia berada
+        const b = G.boy;
+        if (!this.follow(dt)) return;
+        if (Math.hypot(b.x - this.x, b.y - this.y) > 18) { this.step(b.x + (this.x < b.x ? -14 : 14), b.y + 1, dt, 36); return; }
+        this.moving = false; this.dir = b.x > this.x ? 1 : -1;
+        this.handOver();
+      } else if (this.st === 'dance') {
+        const b = G.boy;
+        this.timer -= dt; this.moving = false;
+        this.dir = Math.sin(this.timer * 5) > 0 ? 1 : -1;
+        if (Math.random() < dt * 2.5) fx('note', this.x + (Math.random() < 0.5 ? -10 : 10), this.y - 34, 1);
+        // Russel ikut melompat kalau berada di dekat robot
+        if (!b.moving && !b.act && Math.hypot(b.x - this.x, b.y - this.y) < 70) doAct(b, 'hop', 0.9);
+        if (this.timer <= 0) { this.st = 'patrol'; this.wait = 1; say([{ k: 'fun', by: b }]); }
+      } else if (this.st === 'followBoy') {
+        const b = G.boy;
+        this.timer -= dt;
+        if (this.timer <= 0) { this.st = 'back'; this.route = [[150, 120]]; return; }
+        if (Math.hypot(b.x - this.x, b.y - this.y) > 22) this.step(b.x + (this.x < b.x ? -16 : 16), b.y + 1, dt, 40);
+        else this.moving = false;
       } else if (this.st === 'deliver') {
         if (this.follow(dt)) {
           const who = this.target; this.carry = false; this.st = 'back';
@@ -294,10 +330,45 @@ SCENES.office = (() => {
         if (this.follow(dt)) { this.st = 'patrol'; this.pi = 0; }
       }
     },
+    // susu langsung diminum Russel; kopi masuk tas untuk diberikan ke Ayah. Tas penuh: robot mengantar kopinya sendiri.
+    handOver() {
+      const b = G.boy;
+      this.carry = false;
+      if (this.what === 'milk') {
+        b.dir = 'down'; doAct(b, 'eat', 1.4); sfx('eat'); fx('heart', b.x, b.y - 28, 2);
+        say([{ k: 'giveyou', by: this }, { k: 'milk' }, { k: 'yummy', by: b }, { k: 'thanks', by: b }]);
+      } else if (bagAdd('coffee', b.x, b.y - 20, true)) {
+        fx('heart', b.x, b.y - 28, 2);
+        say([{ k: 'giveyou', by: this }, { k: 'thanks', by: b }, { k: 'givedad', by: this }]);
+      } else {
+        this.carry = true; this.target = dad.hidden ? uncle : dad;
+        this.route = this.target === dad ? [[200, 70], [60, 70], [58, 98]] : [[262, 70], [262, 98]];
+        this.st = 'deliver';
+        return;
+      }
+      this.st = 'back'; this.route = [[150, 120]];
+    },
+    brewFor(what, line) {
+      this.what = what; this.st = 'toMachine'; this.route = [[this.x, 70], [218, 70], [218, 66]];
+      say([{ k: line, by: this }]);
+    },
     tap() {
-      if (this.st !== 'patrol') { say([{ k: 'robot' }]); return; }
-      this.st = 'toMachine'; this.route = [[this.x, 70], [218, 70], [218, 66]];
-      sfx('chime'); say([{ k: 'robot', zh: '你好！我是机器人。', by: this }, { k: 'makecoffee', by: this }]);
+      if (this.st !== 'patrol' && this.st !== 'followBoy') { say([{ k: 'robot' }]); return; }
+      this.wait = 7; this.moving = false;
+      sfx('chime'); say([{ k: 'robot', zh: '你好！我是机器人。', by: this }]);
+      offerPics(this.x, this.y - 34, [
+        picBtn('coffee', 'take', () => this.brewFor('coffee', 'makecoffee')),
+        picBtn('milk', 'give', () => this.brewFor('milk', 'milk')),
+        picBtn('dance', 'eat', () => {
+          this.st = 'dance'; this.timer = 5;
+          say([{ k: 'dance', by: this }]);
+          [523, 659, 784, 659, 523, 659, 784, 1047, 784, 659, 523, 392, 523, 659, 784, 1047].forEach((f, i) => Snd.tone(f, 0.24, { gain: 0.09, when: i * 0.3, type: 'triangle' }));
+        }),
+        picBtn('followme', 'throw', () => {
+          this.st = 'followBoy'; this.timer = 40;
+          say([{ k: 'followme', by: G.boy }, { k: 'a_ok', by: this }]);
+        }),
+      ]);
     },
   };
   S.objs.push(robot);

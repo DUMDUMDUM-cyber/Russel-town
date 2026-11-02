@@ -57,7 +57,7 @@ G.boy = { x: 58, y: 92, tx: 58, ty: 92, moving: false, dir: 'down', frame: 0, ft
 G.dog = {
   x: 40, y: 96, dir: 1, f: 0, ft: 0, state: 'sit', happyT: 0, idle: 0, n: 0,
   // Dòudou hanya ada di halaman (Pertanian), tidak ikut ke tempat lain
-  get hidden() { return !G.scene || G.scene.id !== 'farm'; },
+  get hidden() { return !G.scene || G.scene.id !== 'farm' || !!this.hiding; },
   get hit() { return [this.x - 11, this.y - 18, 22, 19]; },
   tap() {
     this.happyT = 1.8; this.n++;
@@ -111,9 +111,18 @@ function offerChoice(x, y, opts) {
   el.hidden = false; clearTimeout(choiceT); choiceT = setTimeout(hideChoice, 6000);
   sfx('pop');
 }
+// Tombol bergambar untuk anak yang belum bisa membaca; offerPics menjaga barisan tetap di dalam layar
+function picBtn(k, act, fn) {
+  const w = word(k);
+  return { act, html: `<img class="act-pic" src="${stickerCanvas(k)}" alt=""><span>${rubyHTML(w.zh, w.py)}</span>`, fn };
+}
+function offerPics(x, y, btns) {
+  const half = btns.length * 16;
+  offerChoice(Math.max(half, Math.min(W - half, x)), Math.max(58, y), btns);
+}
 function bagTake(type) { const i = G.bag.indexOf(type); if (i >= 0) G.bag.splice(i, 1); save(); updateBag(); }
 function eatItem(type) {
-  if (!ITEMS[type].food) { doAct(G.boy, 'wave', 1); say([{ k: 'cannoteat' }]); return; }
+  if (!ITEMS[type].food) { doAct(G.boy, 'wave', 1); say(ITEMS[type].adult ? [{ k: 'coffeeadult' }, { k: 'givedad' }] : [{ k: 'cannoteat' }]); return; }
   bagTake(type);
   G.boy.dir = 'down'; doAct(G.boy, 'eat', 1.4); sfx('eat');
   say([{ k: type }, { k: 'yummy', by: G.boy }]); fx('heart', G.boy.x, G.boy.y - 28, 2);
@@ -388,7 +397,8 @@ function say(list, done) {
     const zh = it.zh ? (it.card ? (LANG !== 'zh' ? card.zh : it.zh) : tr(it.zh)) : card.zh;
     // stiker untuk kata baru; rekaman keluarga dipakai bila kalimatnya sama dengan katanya
     const rec = it.k && window.hasRec && hasRec(it.k) && sameText(zh, card.zh) ? it.k : null;
-    return { zh, id: card.id, rec, onStart: () => { showCard(card, zh); if (it.by) bubble(it.by, zh); if (it.k && window.collectSticker) collectSticker(it.k); } };
+    const who = !it.by ? null : it.by === G.boy ? 'me' : it.by.look || it.by.voice || null;
+    return { zh, id: card.id, rec, who, onStart: () => { showCard(card, zh); if (it.by) bubble(it.by, zh); if (it.k && window.collectSticker) collectSticker(it.k); } };
   });
   Talk.say(items, () => { hideCardSoon(); if (done) done(); });
 }

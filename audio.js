@@ -190,6 +190,16 @@ const Snd = {
   },
 };
 
+// Warna suara tiap tokoh: tinggi nada & kecepatan; m = pakai suara laki-laki kalau perangkat punya
+const VOICE_ROLE = {
+  me: { pitch: 1.45, rate: 1.04 }, gege: { pitch: 1.25, m: 1 }, meimei: { pitch: 1.6, rate: 1.05 }, xiaoyu: { pitch: 1.5 }, lele: { pitch: 1.4, rate: 1.06 }, tiantian: { pitch: 1.35, rate: 1.03 },
+  kid1: { pitch: 1.55 }, kid2: { pitch: 1.4 }, kid3: { pitch: 1.5 }, kid4: { pitch: 1.35 },
+  dad: { pitch: 0.82, m: 1 }, uncle: { pitch: 0.75, m: 1 }, hiker: { pitch: 0.9, rate: 1.05, m: 1 }, grandpa: { pitch: 0.65, rate: 0.9, m: 1 },
+  mom: { pitch: 1.12 }, teacher: { pitch: 1.03, rate: 0.97 }, auntie: { pitch: 0.98 }, colleague: { pitch: 0.92 }, grandma: { pitch: 0.88, rate: 0.88 },
+  robot: { pitch: 0.45, rate: 0.92 }, parrot: { pitch: 1.95, rate: 1.1 },
+};
+const MALE_VOICE = /\bmale\b|yunxi|yunyang|yunjian|yunxia|kangkang|keita|daichi|naoki|ichiro|otoya|hattori|guy|david|mark|davis|tony|andrew|brian|christopher|eric|roger|steffan|alex|daniel|fred|aaron|arthur/i;
+
 // Suara Mandarin / English / Jepang memakai mesin suara perangkat (Web Speech).
 const Talk = {
   supported: typeof window !== 'undefined' && 'speechSynthesis' in window,
@@ -211,6 +221,7 @@ const Talk = {
     this.ja = jas[0] || null;
     const ids = vs.filter(v => /^id/i.test(v.lang)).sort((a, b) => score(b) - score(a));
     this.idv = ids[0] || null;
+    this.male = { zh: zh.find(v => MALE_VOICE.test(v.name)) || null, en: ens.find(v => MALE_VOICE.test(v.name)) || null, ja: jas.find(v => MALE_VOICE.test(v.name)) || null };
   },
 
   // suara untuk bahasa yang sedang dipelajari
@@ -245,27 +256,28 @@ const Talk = {
       if (it.onStart) it.onStart();
       const after = () => { if (this.alsoId && it.id) this.one(it.id, 'id', tok, next); else next(); };
       // rekaman suara keluarga dipakai bila ada; kalau gagal kembali ke suara komputer
-      if (it.rec && this.playRec) this.playRec(it.rec, tok, after, () => this.one(it.zh, LANG, tok, after));
-      else this.one(it.zh, LANG, tok, after);
+      if (it.rec && this.playRec) this.playRec(it.rec, tok, after, () => this.one(it.zh, LANG, tok, after, it.who));
+      else this.one(it.zh, LANG, tok, after, it.who);
     };
     Snd.duck(true);
     setTimeout(next, this.supported ? 60 : 0);
   },
 
-  one(text, lang, tok, done) {
+  one(text, lang, tok, done, who) {
     let fired = false, tm;
     const fin = () => { if (fired) return; fired = true; clearTimeout(tm); if (tok === this.token) setTimeout(done, 220); };
     const est = 600 + text.length * ({ zh: 430, en: 75, ja: 230 }[lang] || 90);
     if (this.supported && !this.main) this.pick();
-    const v = lang === 'id' ? this.idv : this[lang];
+    const role = (lang !== 'id' && VOICE_ROLE[who]) || {};
+    const v = lang === 'id' ? this.idv : (role.m && this.male && this.male[lang]) || this[lang];
     // Tanpa suara bahasa yang cocok, jangan biarkan suara bahasa lain membacanya: cukup tampilkan kartu
     if (!this.supported || !v) { tm = setTimeout(fin, est); return; }
     tm = setTimeout(fin, est + 2500);
     const u = new SpeechSynthesisUtterance(text);
     u.lang = v.lang || { zh: 'zh-CN', en: 'en-US', ja: 'ja-JP', id: 'id-ID' }[lang];
     u.voice = v;
-    u.rate = { zh: 0.78, en: 0.82, ja: 0.85 }[lang] || 0.95;
-    u.pitch = 1.1;
+    u.rate = ({ zh: 0.78, en: 0.82, ja: 0.85 }[lang] || 0.95) * (role.rate || 1);
+    u.pitch = role.pitch || 1.1;
     u.onend = fin; u.onerror = fin;
     speechSynthesis.speak(u);
   },

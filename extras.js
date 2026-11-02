@@ -2,7 +2,8 @@
 // bunga matahari antar hari, kejutan harian, dan hari raya. Semua tersimpan di perangkat ini.
 
 const EX_KEY = 'anan-extras-v1';
-const EX = { heard: [], dogLove: 0, sun: { stage: 0, waterDay: null }, fest: 'auto', bday: '', foundDay: -1, cakeT: 0 };
+const EX = { heard: [], dogLove: 0, sun: { stage: 0, waterDay: null }, fest: 'auto', bday: '', foundDay: -1, cakeT: 0,
+  count: {}, limit: 0, playDay: -1, playSec: 0, parrotMic: false, mission: null, coins: 3, room: { owned: [], off: [] } };
 (function () { try { Object.assign(EX, JSON.parse(localStorage.getItem(EX_KEY) || '{}')); } catch (e) {} })();
 const HEARD = new Set(EX.heard.filter(k => WORDS[k]));
 function exSave() { EX.heard = [...HEARD]; try { localStorage.setItem(EX_KEY, JSON.stringify(EX)); } catch (e) {} }
@@ -12,7 +13,9 @@ const sameText = (a, b) => a.replace(/[，。！？、\s]/g, '') === b.replace(/
 // ================= 1. BUKU STIKER =================
 const THEME_COLS = ['#e2483d', '#f08a32', '#e8b02a', '#58a84a', '#3fa0b8', '#4f86e0', '#8f62c9', '#e8739a'];
 function collectSticker(k) {
-  if (HEARD.has(k) || !WORDS[k]) return;
+  if (!WORDS[k]) return;
+  EX.count[k] = (EX.count[k] || 0) + 1; // dipakai untuk memunculkan lagi kata yang jarang didengar
+  if (HEARD.has(k)) { exSave(); return; }
   HEARD.add(k); exSave(); updateStickerCount();
   const b = $('btn-stickers'); b.classList.remove('bump'); void b.offsetWidth; b.classList.add('bump');
   Snd.tone(1568, 0.18, { gain: 0.06 }); Snd.tone(2093, 0.22, { gain: 0.05, when: 0.08 });

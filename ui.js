@@ -21,7 +21,9 @@ document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click
 Object.values(PANELS).forEach(p => p.addEventListener('pointerdown', e => { if (e.target === p) closePanel(); }));
 window.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
 
+const PANEL_HOOK = {}; // gambar per bingkai untuk jendela tambahan (masak, kamar)
 function panelFrame(dt) {
+  if (PANEL_HOOK[G.panel]) PANEL_HOOK[G.panel](dt);
   if (G.panel === 'flower') flowerDraw(dt);
   if (G.panel === 'mirror') mirrorDraw(dt);
   if (G.panel === 'count') countDraw(dt);
@@ -136,7 +138,8 @@ function flowerMode(m) {
   document.querySelectorAll('#p-flower [data-mode]').forEach(b => b.setAttribute('aria-selected', b.dataset.mode === m ? 'true' : 'false'));
   $('flower-parts').hidden = m !== 'look';
   $('flower-stars').hidden = m !== 'find';
-  $('swatches').hidden = m === 'find';
+  $('swatches').hidden = m === 'find' || m === 'process';
+  procMode(m);
   if (m === 'look') FL.stage = 6;
   if (m === 'grow') { FL.stage = 0; say([{ card: PLANT_CARD() }]); }
   if (m === 'find') { FL.stage = 6; FL.stars = 0; FL.target = null; drawStars(); flowerAsk(); }
@@ -163,7 +166,8 @@ function flowerOpen(ci) {
 function flowerDraw(dt) {
   if (FL.hlT > 0) { FL.hlT -= dt; if (FL.hlT <= 0 && !(FL.mode === 'find' && FL.miss >= 2)) FL.hl = null; }
   const c = FL.sctx;
-  if (FL.detail) drawFlowerDetail(c, FL.detail, FLOWER_COLORS[FL.ci], G.t);
+  if (FL.mode === 'process') procDraw(c, dt);
+  else if (FL.detail) drawFlowerDetail(c, FL.detail, FLOWER_COLORS[FL.ci], G.t);
   else drawBigFlower(c, FLOWER_COLORS[FL.ci], FL.hl, G.t, FL.stage);
   if (!FL.detail && FL.mode === 'grow' && FL.stage < 6) {
     const b = Math.round(Math.abs(Math.sin(G.t * 4)) * 2);
@@ -182,6 +186,7 @@ function partAt(x, y) {
 }
 FL.cv.addEventListener('pointerdown', e => {
   const [x, y] = cvPoint(FL.cv, e).map(v => v / 8);
+  if (FL.mode === 'process') { procNext(); return; }
   if (FL.detail) { flowerSay(FL.detail); return; }
   if (FL.mode === 'grow') {
     if (FL.stage >= 6) { FL.ci = (FL.ci + 1) % FLOWER_COLORS.length; FL.stage = 0; sfx('pop'); say([{ card: PLANT_CARD() }]); return; }

@@ -28,6 +28,28 @@ function drawSheepBig(c, x, y, dir, t, shorn) {
   drawScaled(c, x, y, 'sheep' + dir + nod + !!shorn, 28, 24, 8, (cc, ax, ay) => drawSheep(cc, ax, ay, dir, nod ? 0.5 : 0, shorn));
 }
 
+// ---------- Kopi sebagai barang di tas (bukan makanan: minuman orang dewasa) ----------
+// Juga masakan buatan Russel (makanan) dan koin (bukan barang tas, hanya untuk gambar)
+Object.assign(ITEMS, { coffee: { adult: 1 }, tomatoegg: { food: 1 }, carrotsoup: { food: 1 }, applejuice: { food: 1 } });
+const _drawItemBase2 = drawItem;
+drawItem = function (c, x, y, type, big) {
+  x = Math.round(x); y = Math.round(y);
+  const bowl = (band) => { px(c, x - 5, y - 4, 10, 3, '#f3f6fa'); px(c, x - 4, y - 1, 8, 1, '#c5d2e0'); px(c, x - 5, y - 3, 10, 1, band); };
+  if (type === 'coffee') {
+    px(c, x - 3, y - 6, 6, 6, '#ffffff'); px(c, x - 3, y - 6, 6, 2, '#7d5230'); px(c, x + 3, y - 5, 2, 3, '#ffffff'); px(c, x - 3, y - 1, 6, 1, '#c9c6c0');
+    px(c, x - 1, y - 9, 1, 2, '#c9c6c0'); px(c, x + 1, y - 10, 1, 2, '#c9c6c0');
+  } else if (type === 'tomatoegg') {
+    oval(c, x, y - 2, 7, 2, '#f3f6fa'); oval(c, x, y - 4, 5, 2, '#f6d35a'); px(c, x - 3, y - 5, 2, 2, '#e2483d'); px(c, x + 1, y - 4, 2, 2, '#e2483d'); px(c, x - 1, y - 6, 2, 1, '#e2483d');
+  } else if (type === 'carrotsoup') {
+    bowl('#58a84a'); oval(c, x, y - 5, 4, 1, '#f08a32'); px(c, x - 2, y - 6, 1, 1, '#ffb066'); px(c, x + 2, y - 6, 1, 1, '#ffb066');
+    px(c, x - 1, y - 9, 1, 2, 'rgba(255,255,255,0.8)'); px(c, x + 2, y - 10, 1, 2, 'rgba(255,255,255,0.8)');
+  } else if (type === 'applejuice') {
+    px(c, x - 2, y - 9, 5, 9, '#d8e8f0'); px(c, x - 2, y - 7, 5, 7, '#f4c23a'); px(c, x - 1, y - 6, 1, 4, '#ffe08a'); px(c, x + 2, y - 12, 1, 5, '#e2483d');
+  } else if (type === 'coin') {
+    disc(c, x, y - 4, 4, '#c99a1c'); disc(c, x, y - 4, 3, '#f4cf3a'); px(c, x - 1, y - 6, 1, 4, '#fff2a8');
+  } else _drawItemBase2(c, x, y, type, big);
+};
+
 // ---------- Tikar piknik di Pegunungan (x,y = tengah tikar) ----------
 function drawPicnic(c, x, y) {
   x = Math.round(x); y = Math.round(y);
@@ -187,6 +209,10 @@ ST_ART.clock = (c, x, y) => drawClock(c, x, y - 8, 0.8);
 ST_ART.aquarium = (c, x, y) => { px(c, x - 15, y - 22, 30, 20, '#cfe8f5'); px(c, x - 14, y - 19, 28, 16, '#4fa0cf'); drawGoldfish(c, x, y - 12, Math.PI / 1.8); px(c, x - 14, y - 4, 28, 2, '#e9c86a'); px(c, x - 16, y - 2, 32, 2, '#7d5230'); };
 ST_ART.coffeemachine = (c, x, y) => drawCoffeeMachine(c, x, y + 1, false, 0);
 set('robot makecoffee', (c, x, y) => drawRobot(c, x, y, 1, 0.3, false, false));
+ST_ART.dance = (c, x, y) => { drawRobot(c, x, y, 1, 1 / 6, false, false, true); drawNote(c, x - 12, y - 18, '#8f62c9'); drawNote(c, x + 13, y - 24, '#e2483d'); };
+ST_ART.followme = (c, x, y) => { drawPerson(c, x - 10, y, { look: 'me', dir: 'right', mood: 'happy', noShadow: true }); drawRobot(c, x + 10, y, -1, 0.3, false, false); };
+ST_ART.coffeeadult = (c, x, y) => { drawPerson(c, x - 5, y, { look: 'dad', dir: 'down', mood: 'happy', noShadow: true }); drawItem(c, x + 12, y - 2, 'coffee'); };
+ST_ART.givedad = (c, x, y) => { drawPerson(c, x - 10, y, { look: 'me', dir: 'right', mood: 'happy', noShadow: true }); drawPerson(c, x + 10, y, { look: 'dad', dir: 'left', mood: 'happy', noShadow: true }); drawItem(c, x, y - 20, 'coffee'); };
 ST_ART.desk = (c, x, y) => { px(c, x - 15, y - 14, 30, 8, '#d9b98a'); px(c, x - 15, y - 6, 30, 3, '#a8865a'); px(c, x - 13, y - 3, 2, 3, '#7d5f3a'); px(c, x + 11, y - 3, 2, 3, '#7d5f3a'); };
 ST_ART.chair = (c, x, y) => { px(c, x - 5, y - 16, 10, 8, '#c08a52'); px(c, x - 5, y - 16, 10, 1, '#d9a56a'); px(c, x - 6, y - 8, 12, 3, '#a8743c'); px(c, x - 5, y - 5, 2, 5, '#7d5230'); px(c, x + 3, y - 5, 2, 5, '#7d5230'); };
 ST_ART.window = (c, x, y) => { px(c, x - 13, y - 26, 26, 22, PAL.woodD); px(c, x - 11, y - 24, 22, 18, '#8fd0f2'); px(c, x - 1, y - 24, 2, 18, PAL.woodD); px(c, x - 11, y - 16, 22, 2, PAL.woodD); disc(c, x + 6, y - 20, 2, '#ffd84a'); };

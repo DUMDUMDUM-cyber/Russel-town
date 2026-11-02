@@ -57,8 +57,10 @@ function npc(look, x, y, dir, extra) {
     tap() { talk(this); },
     receive(type) {
       this.talkT = 5; this.dir = G.boy.x < this.x ? 'left' : 'right';
-      doAct(this, 'wave', 1.4); fx('heart', this.x, this.y - 34, 3);
-      const list = [{ k: 'giveyou', by: 'me' }, { k: 'thanks', by: 'np' }];
+      // kopi hanya untuk orang dewasa: anak-anak menolak dan kopinya kembali ke tas
+      if (type === 'coffee' && (LOOKS[this.look].kid || LOOKS[this.look].teen)) { doAct(this, 'wave', 1.4); bagAdd('coffee', this.x, this.y - 20, true); say([{ k: 'coffeeadult', by: this }]); return; }
+      doAct(this, type === 'coffee' ? 'eat' : 'wave', 1.4); fx('heart', this.x, this.y - 34, 3);
+      const list = [{ k: type === 'coffee' ? 'pleasedrink' : 'giveyou', by: 'me' }, { k: 'thanks', by: 'np' }];
       if (type === 'wildflower' || type === 'shell' || type === 'starfish') list.push({ k: 'pretty', by: 'np' });
       list.push({ k: 'welcome', by: 'me' });
       say(list.map(it => Object.assign({}, it, { by: it.by === 'me' ? G.boy : this })));
