@@ -61,7 +61,11 @@ function drawGoldfish(c, x, y, t) {
 function drawSunflowerPot(c, x, y, stage, t) {
   x = Math.round(x); y = Math.round(y);
   shadow(c, x, y, 8);
-  px(c, x - 7, y - 9, 14, 9, '#c9673a'); px(c, x - 8, y - 10, 16, 2, '#e08a5a'); px(c, x - 6, y - 9, 12, 1, '#6b4226');
+  // pot mengecil ke bawah: terang di kiri, gelap di kanan
+  px(c, x - 7, y - 8, 14, 3, '#c9673a'); px(c, x - 6, y - 5, 12, 3, '#c9673a'); px(c, x - 5, y - 2, 10, 2, '#c9673a');
+  px(c, x + 4, y - 8, 3, 3, '#a8502c'); px(c, x + 3, y - 5, 3, 3, '#a8502c'); px(c, x + 2, y - 2, 3, 2, '#a8502c');
+  px(c, x - 6, y - 8, 1, 5, '#e08a5a');
+  px(c, x - 6, y - 11, 12, 1, '#6b4226');
   const sw = Math.round(Math.sin(t * 1.5));
   if (stage === 1) { px(c, x - 1, y - 11, 3, 1, '#8a5a35'); px(c, x, y - 12, 1, 1, '#f0dcae'); }
   if (stage >= 2) px(c, x, y - 9 - [0, 0, 5, 14, 24, 30][stage], 2, [0, 0, 5, 14, 24, 30][stage], '#3f8a3a');
@@ -75,9 +79,11 @@ function drawSunflowerPot(c, x, y, stage, t) {
     disc(c, fx, fy, 5, '#8a5a35'); disc(c, fx, fy, 3, '#6b4226');
     px(c, fx - 2, fy - 1, 1, 1, '#2a1d18'); px(c, fx + 2, fy - 1, 1, 1, '#2a1d18'); px(c, fx - 1, fy + 2, 3, 1, '#2a1d18');
   }
-  // papan nama kecil
-  px(c, x + 9, y - 10, 1, 10, PAL.woodD); px(c, x + 6, y - 14, 8, 5, PAL.wood);
-  for (let i = 0; i < Math.max(1, stage); i++) px(c, x + 7 + i, y - 12, 1, 1, i < stage ? '#f4cf3a' : '#7d5230');
+  // bibir pot di depan batang tanaman
+  px(c, x - 8, y - 10, 16, 2, '#e08a5a'); px(c, x - 8, y - 10, 16, 1, '#f0a67a'); px(c, x - 8, y - 9, 16, 1, '#c9673a'); px(c, x + 4, y - 10, 4, 2, '#c9673a');
+  // label tanaman: titik kuning menunjukkan tahap tumbuh
+  px(c, x + 11, y - 9, 1, 9, PAL.woodD); px(c, x + 8, y - 14, 7, 5, '#fff6d8');
+  for (let i = 0; i < stage; i++) px(c, x + 9 + i, y - 12, 1, 1, '#e8b02a');
 }
 
 // ---------- Kostum (digambar di atas baju & kepala) ----------

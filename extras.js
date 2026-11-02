@@ -194,10 +194,12 @@ function growSun() {
 }
 SCENES.farm.blocks.push([168, 92, 16, 8]);
 SCENES.farm.objs.push({
-  x: 176, y: 100, hit: [164, 52, 26, 50], go: [176, 110],
+  // Russel berdiri di samping pot supaya potnya tidak tertutup
+  x: 176, y: 100, hit: [164, 52, 26, 50], go: [158, 100],
   draw(c, t) { drawSunflowerPot(c, this.x, this.y, EX.sun.stage, t); },
   tap() { growSun(); const st = EX.sun.stage; say([{ k: st >= 5 ? 'sunflower' : st === 4 ? 'bud' : st >= 2 ? 'sprout' : 'seed' }]); },
   arrive() {
+    G.boy.dir = 'right';
     growSun();
     const s = EX.sun, td = today();
     if (s.stage === 0) { s.stage = 1; s.waterDay = null; exSave(); sfx('plant'); doAct(G.boy, 'wash', 0.8); say([{ k: 'seed' }, { k: 'sunflower' }]); return; }

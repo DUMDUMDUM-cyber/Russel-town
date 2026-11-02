@@ -19,26 +19,21 @@ function drawBee(c, x, y, t, dusted) {
   px(c, x + 3, y - 1, 2, 2, '#2a1d18');
   if (dusted) { px(c, x - 3, y + 1, 1, 1, '#ffe98a'); px(c, x, y + 2, 1, 1, '#ffe98a'); px(c, x + 2, y + 2, 1, 1, '#ffe98a'); px(c, x - 2, y - 1, 1, 1, '#ffe98a'); }
 }
-function drawGround(c) {
-  c.clearRect(0, 0, 48, 56);
-  px(c, 0, 0, 48, 41, '#dff1fb');
-  px(c, 0, 41, 48, 15, '#8a5a35');
-  for (let i = 0; i < 12; i++) px(c, (i * 13) % 46, 44 + (i * 7) % 11, 2, 1, '#7a4c2c');
-  px(c, 0, 40, 48, 2, PAL.grass);
-}
+function drawGround(c) { drawFlowerGround(c); }
 function miniFlower(c, x, col) {
-  px(c, x, 26, 2, 15, '#3f8a3a'); oval(c, x - 3, 34, 3, 1, '#4a9a3a'); oval(c, x + 5, 31, 3, 1, '#4a9a3a');
-  for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2; disc(c, x + 1 + Math.round(Math.cos(a) * 5), 20 + Math.round(Math.sin(a) * 5), 3, col[2]); }
-  for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2; disc(c, x + 1 + Math.round(Math.cos(a) * 5), 19 + Math.round(Math.sin(a) * 5), 2, col[1]); }
-  disc(c, x + 1, 20, 3, col[0] === 'yellow' ? '#8a5a35' : '#f4cf3a');
+  px(c, x, 26, 2, 15, '#3f8a3a'); px(c, x, 26, 0.5, 15, '#58a84a');
+  bigLeaf(c, x, 35, x - 6, 33.5, 1.4, '#4a9a3a', '#2f7a2c', '#7cc85a'); bigLeaf(c, x + 2, 32, x + 8, 30.5, 1.4, '#4a9a3a', '#2f7a2c', '#7cc85a');
+  for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2; disc(c, x + 1 + Math.cos(a) * 5, 20 + Math.sin(a) * 5, 3, col[2]); }
+  for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2; disc(c, x + 1 + Math.cos(a) * 5, 19.5 + Math.sin(a) * 5, 2.5, col[1]); }
+  disc(c, x + 1, 20, 3, col[0] === 'yellow' ? '#8a5a35' : '#f4cf3a'); disc(c, x + 1, 20, 1.5, col[0] === 'yellow' ? '#6b4226' : '#e9b02a');
 }
 function glowLeaves(c) {
-  oval(c, 17, 31, 6, 2, '#a6e36e'); px(c, 12, 31, 11, 1, '#58a84a');
-  oval(c, 31, 27, 6, 2, '#a6e36e'); px(c, 26, 27, 11, 1, '#58a84a');
+  bigLeaf(c, 23, 32, 11, 30, 2.8, '#a6e36e', '#58a84a', '#d4f5a0');
+  bigLeaf(c, 25, 28, 37, 26, 2.8, '#a6e36e', '#58a84a', '#d4f5a0');
 }
 function drawPod(c, x, y, r, col, dark) {
-  disc(c, x, y, r, dark); disc(c, x, y - 1, r - 1, col);
-  px(c, x - Math.round(r / 2), y - Math.round(r / 2) - 1, 2, 1, 'rgba(255,255,255,0.6)');
+  disc(c, x, y, r, dark); disc(c, x, y - 0.5, r - 0.5, col);
+  oval(c, x - r / 2, y - r / 2 - 0.5, 1.5, 0.75, 'rgba(255,255,255,0.6)');
 }
 
 // ---------- Fotosintesis ----------
@@ -110,7 +105,7 @@ function drawSeedStep(c, col, s, t) {
     for (let k = 0; k < 6; k++) {
       const a = k / 6 * Math.PI * 2 - Math.PI / 2, fall = Math.max(0, t * 16 - k * 5);
       const x = 24 + Math.cos(a) * 8 + Math.sin(fall / 6 + k) * (fall ? 3 : 0), y = Math.min(39, 15 + Math.sin(a) * 8 + fall);
-      disc(c, Math.round(x), Math.round(y), fall ? 2 : 4, col[1]);
+      disc(c, x, y, fall ? 2.5 : 4.5, col[2]); disc(c, x, y - 0.5, fall ? 2 : 3.5, col[1]);
     }
     disc(c, 24, 15, 4, col[0] === 'yellow' ? '#8a5a35' : '#f4cf3a');
   } else if (s === 1) {

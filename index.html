@@ -73,18 +73,18 @@ rt { font-family: var(--lat); font-size: 0.4em; font-weight: 700; letter-spacing
 .t1 { color: var(--t1); } .t2 { color: var(--t2); } .t3 { color: var(--t3); } .t4 { color: var(--t4); } .t5 { color: var(--t5); }
 
 /* Kartu kata */
-#card { position: absolute; left: 50%; bottom: calc(var(--u) * 1.6); transform: translateX(-50%); display: flex; align-items: center; gap: calc(var(--u) * 1.6); padding: calc(var(--u) * 0.8) calc(var(--u) * 1.2) calc(var(--u) * 0.8) calc(var(--u) * 2.4); background: var(--parch-glass); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); border: calc(var(--u) * 0.5) solid var(--wood); border-radius: calc(var(--u) * 1.6); box-shadow: 0 0 0 calc(var(--u) * 0.25) var(--wood-d), 0 calc(var(--u) * 0.6) 0 rgba(0,0,0,0.3); max-width: 80%; pointer-events: auto; }
+#card { --cu: calc(var(--u) * 0.7); position: absolute; left: 50%; bottom: calc(var(--u) * 1.6); transform: translateX(-50%); display: flex; align-items: center; gap: calc(var(--cu) * 1.6); padding: calc(var(--cu) * 0.8) calc(var(--cu) * 1.2) calc(var(--cu) * 0.8) calc(var(--cu) * 2.4); background: var(--parch-glass); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); border: calc(var(--cu) * 0.5) solid var(--wood); border-radius: calc(var(--cu) * 1.6); box-shadow: 0 0 0 calc(var(--cu) * 0.25) var(--wood-d), 0 calc(var(--cu) * 0.6) 0 rgba(0,0,0,0.3); max-width: 80%; pointer-events: auto; }
 #card.pop { animation: pop 0.32s cubic-bezier(.3,1.6,.5,1); }
 @keyframes pop { from { transform: translateX(-50%) scale(0.8); opacity: 0.4; } to { transform: translateX(-50%) scale(1); opacity: 1; } }
 .card-text { display: flex; flex-direction: column; align-items: center; min-width: 0; }
-#card-zh { font-family: var(--zh); font-size: calc(var(--u) * 5.4); line-height: 1.25; color: var(--ink); white-space: nowrap; }
+#card-zh { font-family: var(--zh); font-size: calc(var(--cu) * 5.4); line-height: 1.25; color: var(--ink); white-space: nowrap; }
 #card-zh .plain { display: block; } #card-zh .plainpy { display: block; font-family: var(--lat); font-size: 0.38em; color: var(--ink-soft); text-align: center; }
-#card-id { font-size: calc(var(--u) * 1.7); color: var(--ink-soft); line-height: 1.1; }
+#card-id { font-size: calc(var(--u) * 1.3); color: var(--ink-soft); line-height: 1.1; }
 /* Mode English: huruf Andika (dibuat untuk anak yang mulai membaca), kalimat panjang boleh turun baris */
 :root.lang-en { --zh: "Andika", "Segoe UI", system-ui, sans-serif; }
 :root.lang-en #card-zh, :root.lang-en .bubble, :root.lang-en #place, :root.lang-en .en, :root.lang-en .tile-zh, :root.lang-en .num, :root.lang-en .lyric, :root.lang-en #story-zh, :root.lang-en .story-title, :root.lang-en .video-title, :root.lang-en .map-label, :root.lang-en .badge { font-weight: 700; }
 :root.lang-en #card-zh { white-space: normal; text-align: center; text-wrap: balance; }
-:root.lang-en #card-zh.xlong { font-size: calc(var(--u) * 3.1); }
+:root.lang-en #card-zh.xlong { font-size: calc(var(--cu) * 3.1); }
 :root.lang-en .tabs button, :root.lang-en .act { font-size: calc(var(--u) * 2.4); }
 :root.lang-en .num { font-size: calc(var(--u) * 2); }
 :root.lang-en .num.big { font-size: calc(var(--u) * 3.4); }
@@ -93,7 +93,7 @@ rt { font-family: var(--lat); font-size: 0.4em; font-weight: 700; letter-spacing
 /* Mode Jepang: huruf bulat Kosugi Maru, romaji kecil di atas (tombol) atau di bawah (kartu) */
 :root.lang-ja { --zh: "Kosugi Maru", "Hiragino Maru Gothic ProN", "Yu Gothic", "Meiryo", sans-serif; }
 :root.lang-ja #card-zh { white-space: normal; text-align: center; }
-:root.lang-ja #card-zh.xlong { font-size: calc(var(--u) * 3.1); }
+:root.lang-ja #card-zh.xlong { font-size: calc(var(--cu) * 3.1); }
 :root.lang-ja .tabs button, :root.lang-ja .act { font-size: calc(var(--u) * 2.6); }
 :root.lang-ja .num { font-size: calc(var(--u) * 2.4); }
 :root.lang-ja .num.big { font-size: calc(var(--u) * 3.6); }
@@ -101,8 +101,9 @@ rt { font-family: var(--lat); font-size: 0.4em; font-weight: 700; letter-spacing
 ruby.ja rt { font-family: var(--lat); font-weight: 700; letter-spacing: 0; }
 .lyric span.done { color: var(--leaf-d); }
 .lyric span.now { color: var(--berry); text-decoration: underline; text-decoration-thickness: calc(var(--u) * 0.4); }
-#card-say { width: calc(var(--u) * 6); height: calc(var(--u) * 6); border-radius: 50%; border: calc(var(--u) * 0.4) solid var(--leaf-d); background: var(--leaf); display: grid; place-items: center; padding: 0; flex: none; }
+#card-say { position: relative; width: calc(var(--cu) * 6); height: calc(var(--cu) * 6); border-radius: 50%; border: calc(var(--cu) * 0.4) solid var(--leaf-d); background: var(--leaf); display: grid; place-items: center; padding: 0; flex: none; }
 #card-say svg { width: 58%; height: 58%; }
+#card-say::after { content: ""; position: absolute; inset: calc(var(--u) * -1); } /* area sentuh tetap cukup besar untuk jari anak */
 
 /* Gelembung bicara */
 #bubbles { position: absolute; inset: 0; pointer-events: none; }
@@ -188,13 +189,13 @@ ruby.ja rt { font-family: var(--lat); font-weight: 700; letter-spacing: 0; }
 #count-next.ready { animation: nudge 0.9s ease-in-out infinite; background: linear-gradient(#8fd06a, var(--leaf)); border-color: var(--leaf-d); }
 @keyframes nudge { 50% { transform: translateX(calc(var(--u) * 0.8)) scale(1.08); } }
 .count-stage { position: relative; margin: calc(var(--u) * 1) auto; width: min(100%, calc(var(--u) * 64)); aspect-ratio: 160 / 80; max-width: 100%; }
-#card-zh.long { font-size: calc(var(--u) * 3.9); }
+#card-zh.long { font-size: calc(var(--cu) * 3.9); }
 #card { cursor: grab; touch-action: none; z-index: 1; }
-#card.dragging { cursor: grabbing; box-shadow: 0 0 0 calc(var(--u) * 0.25) var(--wood-d), 0 calc(var(--u) * 1.4) calc(var(--u) * 2) rgba(0,0,0,0.35); }
-.grip { align-self: stretch; width: calc(var(--u) * 1.2); margin-left: calc(var(--u) * -1.2); background: radial-gradient(circle, var(--wood) 30%, transparent 32%) 0 0 / calc(var(--u) * 0.6) calc(var(--u) * 0.6); opacity: 0.7; }
+#card.dragging { cursor: grabbing; box-shadow: 0 0 0 calc(var(--cu) * 0.25) var(--wood-d), 0 calc(var(--cu) * 1.4) calc(var(--cu) * 2) rgba(0,0,0,0.35); }
+.grip { align-self: stretch; width: calc(var(--cu) * 1.2); margin-left: calc(var(--cu) * -1.2); background: radial-gradient(circle, var(--wood) 30%, transparent 32%) 0 0 / calc(var(--cu) * 0.6) calc(var(--cu) * 0.6); opacity: 0.7; }
 #btn-bag { position: relative; }
 #btn-hud { width: calc(var(--u) * 4.6); opacity: 0.92; }
-#box.hud-off .hud > :not(#btn-hud), #box.hud-off #btn-parent { display: none; }
+#box.hud-off .hud > :not(#btn-hud):not(#btn-bag), #box.hud-off #btn-parent { display: none; }
 #bag-count { position: absolute; top: calc(var(--u) * -0.9); right: calc(var(--u) * -0.9); min-width: calc(var(--u) * 2.6); height: calc(var(--u) * 2.6); border-radius: 999px; background: var(--berry); color: #fff; font-size: calc(var(--u) * 1.6); line-height: calc(var(--u) * 2.6); font-weight: 700; text-align: center; padding: 0 calc(var(--u) * 0.5); }
 #btn-bag.bump { animation: bump 0.4s cubic-bezier(.3,1.6,.5,1); }
 @keyframes bump { 40% { transform: scale(1.25); } }
@@ -335,9 +336,10 @@ ruby.ja rt { font-family: var(--lat); font-weight: 700; letter-spacing: 0; }
 #p-drum.rhythm-on .pad-small { width: calc(var(--u) * 13); height: calc(var(--u) * 13); font-size: calc(var(--u) * 2.8); }
 #p-drum.rhythm-on .pad-bell { width: calc(var(--u) * 11.5); height: calc(var(--u) * 11.5); font-size: calc(var(--u) * 2.4); }
 #p-drum.rhythm-on .pads { gap: calc(var(--u) * 9); }
-/* menu atas semi transparan supaya tidak menutupi game */
-.hud, .hud-right { opacity: 0.5; transition: opacity 0.2s; }
-.hud:hover, .hud:focus-within, .hud-right:hover, .hud-right:focus-within { opacity: 1; }
+/* menu atas: alasnya semi transparan supaya tidak menutupi game, ikonnya tetap jelas */
+.hud .wood, .hud-right .wood { background: rgba(58,38,24,0.36); border-color: rgba(58,38,24,0.3); box-shadow: none; transition: background 0.2s; }
+.hud .wood:hover, .hud .wood:focus-visible, .hud-right .wood:hover, .hud-right .wood:focus-visible { background: rgba(58,38,24,0.72); }
+#btn-hud { opacity: 1; }
 .count-tabs { flex: 0 1 auto; }
 .count-tabs button { padding: calc(var(--u) * 0.3) calc(var(--u) * 1.6); }
 .count-quiz { display: flex; align-items: center; justify-content: space-between; gap: calc(var(--u) * 2); }
@@ -352,7 +354,7 @@ ruby.ja rt { font-family: var(--lat); font-weight: 700; letter-spacing: 0; }
 .stars { display: flex; gap: calc(var(--u) * 0.8); }
 .fstar { width: calc(var(--u) * 4.6); height: calc(var(--u) * 4.6); background: #d9c9a6; clip-path: polygon(50% 0, 62% 35%, 100% 38%, 70% 60%, 80% 98%, 50% 76%, 20% 98%, 30% 60%, 0 38%, 38% 35%); }
 .fstar.on { background: var(--sun); filter: drop-shadow(0 0 2px #c99a1c); }
-.map-sheet { width: 84%; padding: calc(var(--u) * 1.2); }
+.map-sheet { width: 82%; padding: calc(var(--u) * 1.2); overflow: hidden; }
 .map-stage { position: relative; width: 100%; aspect-ratio: 160 / 90; }
 #map-cv { width: 100%; height: 100%; border-radius: calc(var(--u) * 1); border: calc(var(--u) * 0.4) solid var(--wood-d); touch-action: none; }
 #map-labels { position: absolute; inset: 0; pointer-events: none; }
@@ -502,7 +504,7 @@ ruby.ja rt { font-family: var(--lat); font-weight: 700; letter-spacing: 0; }
     <section class="panel" id="p-map" hidden>
       <div class="sheet map-sheet">
         <button class="close" data-close type="button" aria-label="Tutup"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 2l6 6M8 2l-6 6" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg></button>
-        <div class="map-stage"><canvas id="map-cv" width="160" height="90"></canvas><div id="map-labels"></div></div>
+        <div class="map-stage"><canvas id="map-cv" width="320" height="180"></canvas><div id="map-labels"></div></div>
       </div>
     </section>
 

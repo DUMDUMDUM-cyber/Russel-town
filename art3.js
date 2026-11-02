@@ -251,7 +251,7 @@ function drawGate(c, x, y, open) {
 
 // ---------- Detail bagian bunga (kanvas 48x56) ----------
 function drawFlowerDetail(c, part, col, t) {
-  c.clearRect(0, 0, 48, 56);
+  c.clearRect(0, 0, 48 * PX, 56 * PX);
   if (part === 'root') {
     for (let y = 0; y < 56; y++) px(c, 0, y, 48, 1, y < 4 ? PAL.grass : (y % 9 === 0 ? '#7a4c2c' : '#8a5a35'));
     for (let i = 0; i < 14; i++) px(c, (i * 17) % 46, 8 + (i * 11) % 46, 2, 1, '#6b4226');
@@ -270,15 +270,15 @@ function drawFlowerDetail(c, part, col, t) {
   px(c, 0, 0, 48, 56, '#dff1fb');
   for (let i = 0; i < 5; i++) px(c, 4 + i * 9, 50 - (i % 2) * 3, 4, 1, '#f4fbff');
   if (part === 'leaf') {
-    for (let x = 4; x <= 44; x++) {
-      const k = (x - 4) / 40, h = Math.round(Math.sin(Math.PI * k) * 15);
-      px(c, x, 28 - h, 1, h * 2 + 1, '#58a84a'); px(c, x, 28 - h, 1, Math.max(1, Math.round(h * 0.55)), '#7cc85a');
-      px(c, x, 28 - h, 1, 1, '#2f6e26'); px(c, x, 28 + h, 1, 1, '#2f6e26');
+    for (let x = 4; x <= 44; x += 0.5) {
+      const k = (x - 4) / 40, h = Math.sin(Math.PI * k) * 15;
+      px(c, x, 28 - h, 0.5, h * 2 + 1, '#58a84a'); px(c, x, 28 - h, 0.5, Math.max(1, h * 0.55), '#7cc85a');
+      px(c, x, 28 - h, 0.5, 0.5, '#2f6e26'); px(c, x, 28 + h + 0.5, 0.5, 0.5, '#2f6e26');
     }
     px(c, 0, 28, 6, 2, '#3d7f33'); px(c, 4, 28, 40, 1, '#3d7f33');
-    for (let i = 9; i < 40; i += 6) for (let k = 0; k < 7; k++) {
+    for (let i = 9; i < 40; i += 6) for (let k = 0; k < 7; k += 0.5) {
       const lim = Math.sin(Math.PI * (i + k - 4) / 40) * 15 - 2;
-      if (k < lim) { px(c, i + k, 27 - k, 1, 1, '#3d7f33'); px(c, i + k, 29 + k, 1, 1, '#3d7f33'); }
+      if (k < lim) { px(c, i + k, 27 - k, 0.5, 0.5, '#3d7f33'); px(c, i + k, 29 + k, 0.5, 0.5, '#3d7f33'); }
     }
     disc(c, 30, 19, 2, '#cfefff'); px(c, 29, 18, 1, 1, '#ffffff');
   } else if (part === 'stem') {
@@ -289,13 +289,16 @@ function drawFlowerDetail(c, part, col, t) {
     for (let i = 2; i < 56; i += 5) { px(c, 20, i, 1, 1, '#7cc85a'); px(c, 27, i + 2, 1, 1, '#7cc85a'); }
     for (let k = 0; k < 4; k++) { const yy = 54 - ((t * 14 + k * 14) % 56); px(c, 23, Math.round(yy), 1, 3, '#8fd0f2'); }
   } else if (part === 'petal') {
-    for (let y = 4; y <= 52; y++) {
-      const k = (y - 4) / 48, w = Math.round(Math.pow(Math.sin(Math.PI * Math.min(1, k * 1.15)), 0.7) * 17 * (1 - k * 0.55));
+    for (let y = 4; y <= 52; y += 0.5) {
+      const k = (y - 4) / 48, w = Math.pow(Math.sin(Math.PI * Math.min(1, k * 1.15)), 0.7) * 17 * (1 - k * 0.55);
       if (w <= 0) continue;
-      px(c, 24 - w, y, w * 2 + 1, 1, col[1]); px(c, 24 - w, y, 2, 1, col[2]); px(c, 24 + w - 1, y, 2, 1, col[2]);
-      if (y > 8 && y < 30) px(c, 24 - Math.round(w * 0.6), y, 2, 1, '#ffffff');
+      px(c, 24 - w, y, w * 2 + 1, 0.5, col[1]); px(c, 24 - w, y, 1, 0.5, col[2]); px(c, 24 + w, y, 1, 0.5, col[2]);
+      if (y > 8 && y < 30) px(c, 24 - w * 0.6, y, 2, 0.5, 'rgba(255,255,255,0.75)');
     }
-    for (const a of [-0.5, -0.25, 0, 0.25, 0.5]) for (let r = 0; r < 34; r++) px(c, 24 + Math.round(Math.sin(a) * r), 50 - Math.round(Math.cos(a) * r), 1, 1, col[2]);
+    for (const a of [-0.5, -0.25, 0, 0.25, 0.5]) for (let r = 0; r < 34; r += 0.5) {
+      const vx = Math.sin(a) * r, vy = 50 - Math.cos(a) * r, k = (vy - 4) / 48;
+      if (Math.abs(vx) < Math.pow(Math.sin(Math.PI * Math.min(1, k * 1.15)), 0.7) * 17 * (1 - k * 0.55) - 1) px(c, 24 + vx, vy, 0.5, 0.5, col[2]); // urat tidak keluar dari kelopak
+    }
   } else if (part === 'pistil') {
     const center = col[0] === 'yellow' ? '#8a5a35' : '#f4cf3a';
     for (let k = 0; k < 16; k++) {

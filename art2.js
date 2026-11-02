@@ -135,18 +135,34 @@ const MAP_SPOTS = {
 };
 function drawMap(c, cur, t) {
   px(c, 0, 0, 160, 90, '#8fd06a');
+  groundPatches(c, 0, 0, 160, 90, 78, '#84c75f', 0.55);
+  groundPatches(c, 0, 0, 160, 90, 79, '#9bd878', 0.6);
   const r = rng(77);
-  for (let i = 0; i < 140; i++) px(c, Math.floor(r() * 160), Math.floor(r() * 90), 2, 1, r() < 0.5 ? '#7cc05a' : '#a6dc80');
-  // sungai
-  for (let y = 0; y < 90; y++) { const x = 112 + Math.round(Math.sin(y / 14) * 6) - Math.round(y * 0.5); px(c, x, y, 6, 1, PAL.water); px(c, x + 1, y, 1, 1, PAL.waterL); }
+  for (let i = 0; i < 90; i++) px(c, Math.floor(r() * 160), Math.floor(r() * 90), 1.5, 0.5, r() < 0.5 ? '#74b854' : '#b4e692');
+  // sungai bertepi pasir
+  for (let y = 0; y < 90; y += 0.5) {
+    const x = 112 + Math.sin(y / 14) * 6 - y * 0.5;
+    px(c, x - 1, y, 8, 0.5, '#d9c48a'); px(c, x, y, 6, 0.5, PAL.water); px(c, x + 0.5, y, 0.5, 0.5, PAL.waterD); px(c, x + 2, y, 1, 0.5, PAL.waterL);
+  }
   // jalan
-  const S = MAP_SPOTS, road = (a, b) => {
-    const [x1, y1] = S[a], [x2, y2] = S[b], n = Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1));
-    for (let i = 0; i <= n; i++) { const x = Math.round(x1 + (x2 - x1) * i / n), y = Math.round(y1 + (y2 - y1) * i / n); px(c, x - 1, y - 1, 3, 3, '#e8cf98'); }
+  const S = MAP_SPOTS, roadLine = (a, b, w, col) => {
+    const [x1, y1] = S[a], [x2, y2] = S[b], n = Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1)) * 2;
+    for (let i = 0; i <= n; i++) px(c, x1 + (x2 - x1) * i / n - w / 2, y1 + (y2 - y1) * i / n - w / 2, w, w, col);
   };
+  const ROADS = [['mountain', 'farm'], ['home', 'farm'], ['farm', 'village'], ['village', 'school'], ['school', 'office'], ['village', 'beach']];
   // laut di pojok kanan bawah
-  for (let y = 66; y < 90; y++) { const x0 = 166 - (y - 66) * 3; px(c, x0 - 3, y, 3, 1, '#f2dca0'); px(c, x0, y, 160 - x0, 1, (y + Math.floor(t * 3)) % 5 ? '#4fa0cf' : '#8fd0f2'); }
-  road('mountain', 'farm'); road('home', 'farm'); road('farm', 'village'); road('village', 'school'); road('school', 'office'); road('village', 'beach');
+  for (let y = 66; y < 90; y += 0.5) {
+    const x0 = 166 - (y - 66) * 3;
+    px(c, x0 - 4, y, 4, 0.5, '#f2dca0'); px(c, x0 - 0.5, y, 1, 0.5, '#ffffff');
+    px(c, x0 + 0.5, y, 160 - x0, 0.5, (Math.floor(y) + Math.floor(t * 3)) % 5 ? '#4fa0cf' : '#8fd0f2');
+  }
+  ROADS.forEach(([a, b]) => roadLine(a, b, 4, '#c9a46a'));
+  ROADS.forEach(([a, b]) => roadLine(a, b, 3, '#e8cf98'));
+  // pohon kecil
+  [[8, 62], [16, 72], [32, 78], [44, 68], [84, 16], [92, 6], [118, 8], [108, 28], [14, 52], [78, 74], [152, 30]].forEach(([a, b]) => {
+    oval(c, a, b + 0.5, 3, 1, 'rgba(30,45,20,0.22)'); px(c, a - 0.5, b - 2, 1, 2, '#7d5230');
+    disc(c, a, b - 4, 3, PAL.leafD); disc(c, a - 0.5, b - 4.5, 2.5, PAL.leaf); disc(c, a - 1, b - 5.5, 1, PAL.leafL);
+  });
   const [bx, by] = S.beach;
   oval(c, bx, by + 4, 10, 3, '#f2dca0');
   for (let dy = -4; dy <= 0; dy++) { const w = Math.floor(7 * Math.sqrt(1 - dy * dy / 16)); for (let i = -w; i <= w; i++) px(c, bx - 4 + i, by - 6 + dy, 1, 1, Math.floor((i + 8) / 3) % 2 ? '#ffffff' : '#e2483d'); }
@@ -156,8 +172,8 @@ function drawMap(c, cur, t) {
   // ikon tempat
   const [mx, my] = S.mountain;
   for (const [ox, h, col] of [[-8, 16, '#8a8fb0'], [6, 13, '#9da2c2'], [-1, 20, '#7a7fa2']]) {
-    for (let k = 0; k < h; k++) px(c, mx + ox - k, my + 6 - h + k, k * 2 + 1, 1, col);
-    for (let k = 0; k < 4; k++) px(c, mx + ox - k, my + 6 - h + k, k * 2 + 1, 1, '#ffffff');
+    for (let k = 0; k < h; k += 0.5) { px(c, mx + ox - k, my + 6 - h + k, k * 2 + 0.5, 0.5, col); px(c, mx + ox, my + 6 - h + k, k + 0.5, 0.5, 'rgba(50,50,90,0.22)'); }
+    for (let k = 0; k < 4; k += 0.5) { px(c, mx + ox - k, my + 6 - h + k, k * 2 + 0.5, 0.5, '#ffffff'); px(c, mx + ox, my + 6 - h + k, k + 0.5, 0.5, '#dfe6ef'); }
   }
   const [hx, hy] = S.home;
   px(c, hx - 7, hy - 2, 14, 8, '#f3e3c0'); for (let k = 0; k < 6; k++) px(c, hx - 9 + k, hy - 3 - k, 18 - k * 2, 1, '#d4553f'); px(c, hx - 1, hy + 2, 3, 4, PAL.wood);

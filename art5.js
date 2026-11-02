@@ -2,30 +2,132 @@
 
 LOOKS.gege = { teen: 1, skin: '#f6cba6', hair: '#2a1d18', hairL: '#4a3a30', style: 'dad', shirt: '#4fa3a0', shirtD: '#367d7a', pants: '#3f4a6a', shoes: '#ffffff' };
 
-// ---------- Sapi & domba 1,5× (dihaluskan dengan EPX, disimpan per pose) ----------
-const _bigCache = {};
-function drawScaled(c, x, y, key, w, h, shadowR, fn) {
-  let img = _bigCache[key];
-  if (!img) {
-    const src = document.createElement('canvas'); src.width = w; src.height = h;
-    const keep = SHADOW_TO; SHADOW_TO = _trash;
-    fn(src.getContext('2d', { willReadFrequently: true }), w / 2, h - 2);
-    SHADOW_TO = keep;
-    img = _bigCache[key] = scale2xCanvas(src);
-  }
-  const s = 1.5;
-  shadow(c, x, y, Math.round(shadowR * s));
-  c.save(); c.imageSmoothingEnabled = false;
-  c.drawImage(img, Math.round(x - (w / 2) * s), Math.round(y - (h - 2) * s), Math.round(w * s), Math.round(h * s));
-  c.restore();
-}
+// ---------- Sapi & domba besar: digambar langsung pada ukuran aslinya, ukuran pikselnya sama dengan tokoh lain ----------
 function drawCowBig(c, x, y, dir, t) {
-  const chew = Math.sin(t * 5) > 0;
-  drawScaled(c, x, y, 'cow' + dir + chew, 34, 26, 11, (cc, ax, ay) => drawCow(cc, ax, ay, dir, chew ? 0.1 : 0.7));
+  x = Math.round(x); y = Math.round(y);
+  shadow(c, x, y, 21);
+  const W1 = '#fbf8f0', W2 = '#e4dccc', K = '#3a3230', K2 = '#544a46', PK = '#f3a6b0', PD = '#d97f8e', HF = '#5a4638';
+  const chew = Math.sin(t * 5) > 0 ? 1 : 0, blink = Math.sin(t * 0.9) > 0.97;
+  flip(c, x, dir, () => {
+    const P = (dx, dy, w, h, col) => px(c, dx, y + dy, w, h, col);
+    // kaki sisi jauh
+    P(-13, -11, 4, 10, W2); P(-13, -2, 4, 2, HF); P(4, -11, 4, 10, W2); P(4, -2, 4, 2, HF);
+    // ekor
+    P(-21, -23, 1, 8, W2); P(-22, -16, 3, 4, K); P(-22, -13, 3, 1, K2);
+    // badan: punggung membulat, perut berbayang
+    P(-17, -25, 25, 1, W1); P(-19, -24, 29, 2, W1); P(-20, -22, 31, 9, W1); P(-19, -13, 29, 2, W2); P(-17, -11, 25, 1, W2);
+    // bercak hitam
+    P(-17, -24, 8, 4, K); P(-19, -21, 7, 4, K); P(-15, -17, 4, 2, K); P(-16, -23, 3, 1, K2);
+    P(-5, -22, 8, 5, K); P(-3, -17, 5, 2, K); P(-6, -20, 1, 2, K); P(-4, -21, 3, 1, K2);
+    P(6, -25, 4, 3, K); P(8, -22, 2, 2, K);
+    // ambing
+    P(-11, -11, 7, 3, PK); P(-11, -11, 7, 1, PD); P(-10, -8, 1, 2, PD); P(-6, -8, 1, 2, PD);
+    // kaki sisi dekat
+    P(-19, -13, 5, 12, W1); P(-19, -2, 5, 2, HF); P(-15, -12, 1, 10, W2);
+    P(0, -13, 5, 12, W1); P(0, -2, 5, 2, HF); P(4, -12, 1, 10, W2);
+    // leher & kepala
+    P(7, -26, 7, 13, W1); P(7, -14, 6, 1, W2);
+    P(11, -34, 10, 11, W1); P(10, -33, 12, 9, W1); P(19, -25, 2, 2, W2);
+    P(10, -33, 5, 5, K); P(11, -34, 3, 1, K);
+    // tanduk & telinga
+    P(12, -36, 2, 2, '#efe2b8'); P(18, -36, 2, 2, '#efe2b8'); P(12, -36, 1, 1, '#fff6d8'); P(18, -36, 1, 1, '#fff6d8');
+    P(7, -32, 3, 3, K); P(8, -31, 2, 1, PK);
+    // mata
+    if (blink) P(16, -30, 3, 1, K); else { P(16, -31, 3, 3, K); P(16, -31, 1, 1, '#ffffff'); }
+    // moncong: rahang bawah naik turun saat mengunyah
+    P(13, -26, 10, 4, PK); P(13, -26, 10, 1, '#f8c4cb'); P(16, -24, 1, 1, PD); P(20, -24, 1, 1, PD);
+    P(14, -22 + chew, 8, 2, PD); P(14, -22, 8, 1, PK);
+    // kalung lonceng
+    P(8, -18, 6, 1, '#e2483d'); P(9, -17, 4, 3, '#c99a1c'); P(9, -17, 3, 2, '#f4cf3a');
+  });
 }
+// shorn = sudah dicukur: badan lebih kecil & merah muda
 function drawSheepBig(c, x, y, dir, t, shorn) {
-  const nod = Math.sin(t * 1.5) > 0.6;
-  drawScaled(c, x, y, 'sheep' + dir + nod + !!shorn, 28, 24, 8, (cc, ax, ay) => drawSheep(cc, ax, ay, dir, nod ? 0.5 : 0, shorn));
+  x = Math.round(x); y = Math.round(y);
+  shadow(c, x, y, 15);
+  const Wl = shorn ? '#f8e0d2' : '#faf6ec', Wd = shorn ? '#e8c6b2' : '#d9d1c0', Wm = shorn ? '#f0d2c0' : '#ece6d8', K = '#4a3f3a', K2 = '#2f2826';
+  const nod = Math.sin(t * 1.5) > 0.6 ? 1 : 0, s = shorn ? 2 : 0;
+  flip(c, x, dir, () => {
+    const P = (dx, dy, w, h, col) => px(c, dx, y + dy, w, h, col);
+    // kaki
+    P(-6, -8, 3, 7, K2); P(3, -8, 3, 7, K2);
+    // bulu bergerombol, gelap di bawah & terang di atas
+    [[-9, -11, 6], [-2, -9, 6], [5, -11, 5], [-9, -15, 6], [0, -17, 7], [7, -15, 5]].forEach(([a, b, r]) => disc(c, a, y + b + s, r - s, Wd));
+    [[-9, -13, 5], [-2, -11, 5], [5, -12, 4], [0, -16, 6], [-7, -16, 5], [6, -16, 4]].forEach(([a, b, r]) => disc(c, a, y + b + s, r - s, Wm));
+    [[-8, -17, 3], [-1, -18, 4], [5, -17, 2]].forEach(([a, b, r]) => disc(c, a, y + b + s, Math.max(1, r - s), Wl));
+    // ikal bulu
+    if (!shorn) [[-11, -14], [-5, -12], [1, -13], [7, -12], [-4, -19], [3, -20]].forEach(([a, b]) => { P(a, b, 2, 1, Wd); P(a + 2, b + 1, 1, 1, Wd); });
+    // kaki depan (sisi dekat)
+    P(-10, -7, 3, 7, K); P(-10, -1, 3, 1, K2); P(7, -7, 3, 7, K); P(7, -1, 3, 1, K2);
+    // kepala
+    const hy = nod;
+    P(10, -19 + hy, 7, 9, K); P(11, -20 + hy, 5, 1, K); P(11, -10 + hy, 5, 1, K);
+    P(7, -18 + hy, 4, 2, K); P(8, -18 + hy, 2, 1, '#e8a8a8');
+    P(13, -17 + hy, 3, 3, '#ffffff'); P(14, -16 + hy, 2, 2, K2); P(14, -16 + hy, 1, 1, '#ffffff');
+    P(15, -12 + hy, 2, 1, '#d99a9a');
+    disc(c, 12, y - 21 + hy, 3, Wm); disc(c, 12, y - 22 + hy, 2, Wl);
+  });
+}
+
+// ---------- Makanan di meja rumah: digambar besar pada ukuran aslinya supaya jelas ----------
+function drawFoodBig(c, x, y, f) {
+  x = Math.round(x); y = Math.round(y);
+  const bowl = band => {
+    px(c, x - 10, y - 10, 20, 1, '#ffffff'); px(c, x - 10, y - 9, 20, 3, '#eef3f8'); px(c, x - 9, y - 6, 18, 2, '#e7edf4'); px(c, x - 8, y - 4, 16, 2, '#dbe4ee');
+    px(c, x - 6, y - 2, 12, 1, '#c5d2e0'); px(c, x - 4, y - 1, 8, 1, '#aebccb');
+    px(c, x - 10, y - 8, 20, 2, band); px(c, x + 5, y - 9, 5, 1, 'rgba(120,140,170,0.25)'); px(c, x + 4, y - 6, 5, 2, 'rgba(120,140,170,0.25)');
+  };
+  const plate = () => { oval(c, x, y - 2, 12, 2, '#c5d2e0'); oval(c, x, y - 3, 12, 2, '#eef3f8'); oval(c, x, y - 3, 9, 1, '#ffffff'); };
+  switch (f) {
+    case 'rice':
+      oval(c, x, y - 11, 8, 4, '#f4f1e8'); oval(c, x - 1, y - 12, 6, 3, '#ffffff');
+      [[-5, -11], [-2, -14], [2, -12], [5, -11], [0, -10], [3, -14]].forEach(([a, b]) => px(c, x + a, y + b, 2, 1, '#e3dfd0'));
+      bowl('#4f86e0'); break;
+    case 'noodles':
+      oval(c, x, y - 11, 8, 3, '#e8bf5a');
+      [[-7, -12, 5], [-3, -13, 6], [1, -11, 6], [-5, -10, 4], [3, -13, 4]].forEach(([a, b, w]) => px(c, x + a, y + b, w, 1, '#fbe6a4'));
+      disc(c, x - 3, y - 12, 2, '#fff6e0'); disc(c, x - 3, y - 12, 1, '#f4b23a'); px(c, x + 3, y - 12, 2, 1, '#58a84a'); px(c, x + 1, y - 10, 2, 1, '#58a84a');
+      for (let i = 0; i < 11; i++) { px(c, x + 2 + i, y - 11 - i, 1, 1, '#a8743c'); px(c, x + 5 + i, y - 11 - i, 1, 1, '#8a5a35'); }
+      bowl('#e2483d'); break;
+    case 'dumpling':
+      plate();
+      [[0, -5], [-6, -2], [6, -2]].forEach(([a, b]) => {
+        oval(c, x + a, y + b - 3, 5, 3, '#e3d3b0'); oval(c, x + a, y + b - 4, 5, 2, '#f8f0dc');
+        for (let k = -3; k <= 3; k += 2) px(c, x + a + k, y + b - 7, 1, 2, '#d9c69e');
+        px(c, x + a - 2, y + b - 4, 2, 1, '#ffffff');
+      });
+      break;
+    case 'bun':
+      [[-5, -7], [5, -7]].forEach(([a, b]) => {
+        oval(c, x + a, y + b - 2, 5, 4, '#e9dfc8'); oval(c, x + a - 1, y + b - 3, 4, 3, '#fffaf0');
+        px(c, x + a - 1, y + b - 6, 2, 1, '#d9c69e'); px(c, x + a, y + b - 5, 1, 1, '#d9c69e');
+      });
+      px(c, x - 11, y - 7, 22, 7, '#c9a26a'); px(c, x - 11, y - 7, 22, 1, '#e3c48c'); px(c, x - 11, y - 1, 22, 1, '#a07c48');
+      for (let i = -9; i < 11; i += 3) px(c, x + i, y - 5, 1, 4, '#a98650');
+      px(c, x - 11, y - 4, 22, 1, '#b8945a');
+      break;
+    case 'egg':
+      plate();
+      oval(c, x - 4, y - 8, 4, 5, '#e8d6b4'); oval(c, x - 5, y - 9, 3, 4, '#f6ead2'); px(c, x - 6, y - 11, 1, 2, '#ffffff');
+      oval(c, x + 4, y - 7, 4, 5, '#ecdcbc'); oval(c, x + 3, y - 8, 3, 4, '#fbf0dc'); px(c, x + 2, y - 10, 1, 2, '#ffffff');
+      break;
+    case 'milk':
+      px(c, x - 5, y - 20, 10, 20, '#d8e8f0'); px(c, x - 5, y - 16, 10, 16, '#ffffff'); px(c, x + 2, y - 16, 3, 16, '#e6eef4');
+      oval(c, x, y - 16, 5, 1, '#fbfdff'); px(c, x - 5, y - 20, 10, 1, '#f4fbff'); px(c, x - 4, y - 19, 1, 3, '#f4fbff');
+      px(c, x - 5, y - 1, 10, 1, '#c5d2e0');
+      break;
+    case 'fish':
+      plate();
+      oval(c, x - 1, y - 7, 8, 4, '#d8701e'); oval(c, x - 1, y - 8, 7, 3, '#f08a32');
+      for (let i = 0; i < 4; i++) { px(c, x + 6 + i, y - 8 - i, 1, 2 + i * 2, '#f08a32'); }
+      px(c, x + 9, y - 11, 1, 8, '#d8701e');
+      px(c, x - 1, y - 12, 4, 2, '#d8701e');
+      [[0, -9], [3, -7], [-2, -7], [1, -6]].forEach(([a, b]) => px(c, x + a, y + b, 2, 1, '#ffb066'));
+      disc(c, x - 6, y - 8, 1, '#ffffff'); px(c, x - 6, y - 8, 1, 1, '#2a1d18');
+      px(c, x - 9, y - 6, 2, 1, '#a8501c');
+      break;
+    default: drawFood(c, x, y, f);
+  }
 }
 
 // ---------- Kopi sebagai barang di tas (bukan makanan: minuman orang dewasa) ----------
@@ -117,10 +219,10 @@ ST_ART.shakehand = (c, x, y) => drawDogTrick(c, x, y, 1, 0, 'shake', 0);
 ST_ART.rollover = (c, x, y) => drawDogTrick(c, x, y, 1, 0, 'roll', 0.15);
 set('cat meow', (c, x, y) => drawCat(c, x, y, 0));
 set('chicken cluck', (c, x, y) => drawChicken(c, x, y, 1, 0, false));
-set('cow moo', (c, x, y) => drawCow(c, x, y, 1, 0));
-set('sheep baa', (c, x, y) => drawSheep(c, x, y, 1, 0));
-ST_ART.shear = (c, x, y) => { drawSheep(c, x - 4, y, 1, 0, true); drawItem(c, x + 9, y, 'wool'); };
-ST_ART.milkcow = (c, x, y) => { drawCow(c, x - 3, y, 1, 0); px(c, x + 9, y - 7, 8, 7, '#a9b6c4'); px(c, x + 10, y - 7, 6, 2, '#ffffff'); };
+set('cow moo', (c, x, y) => drawCowBig(c, x, y, 1, 0));
+set('sheep baa', (c, x, y) => drawSheepBig(c, x, y, 1, 0));
+ST_ART.shear = (c, x, y) => { drawSheepBig(c, x - 4, y, 1, 0, true); drawItem(c, x + 15, y, 'wool'); };
+ST_ART.milkcow = (c, x, y) => { drawCowBig(c, x, y, 1, 0); px(c, x + 9, y - 7, 8, 7, '#a9b6c4'); px(c, x + 10, y - 7, 6, 2, '#ffffff'); };
 set('duck quack', (c, x, y) => drawDuck(c, x, y, 1, 0, false));
 set('rabbit q_bunny a_bunny', (c, x, y) => drawRabbit(c, x, y, 1, 0, false));
 ST_ART.squirrel = (c, x, y) => drawSquirrel(c, x, y, 1, 0);

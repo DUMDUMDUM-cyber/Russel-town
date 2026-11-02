@@ -44,7 +44,7 @@ CK.sctx = CK.src.getContext('2d', { willReadFrequently: true });
 CK.ctx = CK.cv.getContext('2d');
 PANELS.cook = $('p-cook');
 PANELS.cook.addEventListener('pointerdown', e => { if (e.target === PANELS.cook) closePanel(); });
-const bigItem = (c, x, y, k, s = 3) => drawOutlined(c, x, y, s, (cc, ax, ay) => drawItem(cc, ax, ay, k, true));
+const bigItem = (c, x, y, k, s = 3) => drawBig(c, x, y, s, (cc, ax, ay) => drawItem(cc, ax, ay, k, true));
 function cookSteps() {
   const steps = CK.rec ? COOK[CK.rec].steps : [];
   $('cook-steps').innerHTML = steps.map((k, i) => `<span class="fstar${i <= CK.i ? ' on' : ''}" aria-hidden="true"></span>`).join('');
@@ -83,12 +83,25 @@ function cookTap() {
 PANEL_HOOK.cook = dt => {
   const c = CK.sctx, t = G.t;
   CK.flash = Math.max(0, CK.flash - dt);
-  px(c, 0, 0, 160, 110, '#f1e2c4');
-  for (let i = 4; i < 160; i += 8) px(c, i, 0, 2, 74, '#e9d6b2');
-  px(c, 0, 74, 160, 36, '#b27a45'); px(c, 0, 74, 160, 3, '#d39b5f'); px(c, 0, 106, 160, 4, '#7d5230');
+  // dapur: dinding ubin, jendela bertirai, rak, dan meja kayu
+  px(c, 0, 0, 160, 74, '#f6ecd6');
+  for (let y = 0; y < 74; y += 12) { px(c, 0, y, 160, 1, '#e6d8bc'); for (let x = (y / 12 % 2) * 6; x < 160; x += 12) px(c, x, y, 1, 12, '#e6d8bc'); }
+  px(c, 12, 6, 38, 30, PAL.woodD); px(c, 14, 8, 34, 26, G.night ? '#26305e' : '#8fd0f2');
+  if (!G.night) { px(c, 14, 28, 34, 6, '#7cc85a'); disc(c, 40, 15, 3, '#ffd84a'); oval(c, 24, 14, 5, 1, '#ffffff'); }
+  px(c, 30, 8, 2, 26, PAL.woodD); px(c, 14, 20, 34, 2, PAL.woodD); px(c, 10, 36, 42, 2, PAL.woodL);
+  px(c, 12, 5, 9, 16, '#e8735a'); px(c, 41, 5, 9, 16, '#e8735a'); for (const x of [14, 18, 43, 47]) px(c, x, 5, 1, 16, '#c9473a'); px(c, 10, 4, 42, 2, PAL.woodD);
+  px(c, 104, 22, 48, 3, PAL.woodD); px(c, 104, 22, 48, 1, PAL.woodL);
+  [[110, '#e2483d'], [122, '#f4cf3a'], [134, '#58a84a'], [146, '#4f86e0']].forEach(([x, k]) => { px(c, x - 3, 13, 7, 9, k); px(c, x - 2, 11, 5, 2, '#fff6e0'); px(c, x - 2, 14, 1, 6, 'rgba(255,255,255,0.45)'); px(c, x + 2, 14, 2, 8, 'rgba(0,0,0,0.1)'); });
+  px(c, 0, 72, 160, 2, 'rgba(60,35,20,0.2)');
+  px(c, 0, 74, 160, 36, '#b27a45'); px(c, 0, 74, 160, 3, '#d39b5f'); px(c, 0, 77, 160, 1, '#94683a');
+  for (const [x, y, w] of [[8, 84, 26], [46, 92, 34], [96, 86, 22], [126, 96, 24], [18, 100, 30], [80, 101, 20]]) px(c, x, y, w, 1, '#a06c3c');
+  px(c, 0, 106, 160, 4, '#7d5230');
   const pot = (x, y, col) => {
-    px(c, x - 24, y - 20, 48, 20, '#7d8a98'); px(c, x - 24, y - 20, 48, 3, '#a9b6c4'); px(c, x - 22, y - 18, 44, 5, col);
-    px(c, x - 29, y - 16, 5, 3, '#4a4a52'); px(c, x + 24, y - 16, 5, 3, '#4a4a52');
+    oval(c, x, y + 1, 30, 3, 'rgba(50,30,15,0.25)');
+    px(c, x - 24, y - 20, 48, 20, '#7d8a98'); px(c, x - 24, y - 1, 48, 1, '#5f6c7a'); px(c, x - 22, y, 44, 1, '#5f6c7a');
+    px(c, x - 24, y - 15, 6, 14, '#a9b6c4'); px(c, x + 16, y - 15, 8, 14, '#67747f');
+    px(c, x - 25, y - 21, 50, 3, '#c6d0da'); px(c, x - 22, y - 19, 44, 5, col); px(c, x - 22, y - 19, 44, 1, 'rgba(255,255,255,0.35)');
+    px(c, x - 30, y - 16, 6, 3, '#4a4a52'); px(c, x - 30, y - 16, 6, 1, '#6a6a72'); px(c, x + 24, y - 16, 6, 3, '#4a4a52'); px(c, x + 24, y - 16, 6, 1, '#6a6a72');
   };
   if (!CK.rec) {
     drawPerson(c, 80, 96, { look: 'mom', dir: 'down', mood: 'happy', act: 'wave', actT: t, noShadow: true });
@@ -247,12 +260,24 @@ function decorPos(k, t) {
 }
 PANEL_HOOK.room = () => {
   const c = RM.sctx, t = G.t;
-  px(c, 0, 0, 160, 58, '#cfe8f0'); for (let i = 6; i < 160; i += 12) px(c, i, 0, 1, 58, '#bcdce8');
-  px(c, 0, 56, 160, 2, '#a8865a'); px(c, 0, 58, 160, 32, '#d9b06a');
-  for (let y = 62; y < 90; y += 7) px(c, 0, y, 160, 1, '#c9a05a');
-  px(c, 72, 8, 32, 24, PAL.woodD); px(c, 74, 10, 28, 20, G.night ? '#26305e' : '#8fd0f2'); px(c, 87, 10, 2, 20, PAL.woodD); px(c, 74, 19, 28, 2, PAL.woodD);
+  // dinding bergaris, papan bawah, lantai papan
+  px(c, 0, 0, 160, 58, '#cfe8f0'); for (let i = 6; i < 160; i += 12) { px(c, i, 0, 2, 48, '#c2e0ea'); }
+  px(c, 0, 48, 160, 8, '#f4f7f2'); px(c, 0, 48, 160, 1, '#ffffff'); px(c, 0, 55, 160, 1, '#c9d2c8');
+  px(c, 0, 56, 160, 2, '#a8865a');
+  drawPlanks(c, 0, 58, 160, 32, ['#d9b06a', '#d3a862', '#dfb873'], '#c29a56', 3, 7, 34);
+  px(c, 0, 58, 160, 2, 'rgba(50,30,15,0.18)');
+  windowLight(c, 76, 60, 26, 22, 8);
+  // jendela bertirai
+  px(c, 72, 8, 32, 24, PAL.woodD); px(c, 74, 10, 28, 20, G.night ? '#26305e' : '#8fd0f2');
+  if (!G.night) { px(c, 74, 25, 28, 5, '#7cc85a'); oval(c, 84, 14, 4, 1, '#ffffff'); }
+  px(c, 87, 10, 2, 20, PAL.woodD); px(c, 74, 19, 28, 2, PAL.woodD); px(c, 70, 32, 36, 2, PAL.woodL);
+  px(c, 70, 7, 8, 18, '#f39ac0'); px(c, 98, 7, 8, 18, '#f39ac0'); for (const x of [72, 75, 100, 103]) px(c, x, 7, 1, 18, '#e27aa4'); px(c, 68, 6, 40, 2, PAL.woodD);
   // tempat tidur
-  px(c, 4, 44, 36, 8, PAL.woodD); px(c, 6, 50, 32, 18, '#fbf8f0'); px(c, 6, 56, 32, 12, '#4f86e0'); px(c, 4, 66, 36, 4, PAL.woodD);
+  px(c, 4, 44, 36, 8, PAL.woodD); px(c, 5, 45, 34, 1, PAL.woodL);
+  px(c, 6, 50, 32, 18, '#fbf8f0'); px(c, 9, 50, 26, 5, '#ffffff'); px(c, 9, 54, 26, 1, '#e3ddd0');
+  px(c, 6, 56, 32, 12, '#4f86e0'); px(c, 6, 56, 32, 2, '#dfe9fa');
+  for (let y = 60; y < 68; y += 4) for (let x = 6 + (y % 8 ? 4 : 0); x < 38; x += 8) px(c, x, y, 4, 4, '#7aa4ea');
+  px(c, 4, 66, 36, 4, PAL.woodD); px(c, 4, 66, 36, 1, PAL.wood);
   Object.keys(DECOR).filter(k => DECOR[k].flat && roomHas(k)).forEach(k => drawDecor(c, DECOR[k].at[0], DECOR[k].at[1], k, t));
   drawPerson(c, 76, 76, { look: 'me', dir: 'down', mood: 'happy', noShadow: true, frame: 0, outfit: effOutfit() });
   Object.keys(DECOR).filter(k => !DECOR[k].flat && roomHas(k)).forEach(k => { const [x, y] = decorPos(k, t); drawDecor(c, x, y, k, t); });

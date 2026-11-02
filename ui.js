@@ -27,7 +27,7 @@ function panelFrame(dt) {
   if (G.panel === 'flower') flowerDraw(dt);
   if (G.panel === 'mirror') mirrorDraw(dt);
   if (G.panel === 'count') countDraw(dt);
-  if (G.panel === 'map') { drawMap(MP.ctx, { classroom: 'school', barn: 'farm' }[G.scene.id] || G.scene.id, G.t); if (window.mapExtra) mapExtra(MP.ctx, G.t); }
+  if (G.panel === 'map') { PX = 2; try { drawMap(MP.ctx, { classroom: 'school', barn: 'farm' }[G.scene.id] || G.scene.id, G.t); if (window.mapExtra) mapExtra(MP.ctx, G.t); } finally { PX = 1; } }
 }
 function cvPoint(c, e) { const r = c.getBoundingClientRect(); return [(e.clientX - r.left) / r.width * c.width, (e.clientY - r.top) / r.height * c.height]; }
 function tile(key, opts = {}) {
@@ -62,7 +62,7 @@ function goPlace(key) {
   });
 })();
 MP.cv.addEventListener('pointerdown', e => {
-  const [x, y] = cvPoint(MP.cv, e);
+  const [x, y] = cvPoint(MP.cv, e).map(v => v / 2);
   let best = null, bd = 18;
   for (const [key, [sx, sy]] of Object.entries(MAP_SPOTS)) { const d = Math.hypot(sx - x, sy - y); if (d < bd) { bd = d; best = key; } }
   if (best) goPlace(best);
@@ -79,7 +79,7 @@ function bagRender() {
     if (type) {
       const w = word(type), cvs = document.createElement('canvas');
       cvs.width = 32; cvs.height = 32;
-      drawOutlined(cvs.getContext('2d', { willReadFrequently: true }), 16, 29, 2, (cc, x, y) => drawItem(cc, x, y, type, true));
+      drawBig(cvs.getContext('2d', { willReadFrequently: true }), 16, 29, 2, (cc, x, y) => drawItem(cc, x, y, type, true));
       b.innerHTML = `<span class="tile-zh">${rubyHTML(w.zh, w.py)}</span>`; b.prepend(upscale4(cvs));
       b.setAttribute('aria-label', w.id); b.setAttribute('aria-pressed', i === BG.sel ? 'true' : 'false');
       b.addEventListener('click', () => { BG.sel = i; sfx('tap'); say([{ k: type }]); bagRender(); });
@@ -99,9 +99,9 @@ document.querySelectorAll('#p-bag [data-act]').forEach(b => b.addEventListener('
 }));
 
 // ---------- Bunga: lihat / tanam / cari ----------
-// Bunga digambar di 48x56 lalu dihaluskan 8× (384x448)
+// Bunga digambar dengan satuan 48x56 dan PX = 2 (96x112), lalu dihaluskan 4× (384x448)
 const FL = { ci: 0, hl: null, hlT: 0, mode: 'look', stage: 6, target: null, stars: 0, miss: 0, detail: null, cv: $('flower-cv'), src: document.createElement('canvas') };
-FL.src.width = 48; FL.src.height = 56;
+FL.src.width = 96; FL.src.height = 112;
 FL.sctx = FL.src.getContext('2d', { willReadFrequently: true });
 FL.ctx = FL.cv.getContext('2d');
 const DETAIL_PARTS = ['petal', 'pistil', 'leaf', 'stem', 'root'];
@@ -166,14 +166,17 @@ function flowerOpen(ci) {
 function flowerDraw(dt) {
   if (FL.hlT > 0) { FL.hlT -= dt; if (FL.hlT <= 0 && !(FL.mode === 'find' && FL.miss >= 2)) FL.hl = null; }
   const c = FL.sctx;
-  if (FL.mode === 'process') procDraw(c, dt);
-  else if (FL.detail) drawFlowerDetail(c, FL.detail, FLOWER_COLORS[FL.ci], G.t);
-  else drawBigFlower(c, FLOWER_COLORS[FL.ci], FL.hl, G.t, FL.stage);
-  if (!FL.detail && FL.mode === 'grow' && FL.stage < 6) {
-    const b = Math.round(Math.abs(Math.sin(G.t * 4)) * 2);
-    px(c, 36, 36 - b, 8, 3, '#4f86e0'); px(c, 42, 33 - b, 2, 3, '#4f86e0'); px(c, 35, 39 - b, 1, 1, '#8fd0f2'); px(c, 37, 41 - b, 1, 1, '#8fd0f2');
-  }
-  FL.ctx.drawImage(upscale8(FL.src), 0, 0);
+  PX = 2;
+  try {
+    if (FL.mode === 'process') procDraw(c, dt);
+    else if (FL.detail) drawFlowerDetail(c, FL.detail, FLOWER_COLORS[FL.ci], G.t);
+    else drawBigFlower(c, FLOWER_COLORS[FL.ci], FL.hl, G.t, FL.stage);
+    if (!FL.detail && FL.mode === 'grow' && FL.stage < 6) {
+      const b = Math.round(Math.abs(Math.sin(G.t * 4)) * 2);
+      px(c, 36, 36 - b, 8, 3, '#4f86e0'); px(c, 42, 33 - b, 2, 3, '#4f86e0'); px(c, 35, 39 - b, 1, 1, '#8fd0f2'); px(c, 37, 41 - b, 1, 1, '#8fd0f2');
+    }
+  } finally { PX = 1; }
+  FL.ctx.drawImage(upscale4(FL.src), 0, 0);
 }
 function partAt(x, y) {
   const d = Math.hypot(x - 24, y - 15);
@@ -362,7 +365,7 @@ function countDraw(dt) {
     if (it.b > 0) it.b -= dt;
     const bo = it.b > 0 ? Math.round(Math.sin(it.b / 0.35 * Math.PI) * 5) : 0;
     oval(c, it.x, it.y - 1, 12, 3, it.n ? '#bfe3a0' : '#efe4cc');
-    drawOutlined(c, it.x, it.y - bo, CT.type.s, (cc, x, y) => drawFood(cc, x, y, CT.type.d));
+    drawBig(c, it.x, it.y - bo, CT.type.s, (cc, x, y) => drawFood(cc, x, y, CT.type.d));
   }
 }
 CT.cv.addEventListener('pointerdown', e => {

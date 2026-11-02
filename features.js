@@ -149,19 +149,25 @@ function peekTail(c, x, y, t) {
   farm.blocks.push([208, 152, 28, 8], [262, 146, 20, 8]);
   farm.objs.push({ x: 222, y: 160, hit: [204, 136, 36, 26], go: [222, 170],
     draw(c, t) {
-      shadow(c, 222, 160, 16);
-      px(c, 208, 146, 2, 14, PAL.woodD); px(c, 234, 146, 2, 14, PAL.woodD);
-      px(c, 204, 140, 36, 6, PAL.wood); px(c, 204, 140, 36, 2, PAL.woodL); px(c, 204, 146, 36, 1, PAL.woodD);
+      shadow(c, 222, 160, 19);
+      px(c, 212, 146, 2, 10, '#5f3f25'); px(c, 230, 146, 2, 10, '#5f3f25');
+      px(c, 206, 146, 3, 14, PAL.woodD); px(c, 235, 146, 3, 14, PAL.woodD); px(c, 206, 146, 1, 14, PAL.wood); px(c, 235, 146, 1, 14, PAL.wood);
+      px(c, 204, 140, 36, 6, PAL.wood); px(c, 204, 140, 36, 1, PAL.woodL);
+      for (const sx of [212, 221, 231]) px(c, sx, 141, 1, 5, PAL.woodD);
+      px(c, 204, 146, 36, 1, PAL.woodD); px(c, 206, 147, 32, 2, '#8a5f38');
       if (HS.on && HS.spot === 'table') peekTail(c, 238, 154, t);
     },
     tap() { if (!HS.on) say([{ k: 'desk' }]); },
     arrive() { hideLook('table'); } });
   farm.objs.push({ x: 272, y: 154, hit: [260, 130, 24, 26], go: [272, 164],
     draw(c, t) {
-      shadow(c, 272, 154, 12);
-      const shake = HS.on && HS.spot === 'box' && Math.floor(t * 2) % 3 === 0 ? 1 : 0;
-      px(c, 262 + shake, 138, 20, 16, '#c08a52'); px(c, 262 + shake, 138, 20, 3, '#d9a56a');
-      px(c, 262 + shake, 145, 20, 1, '#8a5a35'); px(c, 271 + shake, 141, 2, 13, '#8a5a35');
+      shadow(c, 272, 154, 13);
+      const shake = HS.on && HS.spot === 'box' && Math.floor(t * 2) % 3 === 0 ? 1 : 0, bx = 262 + shake;
+      px(c, bx, 138, 20, 16, '#c08a52'); px(c, bx + 16, 141, 4, 13, '#a87444');
+      for (const py of [144, 149]) px(c, bx, py, 20, 1, '#8a5a35');
+      px(c, bx, 138, 20, 3, '#d9a56a'); px(c, bx, 138, 20, 1, '#ecc48c'); px(c, bx, 141, 20, 1, '#8a5a35');
+      for (const sx of [0, 18]) px(c, bx + sx, 141, 2, 13, '#8a5a35');
+      for (const py of [143, 148]) { px(c, bx + 1, py, 1, 1, '#d9d4c8'); px(c, bx + 18, py, 1, 1, '#d9d4c8'); }
       if (HS.on && HS.spot === 'box') peekTail(c, 283, 142, t);
     },
     tap() { if (!HS.on) say([{ k: 'box' }]); },

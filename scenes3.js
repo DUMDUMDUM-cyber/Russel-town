@@ -6,15 +6,27 @@ SCENES.beach = (() => {
     blocks: [[224, 130, 5, 8], [20, 122, 10, 8], [296, 158, 10, 8]], objs: [], lights: [],
   };
   S.bg = c => {
-    for (let y = 0; y < 34; y++) { const k = y / 34; px(c, 0, y, W, 1, G.night ? `rgb(${28 + k * 20},${36 + k * 20},${78 + k * 30})` : `rgb(${150 + k * 60},${212 + k * 26},${245})`); }
-    px(c, 0, 34, W, 62, G.night ? '#2a4f7a' : '#3f9fd6');
-    for (let y = 37; y < 96; y += 6) for (let x = (y * 7) % 23; x < W; x += 23) px(c, x, y, 8, 1, G.night ? '#3a6a9a' : '#5fb3e0');
-    px(c, 0, 34, W, 1, G.night ? '#5a7aa8' : '#bfe6fa');
-    px(c, 0, 96, W, 10, '#d9c28a');
+    const N = G.night;
+    for (let y = 0; y < 34; y++) { const k = y / 34; px(c, 0, y, W, 1, N ? `rgb(${28 + k * 20},${36 + k * 20},${78 + k * 30})` : `rgb(${150 + k * 60},${212 + k * 26},${245})`); }
+    // pulau kecil di kejauhan
+    oval(c, 54, 34, 26, 5, N ? '#2a4a50' : '#7fb8a0'); oval(c, 60, 33, 14, 6, N ? '#2f5258' : '#8fc4aa');
+    // laut makin muda ke arah pantai
+    [[34, 16, '#3a95cc', '#264a74'], [50, 18, '#3f9fd6', '#2a4f7a'], [68, 16, '#4fabdf', '#30578a'], [84, 12, '#6ec0e8', '#3a6496']].forEach(([y, h, day, nite]) => px(c, 0, y, W, h, N ? nite : day));
+    for (let y = 37; y < 96; y += 6) for (let x = (y * 7) % 23; x < W; x += 23) { px(c, x, y, 8, 1, N ? '#3a6a9a' : '#7cc8ec'); px(c, x + 2, y + 1, 4, 1, N ? '#2f5a88' : '#3a95cc'); }
+    px(c, 0, 34, W, 1, N ? '#5a7aa8' : '#bfe6fa');
+    // pasir basah lalu pasir kering
+    px(c, 0, 96, W, 10, '#d9c28a'); px(c, 0, 99, W, 1, '#e8d6a4'); px(c, 0, 103, W, 3, '#e4cf98');
     px(c, 0, 106, W, 74, '#f2dca0');
+    groundPatches(c, 0, 106, W, 74, 16, '#ecd394', 0.55);
+    groundPatches(c, 0, 106, W, 74, 17, '#f7e6b4', 0.62);
     const r = rng(15);
-    for (let i = 0; i < 260; i++) px(c, Math.floor(r() * W), 106 + Math.floor(r() * 74), 1, 1, r() < 0.5 ? '#e3c47a' : '#fbecc4');
-    px(c, 212, 134, 28, 12, '#4f86e0'); for (let x = 214; x < 240; x += 6) px(c, x, 134, 2, 12, '#ffffff');
+    for (let i = 0; i < 200; i++) px(c, Math.floor(r() * W), 106 + Math.floor(r() * 74), 1, 1, r() < 0.5 ? '#d9b870' : '#fbecc4');
+    // jejak kaki kecil
+    for (let i = 0; i < 7; i++) { const fx = 60 + i * 14, fy = 150 + (i % 2) * 4; px(c, fx, fy, 3, 2, '#dcc184'); px(c, fx + 1, fy - 2, 1, 1, '#dcc184'); }
+    // handuk bergaris
+    shadowRect(c, 212, 146, 29, 2);
+    px(c, 211, 133, 30, 14, '#2f5bab'); px(c, 212, 134, 28, 12, '#4f86e0'); for (let x = 214; x < 240; x += 6) { px(c, x, 134, 2, 12, '#ffffff'); }
+    px(c, 212, 134, 28, 1, '#7aa4ea');
   };
 
   // ombak di tepi laut
@@ -100,22 +112,28 @@ SCENES.classroom = (() => {
   };
   S.bg = c => {
     px(c, 0, 0, W, 52, '#fbe9b8'); for (let x = 6; x < W; x += 12) px(c, x, 0, 2, 46, '#f6dfa6');
-    px(c, 0, 46, W, 6, '#c08a52'); px(c, 0, 45, W, 1, '#a8743c');
-    px(c, 0, 52, W, 128, '#d9a86c');
-    for (let r = 0, y = 52; y < H; y += 8, r++) { px(c, 0, y + 7, W, 1, '#c4935a'); for (let x = (r % 2) * 20; x < W; x += 40) px(c, x, y, 1, 7, '#c4935a'); }
+    px(c, 0, 45, W, 7, '#c08a52'); px(c, 0, 45, W, 1, '#d9a56a'); px(c, 0, 46, W, 1, '#a8743c'); px(c, 0, 51, W, 1, '#8a5a35');
+    drawPlanks(c, 0, 52, W, 128, ['#d9a86c', '#d4a265', '#deae74'], '#c4935a', 27);
+    wallFoot(c, 52);
+    windowLight(c, 16, 54, 58, 40, 12);
     px(c, 0, 0, 4, H, '#8a5a35'); px(c, 316, 0, 4, H, '#8a5a35');
     px(c, 0, 176, 144, 4, '#8a5a35'); px(c, 176, 176, 144, 4, '#8a5a35');
-    px(c, 146, 168, 28, 10, '#4f86e0'); px(c, 148, 170, 24, 6, '#7aa4ea');
-    // papan tulis besar
-    px(c, 96, 5, 128, 38, PAL.woodD); px(c, 98, 7, 124, 33, '#2f5a46');
-    [1, 2, 3, 4, 5].forEach((d, i) => drawDigit(c, 106 + i * 10, 12, d, '#f4f0e0'));
-    for (let i = 0; i < 5; i++) for (let k = 0; k <= i; k++) disc(c, 107 + i * 10, 24 + k * 3, 1, ['#ffd84a', '#f39ac0', '#8fd0f2', '#bfe3a0', '#ffffff'][i]);
-    px(c, 170, 14, 40, 1, '#f4f0e0'); px(c, 170, 20, 30, 1, '#f4f0e0'); disc(c, 196, 30, 4, '#ffd84a');
-    px(c, 96, 40, 128, 3, PAL.wood); px(c, 110, 39, 5, 1, '#ffffff'); px(c, 118, 39, 4, 1, '#f39ac0');
-    // poster bentuk
-    px(c, 240, 8, 52, 30, '#ffffff'); px(c, 240, 8, 52, 1, '#c9a873');
-    disc(c, 252, 22, 5, '#e2483d'); for (let k = 0; k < 9; k++) px(c, 266 - Math.round(k / 2), 17 + k, k + 1, 1, '#f4cf3a'); px(c, 278, 17, 9, 9, '#4f86e0');
-    drawClock(c, 86, 14, 0);
+    px(c, 146, 168, 28, 10, '#2f5bab'); px(c, 147, 169, 26, 8, '#4f86e0'); px(c, 149, 171, 22, 4, '#7aa4ea');
+    bgOutlined(c, cc => {
+      // papan tulis besar
+      px(cc, 96, 5, 128, 38, PAL.woodD); px(cc, 96, 5, 128, 1, PAL.woodL); px(cc, 98, 7, 124, 33, '#2f5a46');
+      px(cc, 98, 7, 124, 2, '#28503e'); px(cc, 130, 9, 30, 1, '#3a6a54'); px(cc, 180, 34, 26, 1, '#3a6a54');
+      [1, 2, 3, 4, 5].forEach((d, i) => drawDigit(cc, 106 + i * 10, 12, d, '#f4f0e0'));
+      for (let i = 0; i < 5; i++) for (let k = 0; k <= i; k++) disc(cc, 107 + i * 10, 24 + k * 3, 1, ['#ffd84a', '#f39ac0', '#8fd0f2', '#bfe3a0', '#ffffff'][i]);
+      px(cc, 170, 14, 40, 1, '#f4f0e0'); px(cc, 170, 20, 30, 1, '#f4f0e0'); disc(cc, 196, 30, 4, '#ffd84a');
+      px(cc, 96, 40, 128, 3, PAL.wood); px(cc, 96, 40, 128, 1, PAL.woodL); px(cc, 110, 39, 5, 1, '#ffffff'); px(cc, 118, 39, 4, 1, '#f39ac0');
+      // poster bentuk
+      px(cc, 240, 8, 52, 30, '#ffffff'); px(cc, 240, 8, 52, 2, '#f2e6cc'); px(cc, 263, 6, 6, 3, '#e2483d');
+      disc(cc, 252, 23, 5, '#e2483d'); px(cc, 249, 20, 2, 1, '#ff9a8a');
+      for (let k = 0; k < 9; k++) px(cc, 266 - Math.round(k / 2), 18 + k, k + 1, 1, '#f4cf3a');
+      px(cc, 278, 18, 9, 9, '#4f86e0'); px(cc, 279, 19, 3, 1, '#8fb4ee');
+      drawClock(cc, 86, 14, 0);
+    });
   };
 
   // jendela (langit ikut siang/malam)
@@ -221,21 +239,43 @@ SCENES.barn = (() => {
     blocks: [[38, 88, 50, 18], [143, 86, 34, 16], [186, 82, 32, 12]], objs: [], lights: [[160, 60, 120]],
   };
   S.bg = c => {
-    px(c, 0, 0, W, 56, '#b27a45');
-    for (let y = 0; y < 56; y += 7) { px(c, 0, y + 6, W, 1, '#8a5a35'); for (let x = (Math.floor(y / 7) % 2) * 12; x < W; x += 24) px(c, x, y, 1, 6, '#8a5a35'); }
-    px(c, 0, 0, W, 10, '#7d5230');
-    for (let x = 8; x < W; x += 30) { px(c, x, 2, 22, 8, '#e3c46a'); px(c, x, 4, 22, 1, '#c9a24a'); px(c, x, 7, 22, 1, '#c9a24a'); }
-    px(c, 120, 16, 50, 26, PAL.woodD); px(c, 122, 18, 46, 22, G.night ? '#26305e' : '#8fd0f2');
-    disc(c, 156, 25, 3, G.night ? '#fff2c0' : '#ffd84a'); px(c, 144, 18, 2, 22, PAL.woodD); px(c, 122, 28, 46, 2, PAL.woodD);
-    px(c, 196, 22, 2, 9, '#a9a6a0'); px(c, 200, 22, 2, 9, '#a9a6a0'); disc(c, 197, 33, 2, '#e2483d'); disc(c, 201, 33, 2, '#e2483d');
-    px(c, 0, 52, W, 4, '#6b4226');
+    // dinding papan kayu, balok atap dengan jerami
+    drawPlanks(c, 0, 0, W, 56, ['#b27a45', '#ab7340', '#b8804a'], '#8a5a35', 33, 7, 36);
+    px(c, 0, 0, W, 10, '#7d5230'); px(c, 0, 10, W, 2, 'rgba(50,25,10,0.3)');
+    for (let x = 8; x < W; x += 30) {
+      px(c, x, 2, 22, 8, '#e3c46a'); px(c, x, 2, 22, 1, '#f0d684'); px(c, x, 4, 22, 1, '#c9a24a'); px(c, x, 7, 22, 1, '#c9a24a');
+      px(c, x + 7, 2, 1, 8, '#a8743c'); px(c, x + 15, 2, 1, 8, '#a8743c');
+    }
+    px(c, 0, 52, W, 4, '#6b4226'); px(c, 0, 52, W, 1, '#8a5a35');
+    // lantai jerami: bercak lembut dan helai-helai
     px(c, 0, 56, W, 124, '#d9b06a');
+    groundPatches(c, 0, 56, W, 124, 42, '#cfa45e', 0.55);
+    groundPatches(c, 0, 56, W, 124, 43, '#e3bc76', 0.6);
     const r = rng(41);
-    for (let i = 0; i < 300; i++) px(c, Math.floor(r() * W), 56 + Math.floor(r() * 124), 2, 1, r() < 0.5 ? '#e8c47a' : '#c9a24a');
-    px(c, 8, 60, 3, 50, PAL.woodD); px(c, 8, 70, 100, 2, PAL.wood); px(c, 8, 82, 100, 2, PAL.wood); px(c, 106, 60, 3, 50, PAL.woodD);
-    px(c, 240, 30, 72, 3, PAL.woodD); px(c, 240, 52, 72, 3, PAL.woodD);
-    for (let x = 242; x < 310; x += 23) { px(c, x, 33, 20, 19, '#8a5a35'); oval(c, x + 10, 48, 8, 3, '#e3c46a'); }
-    px(c, 0, 176, 144, 4, '#6b4226'); px(c, 176, 176, 144, 4, '#6b4226'); px(c, 146, 168, 28, 10, '#c9a24a');
+    for (let i = 0; i < 210; i++) { const sx = Math.floor(r() * W), sy = 56 + Math.floor(r() * 124), k = r(); px(c, sx, sy, 3, 1, k < 0.5 ? '#efcf86' : '#bf9650'); if (k < 0.25) px(c, sx + 2, sy - 1, 2, 1, '#efcf86'); }
+    wallFoot(c, 56);
+    windowLight(c, 124, 58, 42, 34, 10);
+    px(c, 0, 176, 144, 4, '#6b4226'); px(c, 176, 176, 144, 4, '#6b4226'); px(c, 146, 168, 28, 10, '#a8862e'); px(c, 147, 169, 26, 8, '#c9a24a'); px(c, 149, 171, 22, 1, '#e3c46a');
+    bgOutlined(c, cc => {
+      // jendela
+      px(cc, 120, 16, 50, 26, PAL.woodD); px(cc, 120, 16, 50, 1, PAL.woodL); px(cc, 122, 18, 46, 22, G.night ? '#26305e' : '#8fd0f2');
+      if (!G.night) { px(cc, 122, 34, 46, 6, '#7cc85a'); oval(cc, 133, 23, 6, 2, '#ffffff'); }
+      disc(cc, 156, 25, 3, G.night ? '#fff2c0' : '#ffd84a'); px(cc, 144, 18, 2, 22, PAL.woodD); px(cc, 122, 28, 46, 2, PAL.woodD);
+      px(cc, 118, 42, 54, 2, PAL.wood);
+      // gunting bulu tergantung
+      px(cc, 196, 22, 2, 9, '#a9a6a0'); px(cc, 200, 22, 2, 9, '#a9a6a0'); disc(cc, 197, 33, 2, '#e2483d'); disc(cc, 201, 33, 2, '#e2483d'); px(cc, 193, 20, 12, 2, PAL.woodD);
+      // kandang sapi
+      shadowRect(cc, 8, 110, 102, 2);
+      px(cc, 8, 60, 3, 50, PAL.woodD); px(cc, 8, 60, 2, 50, PAL.wood); px(cc, 106, 60, 3, 50, PAL.woodD); px(cc, 106, 60, 2, 50, PAL.wood);
+      for (const ry of [70, 82]) { px(cc, 8, ry, 100, 2, PAL.wood); px(cc, 8, ry, 100, 1, PAL.woodL); px(cc, 8, ry + 2, 100, 1, PAL.woodD); }
+      // rak sarang telur
+      px(cc, 240, 30, 72, 3, PAL.woodD); px(cc, 240, 30, 72, 1, PAL.woodL); px(cc, 240, 52, 72, 3, PAL.woodD); px(cc, 240, 52, 72, 1, PAL.wood);
+      for (let x = 242; x < 310; x += 23) {
+        px(cc, x, 33, 20, 19, '#8a5a35'); px(cc, x, 33, 20, 2, '#6b4226');
+        oval(cc, x + 10, 49, 9, 3, '#c9a24a'); oval(cc, x + 10, 48, 8, 3, '#e3c46a');
+        px(cc, x + 4, 48, 3, 1, '#f0d684'); px(cc, x + 13, 49, 3, 1, '#b8903c');
+      }
+    });
   };
 
   // sapi: perah susu
@@ -283,10 +323,16 @@ SCENES.barn = (() => {
 
   // tempat minum & jerami
   S.objs.push({ x: 202, y: 92, hit: [186, 80, 32, 14], go: [202, 102], draw(c) {
-    px(c, 186, 82, 32, 10, PAL.woodD); px(c, 188, 83, 28, 5, PAL.water); px(c, 190, 83, 8, 1, PAL.waterL);
+    shadow(c, 202, 93, 16);
+    px(c, 186, 82, 32, 10, PAL.woodD); px(c, 188, 83, 28, 5, PAL.water); px(c, 188, 83, 28, 1, PAL.waterD); px(c, 190, 85, 8, 1, PAL.waterL); px(c, 204, 86, 5, 1, PAL.waterL);
+    px(c, 187, 88, 30, 3, PAL.wood); px(c, 187, 88, 30, 1, PAL.woodL); px(c, 197, 88, 1, 3, PAL.woodD); px(c, 208, 88, 1, 3, PAL.woodD);
   }, tap() { say([{ k: 'water' }]); } });
   [[30, 150], [54, 162], [290, 150]].forEach(([x, y]) => S.objs.push({ x, y, hit: [x - 12, y - 14, 24, 15], go: [x, y + 6], draw(c) {
-    shadow(c, x, y, 12); px(c, x - 11, y - 12, 22, 12, '#e3c46a'); px(c, x - 11, y - 12, 22, 2, '#f0d684'); px(c, x - 11, y - 7, 22, 1, '#c9a24a'); px(c, x - 3, y - 12, 2, 12, '#a8743c');
+    shadow(c, x, y, 13);
+    px(c, x - 11, y - 12, 22, 12, '#e3c46a'); px(c, x - 11, y - 12, 22, 2, '#f0d684'); px(c, x + 7, y - 10, 4, 10, '#d0ae56');
+    [[-9, -9, 5], [-1, -8, 6], [4, -5, 5], [-8, -4, 4], [1, -3, 4]].forEach(([a, b, w]) => px(c, x + a, y + b, w, 1, '#c9a24a'));
+    [[-6, -6, 4], [4, -9, 3], [-2, -2, 4]].forEach(([a, b, w]) => px(c, x + a, y + b, w, 1, '#f7e49c'));
+    for (const a of [-5, 3]) { px(c, x + a, y - 12, 2, 12, '#a8743c'); px(c, x + a, y - 12, 1, 12, '#c08a52'); }
   }, tap() { say([{ k: 'hay' }]); } }));
 
   // ayam & telur di rak

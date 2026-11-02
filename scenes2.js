@@ -10,11 +10,20 @@ SCENES.school = (() => {
   S.bg = c => {
     drawGrass(c, 0, 0, W, H, 31, true);
     drawPath(c, 0, 64, W, 112, 9);
-    for (let x = 0; x < W; x += 9) px(c, x, 174, 6, 2, PAL.grassD);
-    drawHouse(c, 70, 4, 180, 58, { roof: '#3f9a9a', roofD: '#2a7272', roofL: '#5cb8b8', wall: '#fbefd0', wallD: '#ecdcb4', door: 82, windows: [12, 40, 124, 152], night: G.night });
-    disc(c, 160, 16, 6, '#fbf8f0'); disc(c, 160, 16, 5, '#ffffff'); px(c, 160, 12, 1, 5, '#2a1d18'); px(c, 160, 16, 3, 1, '#2a1d18');
-    [[100, 62], [210, 62]].forEach(([x, y]) => { px(c, x, y - 6, 10, 6, '#c9473a'); px(c, x + 1, y - 7, 8, 1, '#a8352b'); drawFlower(c, x + 3, y - 6, FLOWER_COLORS[1], 0); drawFlower(c, x + 7, y - 6, FLOWER_COLORS[3], 0); });
-    px(c, 272, 4, 2, 58, '#a9a6a0'); px(c, 271, 2, 4, 2, '#f4cf3a'); px(c, 269, 60, 8, 3, PAL.stoneD);
+    bgOutlined(c, cc => {
+      drawHouse(cc, 70, 4, 180, 58, { roof: '#3f9a9a', roofD: '#2a7272', roofL: '#5cb8b8', wall: '#fbefd0', wallD: '#ecdcb4', door: 82, windows: [12, 40, 124, 152], flowerbox: true, night: G.night });
+      disc(cc, 160, 16, 7, PAL.woodD); disc(cc, 160, 16, 6, '#fbf8f0'); disc(cc, 160, 16, 5, '#ffffff'); px(cc, 160, 12, 1, 5, '#2a1d18'); px(cc, 160, 16, 3, 1, '#2a1d18');
+      [[100, 62], [210, 62]].forEach(([x, y]) => {
+        shadow(cc, x + 5, y + 1, 7);
+        px(cc, x, y - 6, 10, 6, '#c9473a'); px(cc, x + 7, y - 6, 3, 6, '#a8352b'); px(cc, x - 1, y - 7, 12, 2, '#e8735a');
+        drawFlower(cc, x + 3, y - 6, FLOWER_COLORS[1], 0); drawFlower(cc, x + 7, y - 6, FLOWER_COLORS[3], 0);
+      });
+      // tiang bendera
+      shadow(cc, 273, 62, 6);
+      px(cc, 272, 4, 2, 58, '#a9a6a0'); px(cc, 272, 4, 1, 58, '#d6d3cc'); px(cc, 271, 2, 4, 2, '#f4cf3a'); px(cc, 269, 60, 8, 3, PAL.stoneD); px(cc, 269, 60, 8, 1, PAL.stone);
+    });
+    // pagar semak rendah di tepi halaman
+    for (let x = 0; x < W; x += 9) { px(c, x, 174, 6, 2, PAL.grassD); px(c, x + 1, 173, 4, 1, PAL.grass); }
   };
   S.objs.push({ flat: true, y: 0, draw(c, t) {
     // bendera merah putih
@@ -24,7 +33,14 @@ SCENES.school = (() => {
 
   // bak pasir kecil di halaman (papan tulis pindah ke ruang kelas)
   S.objs.push({ flat: true, y: 0, hit: [36, 84, 52, 24], go: [62, 112],
-    draw(c) { px(c, 36, 86, 52, 20, PAL.woodD); px(c, 38, 88, 48, 16, '#f2dca0'); px(c, 44, 92, 6, 3, '#e3c47a'); px(c, 66, 96, 8, 3, '#e3c47a'); px(c, 58, 90, 3, 5, '#e2483d'); px(c, 57, 89, 5, 1, '#c9372e'); },
+    draw(c) {
+      shadowRect(c, 36, 106, 53, 2);
+      px(c, 35, 85, 54, 22, '#3a2616'); px(c, 36, 86, 52, 20, PAL.woodD); px(c, 36, 86, 52, 1, PAL.woodL); px(c, 36, 104, 52, 2, PAL.wood);
+      px(c, 38, 88, 48, 16, '#f2dca0'); px(c, 38, 88, 48, 2, '#d9c088');
+      [[42, 92, 7], [66, 96, 8], [50, 100, 6], [74, 91, 5]].forEach(([a, b, w]) => { px(c, a, b, w, 2, '#e3c47a'); px(c, a + 1, b - 1, w - 2, 1, '#fbecc4'); });
+      [[46, 96], [60, 94], [70, 101], [41, 101], [80, 97]].forEach(([a, b]) => px(c, a, b, 1, 1, '#c9a24a'));
+      px(c, 58, 90, 4, 5, '#e2483d'); px(c, 57, 89, 6, 1, '#c9372e'); px(c, 61, 90, 1, 5, '#a8352b'); px(c, 59, 87, 1, 2, '#7d5230');
+    },
     tap() { say([{ k: 'sand' }]); }, arrive() { doAct(G.boy, 'wash', 1); fx('dust', 62, 96, 4); sfx('plant'); } });
 
   const teacher = npc('teacher', 98, 110, 'down', {
@@ -200,14 +216,23 @@ SCENES.office = (() => {
     lights: [[90, 70, 60], [230, 70, 60], [160, 116, 60]],
   };
   S.bg = c => {
-    px(c, 0, 0, W, 50, '#e3eaf0'); for (let x = 0; x < W; x += 16) px(c, x, 0, 1, 44, '#d6dfe7');
-    px(c, 0, 44, W, 6, '#9aa8b8'); px(c, 0, 43, W, 1, '#b8c4d0');
-    for (const wx of [14, 226]) { px(c, wx - 3, 3, 86, 38, '#7d8a98'); drawCity(c, wx, 6, 80, 32, G.night); px(c, wx + 39, 6, 2, 32, '#7d8a98'); }
-    px(c, 0, 50, W, 130, '#a9bccf');
-    for (let y = 50; y < H; y += 12) px(c, 0, y, W, 1, '#98abc0');
-    for (let x = 0; x < W; x += 12) px(c, x, 50, 1, 130, '#9fb2c6');
+    px(c, 0, 0, W, 50, '#e3eaf0'); for (let x = 0; x < W; x += 16) { px(c, x, 0, 1, 44, '#d6dfe7'); px(c, x + 1, 0, 1, 44, '#edf2f6'); }
+    px(c, 0, 43, W, 7, '#9aa8b8'); px(c, 0, 43, W, 1, '#c6d0da'); px(c, 0, 49, W, 1, '#7d8a98');
+    bgOutlined(c, cc => {
+      for (const wx of [14, 226]) {
+        px(cc, wx - 3, 3, 86, 38, '#7d8a98'); px(cc, wx - 3, 3, 86, 1, '#a9b6c4');
+        drawCity(cc, wx, 6, 80, 32, G.night);
+        px(cc, wx + 39, 6, 2, 32, '#7d8a98'); px(cc, wx, 38, 80, 1, '#5f6c7a');
+        px(cc, wx - 5, 40, 90, 2, '#c6d0da');
+      }
+    });
+    drawTiles(c, 0, 50, W, 130, 12, ['#a9bccf', '#a4b7cb', '#aec1d4'], '#98abc0', 18);
+    wallFoot(c, 50);
+    windowLight(c, 18, 52, 72, 24, 12); windowLight(c, 230, 52, 72, 24, 12);
     px(c, 0, 0, 4, H, '#7d8a98'); px(c, 316, 0, 4, H, '#7d8a98'); px(c, 0, 176, W, 4, '#7d8a98');
-    oval(c, 160, 100, 52, 14, '#8fa4bc');
+    // permadani di tengah ruangan
+    oval(c, 160, 101, 53, 15, 'rgba(40,50,70,0.18)');
+    oval(c, 160, 100, 53, 15, '#6f84a0'); oval(c, 160, 100, 51, 13, '#8fa4bc'); oval(c, 160, 100, 44, 10, '#a3b6cc'); oval(c, 160, 100, 42, 9, '#8fa4bc');
   };
   S.objs.push({ flat: true, y: 0, hit: [152, 10, 16, 16], go: [160, 64], draw(c, t) { drawClock(c, 160, 18, t); }, tap() { say([{ k: 'clock' }]); sfx('chime'); } });
   S.objs.push({ flat: true, y: 0, hit: [104, 2, 48, 52], go: [128, 64], draw(c) { drawBookshelf(c, 104, 4, 48, 50); }, tap() { say([{ k: 'book' }]); } });
@@ -412,28 +437,66 @@ SCENES.mountain = (() => {
     id: 'mountain', place: 'mountain', outdoor: true, walk: [6, 84, 314, 176], spawn: [300, 140],
     blocks: [[10, 98, 76, 28], [24, 124, 26, 56]], objs: [], lights: [],
   };
-  const peak = (c, cx, base, h, w, col, snow) => {
-    for (let r = 0; r < h; r++) { const half = Math.round(w * r / h); px(c, cx - half, base - h + r, half * 2 + 1, 1, col); }
-    for (let r = 0; r < Math.round(h * 0.22); r++) { const half = Math.round(w * r / h); px(c, cx - half, base - h + r, half * 2 + 1, 1, snow); }
+  // gunung: sisi kiri terang, sisi kanan berbayang, salju bergerigi
+  const peak = (c, cx, base, h, w, col, shade, snow, snowD) => {
+    for (let r = 0; r < h; r++) {
+      const half = Math.round(w * r / h), ly = base - h + r, ridge = Math.round(Math.sin(r / 5) * 2 * Math.min(1, r / 12));
+      px(c, cx - half, ly, half * 2 + 1, 1, col);
+      px(c, cx + ridge, ly, Math.max(0, half - ridge + 1), 1, shade);
+    }
+    const sn = Math.round(h * 0.24);
+    for (let r = 0; r < sn + 4; r++) {
+      const half = Math.round(w * r / h), ly = base - h + r;
+      for (let i = -half; i <= half; i++) {
+        const edge = sn + Math.round(Math.sin(i / 2.2) * 2.4);
+        if (r <= edge) px(c, cx + i, ly, 1, 1, i >= Math.round(Math.sin(r / 5) * 2 * Math.min(1, r / 12)) ? snowD : snow);
+      }
+    }
   };
   S.bg = c => {
+    const N = G.night;
     for (let y = 0; y < 72; y++) {
       const k = y / 72;
-      px(c, 0, y, W, 1, G.night ? `rgb(${30 + k * 20},${38 + k * 24},${80 + k * 30})` : `rgb(${143 + k * 60},${208 + k * 30},${242 + k * 8})`);
+      px(c, 0, y, W, 1, N ? `rgb(${30 + k * 20},${38 + k * 24},${80 + k * 30})` : `rgb(${143 + k * 60},${208 + k * 30},${242 + k * 8})`);
     }
-    peak(c, 150, 66, 52, 46, G.night ? '#4a4f7a' : '#8a8fb0', '#f4f7fa');
-    peak(c, 230, 66, 62, 52, G.night ? '#3e4370' : '#7a7fa2', '#ffffff');
-    peak(c, 300, 66, 44, 40, G.night ? '#4a4f7a' : '#9da2c2', '#f4f7fa');
-    for (let x = 0; x < W; x++) px(c, x, 60 + Math.round(Math.sin(x / 22) * 4), 1, 20, G.night ? '#3f6a48' : '#5ea85a');
+    peak(c, 150, 66, 52, 46, N ? '#4a4f7a' : '#8f94b6', N ? '#3e4368' : '#777ca0', '#f4f7fa', N ? '#c6cce0' : '#d6deea');
+    peak(c, 300, 66, 44, 40, N ? '#4a4f7a' : '#a2a7c6', N ? '#3e4368' : '#868bac', '#f4f7fa', N ? '#c6cce0' : '#d6deea');
+    peak(c, 230, 66, 62, 52, N ? '#3e4370' : '#7f84a8', N ? '#34395e' : '#686d90', '#ffffff', N ? '#c6cce0' : '#d6deea');
+    // bukit berlapis dengan barisan pinus kecil di kejauhan
+    for (let x = 0; x < W; x++) px(c, x, 57 + Math.round(Math.sin(x / 31 + 1) * 3), 1, 20, N ? '#34583e' : '#4f9a58');
+    for (let x = 96; x < W; x += 6) {
+      const by = 58 + Math.round(Math.sin(x / 31 + 1) * 3), th = 4 + (x * 7) % 3;
+      for (let k = 0; k < th; k++) px(c, x - Math.floor(k / 2), by - th + k, Math.floor(k / 2) * 2 + 1, 1, N ? '#2a4a34' : '#3c8348');
+    }
+    for (let x = 0; x < W; x++) px(c, x, 62 + Math.round(Math.sin(x / 22) * 4), 1, 20, N ? '#3f6a48' : '#5ea85a');
     drawGrass(c, 0, 74, W, 106, 41, true);
     drawPath(c, 96, 132, 224, 14, 12);
-    // tebing & kolam
+    // tebing batu berlapis
     px(c, 0, 40, 92, 62, '#8f8c86');
+    groundPatches(c, 0, 40, 92, 62, 9, '#84817b', 0.5);
     const r = rng(9);
-    for (let i = 0; i < 50; i++) px(c, Math.floor(r() * 90), 42 + Math.floor(r() * 58), 3, 2, r() < 0.5 ? '#a9a6a0' : '#7a7772');
-    px(c, 0, 40, 92, 3, '#5ea85a');
-    oval(c, 48, 112, 36, 12, '#4fa0cf'); oval(c, 48, 111, 33, 10, PAL.water);
-    px(c, 28, 120, 20, 60, PAL.water); px(c, 32, 120, 2, 60, PAL.waterL);
+    // retakan tidak beraturan supaya terlihat seperti batu alam, bukan tembok
+    for (let y = 47; y < 102; y += 7 + Math.floor(r() * 7)) {
+      for (let x = Math.floor(r() * 10); x < 92;) {
+        const len = Math.min(8 + Math.floor(r() * 20), 90 - x), dy = Math.floor(r() * 3) - 1;
+        if (len <= 0) break;
+        px(c, x, y + dy, len, 1, '#6f6c66'); px(c, x, y + dy + 1, len, 1, '#a9a6a0');
+        if (x + len < 88 && r() < 0.35) { const ch = 3 + Math.floor(r() * 4); px(c, x + len, y + dy, 1, ch, '#6f6c66'); px(c, x + len + 1, y + dy, 1, ch, '#a09d97'); }
+        x += len + 3 + Math.floor(r() * 9);
+      }
+    }
+    for (let i = 0; i < 30; i++) px(c, Math.floor(r() * 90), 42 + Math.floor(r() * 58), 3, 1, r() < 0.5 ? '#b4b1aa' : '#77746e');
+    px(c, 90, 40, 2, 62, '#6f6c66');
+    // rumput di atas tebing, menjuntai
+    px(c, 0, 38, 92, 4, '#5ea85a'); px(c, 0, 38, 92, 1, PAL.grassL);
+    for (let x = 0; x < 92; x += 3) px(c, x, 42, 2, 1 + (x * 7) % 3, x % 2 ? '#4f9a3c' : '#5ea85a');
+    // kolam dan sungai bertepi batu
+    oval(c, 48, 113, 38, 14, '#c9ad72'); oval(c, 48, 112, 36, 12, '#3f8fc4'); oval(c, 48, 111, 33, 10, PAL.water); oval(c, 46, 109, 22, 5, '#6cbce6');
+    [[18, 104], [10, 112], [14, 120], [76, 104], [86, 112], [80, 120], [60, 124], [36, 124]].forEach(([a, b]) => { oval(c, a, b, 3, 2, '#7f7c78'); oval(c, a - 1, b - 1, 2, 1, '#b4b0a8'); });
+    px(c, 26, 120, 2, 60, '#c9ad72'); px(c, 48, 120, 2, 60, '#c9ad72');
+    drawWater(c, 28, 120, 20, 60, 44);
+    px(c, 28, 120, 1, 60, PAL.waterD); px(c, 47, 120, 1, 60, PAL.waterD);
+    [[58, 110], [40, 115], [30, 106]].forEach(([a, b]) => px(c, a, b, 7, 1, PAL.waterL));
   };
 
   S.objs.push({ flat: true, y: 0, hit: [100, 4, 220, 56], go: [200, 92], draw() {}, tap() { say([{ k: 'mountain' }]); } });

@@ -1,8 +1,8 @@
 // Gambar piksel: semua digambar dengan kotak-kotak kecil di kanvas 320x180, lalu diperbesar.
 
 const PAL = {
-  grass: '#6dbb4f', grassD: '#4f9a3c', grassL: '#93d36a',
-  path: '#e4c78f', pathD: '#c9a46a', pathL: '#f0dcae',
+  grass: '#6dbb4f', grassD: '#4f9a3c', grassL: '#93d36a', grassM: '#62b047', grassN: '#79c55a',
+  path: '#e4c78f', pathD: '#c9a46a', pathL: '#f0dcae', pathM: '#dcbc82',
   soil: '#8a5a35', soilD: '#6b4226', soilWet: '#5a3820',
   wood: '#b27a45', woodD: '#7d5230', woodL: '#d39b5f',
   water: '#5fb3e0', waterD: '#3f8fc4', waterL: '#a8dcf5',
@@ -10,23 +10,32 @@ const PAL = {
   stone: '#a9a6a0', stoneD: '#7f7c78',
 };
 
-function px(c, x, y, w, h, col) { c.fillStyle = col; c.fillRect(Math.round(x), Math.round(y), w, h); }
+// PX = ukuran satu satuan gambar. Gambar dekat (panel) memakai PX > 1 supaya lengkungannya digambar ulang dengan halus, bukan diperbesar.
+let PX = 1;
+function px(c, x, y, w, h, col) { c.fillStyle = col; c.fillRect(Math.round(x * PX), Math.round(y * PX), Math.round(w * PX), Math.round(h * PX)); }
 function disc(c, cx, cy, r, col) {
   c.fillStyle = col;
-  for (let dy = -r; dy <= r; dy++) { const w = Math.floor(Math.sqrt(r * r - dy * dy) + 0.35); c.fillRect(Math.round(cx - w), Math.round(cy + dy), w * 2 + 1, 1); }
+  const R = r * PX, X = cx * PX, Y = cy * PX;
+  for (let dy = -R; dy <= R; dy++) { const w = Math.floor(Math.sqrt(R * R - dy * dy) + 0.35); c.fillRect(Math.round(X - w), Math.round(Y + dy), w * 2 + 1, 1); }
 }
 function oval(c, cx, cy, rx, ry, col) {
   c.fillStyle = col;
-  for (let dy = -ry; dy <= ry; dy++) { const w = Math.floor(rx * Math.sqrt(Math.max(0, 1 - (dy * dy) / (ry * ry))) + 0.35); c.fillRect(Math.round(cx - w), Math.round(cy + dy), w * 2 + 1, 1); }
+  const RX = rx * PX, RY = ry * PX, X = cx * PX, Y = cy * PX;
+  for (let dy = -RY; dy <= RY; dy++) { const w = Math.floor(RX * Math.sqrt(Math.max(0, 1 - (dy * dy) / (RY * RY))) + 0.35); c.fillRect(Math.round(X - w), Math.round(Y + dy), w * 2 + 1, 1); }
 }
 // Bayangan bisa diarahkan ke kanvas utama agar tidak ikut diberi garis tepi
 let SHADOW_TO = null;
-function shadow(c, x, y, rx) { oval(SHADOW_TO || c, Math.round(x), Math.round(y) - 1, rx, 1, 'rgba(30,45,20,0.22)'); }
+function shadow(c, x, y, rx) {
+  const t = SHADOW_TO || c, ry = rx < 9 ? 1 : rx < 18 ? 2 : 3, cx = Math.round(x), cy = Math.round(y) - 1;
+  t.fillStyle = 'rgba(30,45,20,0.24)';
+  for (let dy = -ry; dy <= ry; dy++) { const w = Math.round(rx * Math.sqrt(1 - (dy / (ry + 0.6)) ** 2)); t.fillRect(cx - w, cy + dy, w * 2 + 1, 1); }
+}
+function shadowRect(c, x, y, w, h) { const t = SHADOW_TO || c; t.fillStyle = 'rgba(30,45,20,0.2)'; t.fillRect(Math.round(x), Math.round(y), w, h); }
 function rng(seed) {
   return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
 }
 // Gambar menghadap kanan dengan koordinat relatif; dir -1 = dibalik ke kiri
-function flip(c, x, dir, fn) { c.save(); c.translate(Math.round(x), 0); if (dir < 0) c.scale(-1, 1); fn(); c.restore(); }
+function flip(c, x, dir, fn) { c.save(); c.translate(Math.round(x) * PX, 0); if (dir < 0) c.scale(-1, 1); fn(); c.restore(); }
 
 // ---------- Orang (gaya chibi: kepala besar, mata berkilau) ----------
 const LOOKS = {
@@ -364,15 +373,19 @@ function drawButterfly(c, x, y, t, col) {
 function drawTree(c, x, y, o = {}) {
   x = Math.round(x + (o.shake || 0)); y = Math.round(y);
   const r = o.r || 16;
-  shadow(c, x, y + 1, Math.round(r * 0.8));
-  px(c, x - 3, y - 12, 6, 12, '#8a5a35'); px(c, x + 1, y - 12, 2, 12, '#6b4226');
+  shadow(c, x, y + 1, Math.round(r * 0.95));
+  px(c, x - 3, y - 12, 6, 12, '#8a5a35'); px(c, x + 1, y - 12, 2, 12, '#6b4226'); px(c, x - 2, y - 12, 1, 9, '#a87448');
   px(c, x - 5, y - 2, 2, 2, '#8a5a35'); px(c, x + 3, y - 2, 2, 2, '#6b4226');
-  const cy = y - 12 - r + 4;
-  disc(c, x, cy + 2, r, PAL.leafD);
-  disc(c, x - Math.round(r * 0.35), cy - 2, Math.round(r * 0.7), PAL.leaf);
-  disc(c, x + Math.round(r * 0.4), cy, Math.round(r * 0.62), PAL.leaf);
-  disc(c, x - Math.round(r * 0.4), cy - Math.round(r * 0.35), Math.round(r * 0.32), PAL.leafL);
-  disc(c, x + Math.round(r * 0.3), cy - Math.round(r * 0.2), Math.round(r * 0.22), PAL.leafL);
+  const cy = y - 12 - r + 4, R = k => Math.max(1, Math.round(r * k));
+  // daun bergerombol: tepi bergelombang, terang dari kiri atas, gelap di kanan bawah
+  disc(c, x, cy + 2, R(0.86), PAL.leafD);
+  [[-0.62, 0.22, 0.46], [0.64, 0.24, 0.46], [-0.34, -0.5, 0.5], [0.36, -0.5, 0.48], [0, 0.56, 0.5], [-0.72, -0.14, 0.3], [0.74, -0.14, 0.3]]
+    .forEach(([a, b, k]) => disc(c, x + R(Math.abs(a)) * Math.sign(a), cy + 2 + R(Math.abs(b)) * Math.sign(b), R(k), PAL.leafD));
+  [[-0.34, -0.26, 0.56], [0.26, -0.3, 0.48], [-0.56, 0.16, 0.34], [0.08, 0.14, 0.42], [0.58, 0.02, 0.26]]
+    .forEach(([a, b, k]) => disc(c, x + R(Math.abs(a)) * Math.sign(a), cy + R(Math.abs(b)) * Math.sign(b), R(k), PAL.leaf));
+  [[-0.46, -0.48, 0.26], [0.14, -0.56, 0.18], [-0.68, 0.02, 0.13], [-0.1, -0.12, 0.13]]
+    .forEach(([a, b, k]) => disc(c, x + R(Math.abs(a)) * Math.sign(a), cy + R(Math.abs(b)) * Math.sign(b), R(k), PAL.leafL));
+  if (r >= 12) [[-3, 4], [5, -4], [9, 4], [-10, 3], [2, 8], [-6, -9], [7, -10], [-1, -4]].forEach(([a, b], i) => px(c, x + a, cy + b, 2, 1, i % 3 ? PAL.leafD : PAL.leafL));
   if (o.apples) o.apples.forEach(a => drawApple(c, x + a[0], cy + a[1]));
 }
 
@@ -395,9 +408,26 @@ function drawFlower(c, x, y, col, t) {
 }
 
 function drawPlot(c, x, y, w, h, wet) {
+  const dark = wet ? '#4a2c18' : PAL.soilD, light = wet ? '#6e4a2c' : '#a87448';
   px(c, x, y, w, h, wet ? PAL.soilWet : PAL.soil);
-  px(c, x, y + h - 1, w, 1, PAL.soilD);
-  for (let i = 3; i < h - 1; i += 4) px(c, x + 1, y + i, w - 2, 1, wet ? '#4a2c18' : PAL.soilD);
+  px(c, x, y, w, 1, light); px(c, x, y + h - 1, w, 1, dark);
+  // alur tanah: gundukan terang di atas, cekungan gelap di bawah
+  for (let i = 3; i < h - 1; i += 4) {
+    px(c, x + 1, y + i, w - 2, 1, dark);
+    for (let j = 1 + (i % 3); j < w - 2; j += 3) px(c, x + j, y + i - 2, 2, 1, light);
+  }
+}
+// Petak berbingkai batu: tanahnya bertekstur dan bingkainya berbayang
+function drawBed(c, x, y, w, h, seed) {
+  shadowRect(c, x - 2, y + h + 1, w + 4, 2);
+  px(c, x, y, w, h, '#946c44');
+  groundPatches(c, x, y, w, h, seed, '#886240', 0.55);
+  const r = rng(seed);
+  for (let i = 0; i < w * h / 34; i++) px(c, x + Math.floor(r() * w), y + Math.floor(r() * h), r() < 0.5 ? 2 : 1, 1, r() < 0.55 ? '#7a5636' : '#ab8256');
+  px(c, x, y, w, 2, 'rgba(50,30,15,0.3)');
+  const stone = (sx, sy, sw, sh) => { px(c, sx, sy, sw, sh, PAL.stoneD); px(c, sx, sy, sw - 1, sh - 1, PAL.stone); px(c, sx, sy, sw - 2, 1, '#cfccc6'); };
+  for (let i = -2; i < w; i += 6) { stone(x + i, y - 3, 6, 3); stone(x + i, y + h - 1, 6, 3); }
+  for (let j = 0; j < h - 1; j += 5) { stone(x - 3, y + j, 3, 5); stone(x + w, y + j, 3, 5); }
 }
 
 function drawCrop(c, cx, by, type, stage, t) {
@@ -551,31 +581,53 @@ function drawHouse(c, x, y, w, h, o) {
   shadow(c, x + w / 2, y + h + 2, w / 2 + 2);
   px(c, x, y + rh, w, h - rh, o.wall || '#f3e3c0');
   for (let i = y + rh + 4; i < y + h; i += 4) px(c, x, i, w, 1, o.wallD || '#e2cda2');
-  px(c, x, y + rh, 3, h - rh, PAL.wood); px(c, x + w - 3, y + rh, 3, h - rh, PAL.wood);
-  px(c, x, y + h - 2, w, 2, PAL.stone);
-  if (o.chimney) { px(c, x + w - 20, y - 8, 8, 14, PAL.stone); px(c, x + w - 21, y - 9, 10, 2, PAL.stoneD); }
+  px(c, x + w - 16, y + rh, 13, h - rh, 'rgba(110,70,40,0.09)');
+  px(c, x, y + rh, w, 3, 'rgba(90,55,35,0.28)');
+  px(c, x, y + rh, 3, h - rh, PAL.wood); px(c, x + w - 3, y + rh, 3, h - rh, PAL.woodD); px(c, x, y + rh, 1, h - rh, PAL.woodL);
+  // fondasi batu
+  px(c, x - 1, y + h - 3, w + 2, 3, PAL.stoneD);
+  for (let j = 0; j < w; j += 6) { px(c, x + j, y + h - 3, 5, 2, PAL.stone); px(c, x + j, y + h - 3, 3, 1, '#c9c6c0'); }
+  if (o.chimney) {
+    px(c, x + w - 20, y - 8, 8, 14, PAL.stone); px(c, x + w - 21, y - 9, 10, 2, PAL.stoneD); px(c, x + w - 14, y - 7, 2, 13, PAL.stoneD);
+    for (let k = 0; k < 3; k++) px(c, x + w - 20 + (k % 2) * 2, y - 5 + k * 3, 4, 1, PAL.stoneD);
+  }
+  // genteng berlapis: tiap baris punya tepi terang dan bayangan
   px(c, x - 4, y, w + 8, rh, o.roof);
-  for (let i = y + 3; i < y + rh; i += 4) px(c, x - 4, i, w + 8, 1, o.roofD);
-  for (let r = 0, i = y; i < y + rh; i += 4, r++) for (let j = x - 4 + (r % 2) * 4; j < x + w + 4; j += 8) px(c, j, i, 1, 3, o.roofD);
-  px(c, x - 4, y, w + 8, 1, o.roofL || o.roof); px(c, x - 5, y + rh - 2, w + 10, 2, o.roofD);
+  for (let r = 0, i = y; i < y + rh; i += 4, r++) {
+    px(c, x - 4, i + 3, w + 8, 1, o.roofD);
+    for (let j = x - 4 + (r % 2) * 4; j < x + w + 4; j += 8) { px(c, j, i, 1, 3, o.roofD); px(c, j + 1, i, 4, 1, o.roofL || o.roof); }
+  }
+  px(c, x + w - 18, y, 22, rh, 'rgba(70,20,20,0.12)');
+  px(c, x - 4, y, w + 8, 1, o.roofL || o.roof); px(c, x - 5, y + rh - 2, w + 10, 2, o.roofD); px(c, x - 5, y + rh - 1, w + 10, 1, 'rgba(50,20,15,0.35)');
   if (o.door != null) {
     const dx = x + o.door;
     px(c, dx - 1, y + h - 21, 16, 19, PAL.woodD); px(c, dx, y + h - 20, 14, 18, PAL.wood);
-    px(c, dx + 6, y + h - 20, 1, 18, PAL.woodD); px(c, dx + 10, y + h - 11, 2, 2, '#f4cf3a');
-    px(c, dx - 3, y + h - 2, 20, 2, PAL.stoneD);
+    px(c, dx + 6, y + h - 20, 2, 18, PAL.woodD);
+    for (const pn of [dx + 2, dx + 9]) { px(c, pn, y + h - 18, 3, 6, '#9c6a3a'); px(c, pn, y + h - 10, 3, 6, '#9c6a3a'); px(c, pn, y + h - 18, 3, 1, PAL.woodL); px(c, pn, y + h - 10, 3, 1, PAL.woodL); }
+    px(c, dx + 5, y + h - 11, 1, 2, '#f4cf3a'); px(c, dx + 8, y + h - 11, 1, 2, '#f4cf3a');
+    px(c, dx - 3, y + h - 2, 20, 3, PAL.stoneD); px(c, dx - 3, y + h - 2, 20, 1, '#c9c6c0');
   }
-  (o.windows || []).forEach(wx => drawWindow(c, x + wx, y + rh + 7, o.night));
+  (o.windows || []).forEach(wx => {
+    drawWindow(c, x + wx, y + rh + 7, o.night);
+    if (o.flowerbox) {
+      const fy = y + rh + 18;
+      px(c, x + wx - 1, fy + 1, 16, 3, PAL.woodD); px(c, x + wx, fy + 1, 14, 2, PAL.wood);
+      px(c, x + wx - 1, fy - 1, 16, 2, PAL.leafD);
+      for (let k = 0; k < 7; k++) px(c, x + wx + k * 2, fy - 2 + (k % 2), 1, 1, k % 3 === 0 ? '#f39ac0' : k % 3 === 1 ? '#f4cf3a' : '#ffffff');
+    }
+  });
 }
 function drawWindow(c, x, y, night) {
   px(c, x - 1, y - 1, 16, 13, PAL.woodD);
   px(c, x, y, 14, 11, night ? '#ffd96a' : '#a8dcf5');
-  if (!night) { px(c, x + 1, y + 1, 3, 1, '#e3f5fc'); px(c, x + 1, y + 2, 1, 2, '#e3f5fc'); }
+  if (!night) { px(c, x, y + 8, 14, 3, '#8fcdea'); px(c, x + 1, y + 1, 3, 1, '#e3f5fc'); px(c, x + 1, y + 2, 1, 2, '#e3f5fc'); px(c, x + 9, y + 1, 2, 1, '#e3f5fc'); }
   px(c, x + 6, y, 2, 11, PAL.woodD); px(c, x, y + 5, 14, 1, PAL.woodD);
-  px(c, x - 2, y + 11, 18, 2, PAL.wood);
+  px(c, x - 2, y + 11, 18, 2, PAL.wood); px(c, x - 2, y + 11, 18, 1, PAL.woodL);
 }
 
 function drawFenceH(c, x, y, len) {
-  for (let i = 0; i <= len; i += 8) { px(c, x + i, y - 9, 3, 10, PAL.woodD); px(c, x + i, y - 9, 2, 9, PAL.wood); }
+  shadowRect(c, x, y + 1, len + 3, 2);
+  for (let i = 0; i <= len; i += 8) { px(c, x + i, y - 9, 3, 10, PAL.woodD); px(c, x + i, y - 9, 2, 9, PAL.wood); px(c, x + i, y - 9, 2, 1, PAL.woodL); }
   px(c, x, y - 7, len + 3, 2, PAL.woodL); px(c, x, y - 3, len + 3, 2, PAL.woodL);
   px(c, x, y - 6, len + 3, 1, PAL.woodD); px(c, x, y - 2, len + 3, 1, PAL.woodD);
 }
@@ -584,32 +636,135 @@ function drawFenceV(c, x, y, len) {
   for (let i = 0; i <= len; i += 8) { px(c, x - 1, y + i - 9, 4, 10, PAL.woodD); px(c, x - 1, y + i - 9, 3, 9, PAL.wood); }
 }
 
-function drawGrass(c, x, y, w, h, seed, flowers) {
-  px(c, x, y, w, h, PAL.grass);
-  const r = rng(seed), n = Math.floor(w * h / 70);
-  for (let i = 0; i < n; i++) {
-    const gx = x + Math.floor(r() * w), gy = y + Math.floor(r() * h), k = r();
-    if (k < 0.55) { px(c, gx, gy, 1, 2, PAL.grassD); px(c, gx + 2, gy, 1, 2, PAL.grassD); px(c, gx + 1, gy + 1, 1, 1, PAL.grassD); }
-    else if (k < 0.85) px(c, gx, gy, 2, 1, PAL.grassL);
-    else if (flowers && k < 0.92) { px(c, gx, gy, 1, 1, '#ffffff'); px(c, gx + 1, gy + 1, 1, 1, '#f4cf3a'); }
-    else if (flowers) px(c, gx, gy, 1, 1, '#f39ac0');
+// Bercak lembut pada tanah (derau halus) supaya warnanya tidak rata
+function groundPatches(c, x, y, w, h, seed, col, level) {
+  const r = rng(seed), cell = 14, cols = Math.ceil(w / cell) + 2, rows = Math.ceil(h / cell) + 2, g = [];
+  for (let i = 0; i < cols * rows; i++) g.push(r());
+  const at = (i, j) => g[j * cols + i], sm = v => v * v * (3 - 2 * v);
+  c.fillStyle = col;
+  for (let py = 0; py < h; py += 2) for (let qx = 0; qx < w; qx += 2) {
+    const fx = qx / cell, fy = py / cell, i = Math.floor(fx), j = Math.floor(fy), u = sm(fx - i), v = sm(fy - j);
+    const n = (at(i, j) * (1 - u) + at(i + 1, j) * u) * (1 - v) + (at(i, j + 1) * (1 - u) + at(i + 1, j + 1) * u) * v;
+    if (n > level) c.fillRect((x + qx) * PX, (y + py) * PX, 2 * PX, 2 * PX);
   }
 }
-function drawPath(c, x, y, w, h, seed) {
-  px(c, x, y, w, h, PAL.path);
+function drawGrass(c, x, y, w, h, seed, flowers) {
+  px(c, x, y, w, h, PAL.grass);
+  groundPatches(c, x, y, w, h, seed + 1, PAL.grassM, 0.58);
+  groundPatches(c, x, y, w, h, seed + 2, PAL.grassN, 0.6);
+  const r = rng(seed), n = Math.floor(w * h / 130);
+  for (let i = 0; i < n; i++) {
+    const gx = x + Math.floor(r() * w), gy = y + Math.floor(r() * h);
+    if (r() < 0.62) { px(c, gx, gy, 1, 2, PAL.grassD); px(c, gx + 2, gy, 1, 2, PAL.grassD); px(c, gx + 1, gy + 1, 1, 1, PAL.grassD); }
+    else px(c, gx, gy, 2, 1, PAL.grassL);
+  }
+  if (!flowers) return;
+  // bunga liar tumbuh bergerombol, bukan tersebar acak
+  const groups = Math.floor(w * h / 3600);
+  for (let i = 0; i < groups; i++) {
+    const gx = x + Math.floor(r() * w), gy = y + Math.floor(r() * h), col = ['#ffffff', '#f7d64a', '#f6a8c8'][Math.floor(r() * 3)];
+    for (let k = 0; k < 4; k++) {
+      const fx = gx + Math.floor(r() * 13) - 6, fy = gy + Math.floor(r() * 9) - 4;
+      px(c, fx, fy - 1, 1, 3, col); px(c, fx - 1, fy, 3, 1, col); px(c, fx, fy, 1, 1, col === '#f7d64a' ? '#c98a2a' : '#f4cf3a');
+    }
+  }
+}
+// Jalan tanah bertepi tidak lurus. Tepi digambar dulu, isi belakangan, supaya persimpangan bersih.
+function pathEdge(c, x, y, w, h, seed) {
   const r = rng(seed);
-  for (let i = 0; i < w * h / 40; i++) px(c, x + Math.floor(r() * w), y + Math.floor(r() * h), r() < 0.5 ? 2 : 1, 1, r() < 0.6 ? PAL.pathD : PAL.pathL);
-  px(c, x, y, w, 1, PAL.pathD); px(c, x, y + h - 1, w, 1, PAL.pathL);
+  const side = (len, put) => { for (let i = 0; i < len;) { const n = 2 + Math.floor(r() * 5), e = Math.floor(r() * 3); put(i, Math.min(n, len - i), e); i += n; } };
+  side(w, (i, n, e) => { px(c, x + i, y - e - 1, n, 1, PAL.pathD); px(c, x + i, y - e, n, e, PAL.path); });
+  side(w, (i, n, e) => { px(c, x + i, y + h + e, n, 1, PAL.pathD); px(c, x + i, y + h, n, e, PAL.path); });
+  side(h, (i, n, e) => { px(c, x - e - 1, y + i, 1, n, PAL.pathD); px(c, x - e, y + i, e, n, PAL.path); });
+  side(h, (i, n, e) => { px(c, x + w + e, y + i, 1, n, PAL.pathD); px(c, x + w, y + i, e, n, PAL.path); });
+}
+function pathFill(c, x, y, w, h, seed) {
+  px(c, x, y, w, h, PAL.path);
+  groundPatches(c, x, y, w, h, seed + 3, PAL.pathM, 0.56);
+  const r = rng(seed + 7);
+  for (let i = 0; i < w * h / 60; i++) px(c, x + Math.floor(r() * w), y + Math.floor(r() * h), r() < 0.5 ? 2 : 1, 1, r() < 0.6 ? PAL.pathD : PAL.pathL);
+  for (let i = 0; i < w * h / 700; i++) { const sx = x + Math.floor(r() * (w - 3)), sy = y + 1 + Math.floor(r() * (h - 3)); px(c, sx, sy, 3, 2, '#b89a68'); px(c, sx, sy, 2, 1, '#d8c49a'); }
+}
+function drawPaths(c, list) { list.forEach(p => pathEdge(c, ...p)); list.forEach(p => pathFill(c, ...p)); }
+function drawPath(c, x, y, w, h, seed) { drawPaths(c, [[x, y, w, h, seed]]); }
+
+// Benda di latar diberi garis tepi yang sama dengan benda berdiri (fn menggambar ke lapisan sementara)
+let _bgL = null, _bgS = null;
+function bgOutlined(c, fn) {
+  if (!_bgL) { _bgL = document.createElement('canvas'); _bgL.width = W; _bgL.height = H; _bgS = document.createElement('canvas'); _bgS.width = W; _bgS.height = H; }
+  const lc = _bgL.getContext('2d'), sc = _bgS.getContext('2d'), keep = SHADOW_TO;
+  lc.clearRect(0, 0, W, H);
+  SHADOW_TO = c; fn(lc); SHADOW_TO = keep;
+  sc.globalCompositeOperation = 'source-over'; sc.clearRect(0, 0, W, H); sc.drawImage(_bgL, 0, 0);
+  sc.globalCompositeOperation = 'source-in'; sc.fillStyle = 'rgba(46,30,20,0.85)'; sc.fillRect(0, 0, W, H);
+  sc.globalCompositeOperation = 'source-over';
+  for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) c.drawImage(_bgS, dx, dy);
+  c.drawImage(_bgL, 0, 0);
+}
+
+// Benda dekat yang lebih besar: bentuknya digambar pada ukuran itu (s kali), garis tepinya tetap 1 piksel
+const _bigBuf = {};
+function drawBig(c, x, y, s, fn, col = '#3a2616') {
+  const size = 48 * s;
+  if (!_bigBuf[s]) { const o = document.createElement('canvas'), m = document.createElement('canvas'); o.width = o.height = m.width = m.height = size; _bigBuf[s] = [o, m]; }
+  const [ob, mb] = _bigBuf[s], oc = ob.getContext('2d'), mc = mb.getContext('2d'), keepS = SHADOW_TO, keepP = PX;
+  oc.clearRect(0, 0, size, size);
+  SHADOW_TO = _trash; PX = s;
+  try { fn(oc, 24, 40); } finally { PX = keepP; SHADOW_TO = keepS; }
+  mc.globalCompositeOperation = 'source-over'; mc.clearRect(0, 0, size, size); mc.drawImage(ob, 0, 0);
+  mc.globalCompositeOperation = 'source-in'; mc.fillStyle = col; mc.fillRect(0, 0, size, size);
+  mc.globalCompositeOperation = 'source-over';
+  const ox = Math.round(x) - 24 * s, oy = Math.round(y) - 40 * s;
+  for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) c.drawImage(mb, ox + dx, oy + dy);
+  c.drawImage(ob, ox, oy);
+}
+
+// ---------- Lantai, dinding, air ----------
+// Lantai papan: tiap papan sedikit beda warna, ada sambungan dan serat kayu
+function drawPlanks(c, x, y, w, h, tones, seam, seed, rowH = 8, len = 44) {
+  const r = rng(seed);
+  for (let row = 0, py = y; py < y + h; py += rowH, row++) {
+    for (let qx = x - (row % 2) * (len >> 1); qx < x + w; qx += len) {
+      const sx = Math.max(x, qx), ex = Math.min(x + w, qx + len);
+      px(c, sx, py, ex - sx, rowH - 1, tones[Math.floor(r() * tones.length)]);
+      if (qx >= x) px(c, sx, py, 1, rowH - 1, seam);
+      for (let g = 0; g < 2; g++) px(c, sx + 3 + Math.floor(r() * Math.max(1, ex - sx - 14)), py + 1 + Math.floor(r() * (rowH - 3)), 4 + Math.floor(r() * 8), 1, 'rgba(90,55,25,0.13)');
+    }
+    px(c, x, py + rowH - 1, w, 1, seam);
+  }
+}
+// Lantai ubin: warnanya sedikit berbeda per ubin
+function drawTiles(c, x, y, w, h, size, tones, seam, seed) {
+  const r = rng(seed);
+  for (let py = y; py < y + h; py += size) for (let qx = x; qx < x + w; qx += size) {
+    px(c, qx, py, size, size, tones[Math.floor(r() * tones.length)]);
+    px(c, qx, py, size, 1, seam); px(c, qx, py, 1, size, seam);
+  }
+}
+// Cahaya jendela yang jatuh miring ke lantai (siang saja)
+function windowLight(c, x, y, w, h, lean = 10) {
+  if (G.night) return;
+  for (let i = 0; i < h; i++) px(c, x + Math.round(i * lean / h), y + i, w, 1, 'rgba(255,244,205,0.2)');
+}
+// Bayangan lembut di kaki dinding
+function wallFoot(c, y, x = 0, w = W) { px(c, x, y, w, 2, 'rgba(50,30,15,0.24)'); px(c, x, y + 2, w, 2, 'rgba(50,30,15,0.1)'); }
+function drawWater(c, x, y, w, h, seed) {
+  px(c, x, y, w, h, PAL.water);
+  groundPatches(c, x, y, w, h, seed, '#55a9d9', 0.52);
+  groundPatches(c, x, y, w, h, seed + 1, '#6cbce6', 0.62);
+  const r = rng(seed + 2);
+  for (let i = 0; i < w * h / 150; i++) px(c, x + Math.floor(r() * w), y + Math.floor(r() * h), 3 + Math.floor(r() * 7), 1, r() < 0.55 ? PAL.waterL : '#8fd0f2');
 }
 
 function drawArrow(c, x, y, dir, t) {
-  const o = Math.round(Math.sin(t * 5) * 2);
-  c.save(); c.translate(x + (dir === 'right' ? o : dir === 'left' ? -o : 0), y + (dir === 'down' ? o : dir === 'up' ? -o : 0));
+  const o = Math.round(Math.sin(t * 4));
+  c.save(); c.globalAlpha = 0.88; c.translate(x + (dir === 'right' ? o : dir === 'left' ? -o : 0), y + (dir === 'down' ? o : dir === 'up' ? -o : 0));
   c.rotate({ right: 0, down: Math.PI / 2, left: Math.PI, up: -Math.PI / 2 }[dir]);
   const A = (dx, dy, w, h, k) => { c.fillStyle = k; c.fillRect(dx, dy, w, h); };
-  A(-8, -4, 9, 8, '#5a3a22'); A(1, -8, 2, 16, '#5a3a22'); A(3, -6, 2, 12, '#5a3a22'); A(5, -4, 2, 8, '#5a3a22'); A(7, -2, 2, 4, '#5a3a22');
-  A(-7, -3, 9, 6, '#ffd84a'); A(2, -6, 2, 12, '#ffd84a'); A(4, -4, 2, 8, '#ffd84a'); A(6, -2, 1, 4, '#ffd84a');
-  A(-7, -3, 9, 1, '#fff2a8');
+  const E = '#6b4f33', F = '#ffe88a';
+  A(-6, -3, 7, 6, E); A(1, -6, 2, 12, E); A(3, -4, 2, 8, E); A(5, -2, 2, 4, E);
+  A(-5, -2, 7, 4, F); A(2, -4, 2, 8, F); A(4, -2, 1, 4, F);
+  A(-5, -2, 7, 1, '#fff8d4');
   c.restore();
 }
 
@@ -624,30 +779,60 @@ function drawDigit(c, x, y, d, col) {
 function drawBigFlower(c, col, hl, t, stage = 6) {
   const blink = Math.floor(t * 6) % 2 === 0;
   const C = (part, base) => (hl === part && blink) ? '#fff7b0' : base;
-  c.clearRect(0, 0, 48, 56);
-  px(c, 0, 0, 48, 41, '#dff1fb');
-  px(c, 0, 41, 48, 15, (hl === 'root' && blink) ? '#9a6a45' : '#8a5a35');
-  for (let i = 0; i < 12; i++) px(c, (i * 13) % 46, 44 + (i * 7) % 11, 2, 1, '#7a4c2c');
-  px(c, 0, 40, 48, 2, PAL.grass);
-  if (stage >= 1 && stage <= 2) { oval(c, 24, 44, 3, 2, C('seed', '#c9a24a')); px(c, 23, 43, 1, 1, '#f0dcae'); }
+  drawFlowerGround(c, (hl === 'root' && blink) ? '#9a6a45' : '#8a5a35');
+  if (stage >= 1 && stage <= 2) { oval(c, 24, 44, 3, 2, C('seed', '#c9a24a')); oval(c, 23.5, 43.5, 1.5, 0.5, '#f0dcae'); }
   if (stage >= 2) {
     const R = C('root', '#f0dcae');
-    px(c, 23, 42, 2, 6, R); px(c, 20, 46, 3, 1, R); px(c, 19, 47, 1, 4, R); px(c, 25, 46, 3, 1, R); px(c, 28, 47, 1, 4, R);
-    px(c, 22, 49, 1, 4, R); px(c, 25, 50, 1, 4, R); px(c, 18, 51, 1, 2, R); px(c, 29, 51, 1, 2, R);
+    // akar melengkung, makin ke bawah makin tipis
+    [[24, 42, 19, 51, 1], [24, 42, 29, 51, -1], [24, 42, 22, 54, 0.4], [24, 42, 26, 54, -0.4], [21, 47, 16, 53, 0.6], [27, 47, 32, 53, -0.6]].forEach(([x0, y0, x1, y1, b], i) => {
+      for (let u = 0; u <= 1; u += 0.05) px(c, x0 + (x1 - x0) * u + Math.sin(u * Math.PI) * b, y0 + (y1 - y0) * u, u < 0.4 && i < 4 ? 1 : 0.5, 0.5, R);
+    });
   }
-  if (stage >= 3) px(c, 23, 20, 2, 21, C('stem', '#3f8a3a'));
+  if (stage >= 3) {
+    px(c, 23, 20, 2, 21, C('stem', '#3f8a3a'));
+    if (hl !== 'stem' || !blink) { px(c, 23, 20, 0.5, 21, '#58a84a'); px(c, 24.5, 20, 0.5, 21, '#2f6e26'); }
+  }
   if (stage >= 4) {
-    const Lf = C('leaf', '#4a9a3a'), Ld = C('leaf', '#2f7a2c');
-    oval(c, 17, 31, 6, 2, Lf); px(c, 12, 31, 11, 1, Ld);
-    oval(c, 31, 27, 6, 2, Lf); px(c, 26, 27, 11, 1, Ld);
+    bigLeaf(c, 23, 32, 11, 30, 2.8, C('leaf', '#4a9a3a'), C('leaf', '#2f7a2c'), C('leaf', '#7cc85a'));
+    bigLeaf(c, 25, 28, 37, 26, 2.8, C('leaf', '#4a9a3a'), C('leaf', '#2f7a2c'), C('leaf', '#7cc85a'));
   }
   if (stage >= 5) {
     const Pm = C('petal', col[1]), Pd = C('petal', col[2]);
-    for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2 - Math.PI / 2; disc(c, 24 + Math.round(Math.cos(a) * 8), 15 + Math.round(Math.sin(a) * 8), 5, Pd); }
-    for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2 - Math.PI / 2; disc(c, 24 + Math.round(Math.cos(a) * 8), 15 + Math.round(Math.sin(a) * 8) - 1, 4, Pm); }
+    // kelopak: pangkal sempit, ujung membulat
+    const petal = (a, grow, r, k, col2) => {
+      for (let u = 0; u <= 1; u += 0.08) disc(c, 24 + Math.cos(a) * (2 + 8.5 * u), 15 + Math.sin(a) * (2 + 8.5 * u) - k, (1.2 + Math.sin(Math.pow(u, 1.4) * Math.PI * 0.74) * r) * grow, col2);
+    };
+    for (let i = 0; i < 6; i++) petal(i / 6 * Math.PI * 2 - Math.PI / 2, 1, 4.1, 0, Pd);
+    for (let i = 0; i < 6; i++) petal(i / 6 * Math.PI * 2 - Math.PI / 2, 0.82, 4.1, 0.5, Pm);
+    for (let i = 0; i < 6; i++) {
+      const a = i / 6 * Math.PI * 2 - Math.PI / 2;
+      for (let u = 0.3; u < 0.92; u += 0.05) px(c, 24 + Math.cos(a) * (2 + 10 * u), 15 + Math.sin(a) * (2 + 10 * u) - 0.5, 0.5, 0.5, Pd);
+    }
   }
   if (stage >= 6) {
     disc(c, 24, 15, 4, C('pistil', col[0] === 'yellow' ? '#8a5a35' : '#f4cf3a'));
-    px(c, 22, 13, 1, 1, '#ffffff'); px(c, 25, 16, 1, 1, 'rgba(0,0,0,0.2)'); px(c, 23, 17, 1, 1, 'rgba(0,0,0,0.2)');
+    disc(c, 24, 15, 2.5, C('pistil', col[0] === 'yellow' ? '#6b4226' : '#e9b02a'));
+    for (let k = 0; k < 8; k++) px(c, 24 + Math.cos(k * 0.785) * 3.2, 15 + Math.sin(k * 0.785) * 3.2, 0.5, 0.5, '#fff2a8');
+    px(c, 22.5, 13.5, 1, 0.5, '#ffffff');
+  }
+}
+// Langit dan tanah di balik bunga besar
+function drawFlowerGround(c, soil = '#8a5a35') {
+  c.clearRect(0, 0, 48 * PX, 56 * PX);
+  px(c, 0, 0, 48, 41, '#dff1fb'); px(c, 0, 0, 48, 10, '#d2ebf9'); px(c, 0, 10, 48, 8, '#d9eefa');
+  oval(c, 8, 8, 6, 1.5, '#f4fbff'); oval(c, 11, 7, 3.5, 1.5, '#ffffff');
+  px(c, 0, 41, 48, 15, soil); px(c, 0, 50, 48, 6, 'rgba(50,25,10,0.14)');
+  for (let i = 0; i < 18; i++) px(c, (i * 13) % 46, 43.5 + (i * 7) % 12, 1.5, 0.5, i % 3 ? '#7a4c2c' : '#a0704a');
+  [[6, 47], [40, 45], [34, 53], [12, 53]].forEach(([a, b]) => { oval(c, a, b, 1.5, 1, PAL.stoneD); oval(c, a - 0.5, b - 0.5, 1, 0.5, '#c9c6c0'); });
+  px(c, 0, 40, 48, 2, PAL.grass); px(c, 0, 41.5, 48, 0.5, PAL.grassD);
+  for (let i = 0; i < 16; i++) { px(c, 1 + i * 3, 39, 0.5, 1 + (i % 2), PAL.grass); px(c, 2 + i * 3, 39.5, 0.5, 1, PAL.grassD); }
+}
+// Daun runcing dari pangkal (x0,y0) ke ujung (x1,y1)
+function bigLeaf(c, x0, y0, x1, y1, wid, col, dark, light) {
+  for (let u = 0; u <= 1; u += 0.02) {
+    const h = Math.sin(Math.pow(u, 0.75) * Math.PI) * wid, x = x0 + (x1 - x0) * u, y = y0 + (y1 - y0) * u;
+    px(c, x, y - h, 0.5, h * 2, col);
+    px(c, x, y - h, 0.5, h * 0.7, light);
+    px(c, x, y, 0.5, 0.5, dark);
   }
 }
