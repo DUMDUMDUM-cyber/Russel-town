@@ -3,7 +3,7 @@
 
 const EX_KEY = 'anan-extras-v1';
 const EX = { heard: [], dogLove: 0, sun: { stage: 0, waterDay: null }, fest: 'auto', bday: '', foundDay: -1, cakeT: 0,
-  count: {}, limit: 0, playDay: -1, playSec: 0, parrotMic: false, mission: null, coins: 3, room: { owned: [], off: [] }, robot: null };
+  count: {}, limit: 0, playDay: -1, playSec: 0, parrotMic: false, mission: null, coins: 3, room: { owned: [], off: [] }, robot: null, season: 'summer' };
 (function () { try { Object.assign(EX, JSON.parse(localStorage.getItem(EX_KEY) || '{}')); } catch (e) {} })();
 const HEARD = new Set(EX.heard.filter(k => WORDS[k]));
 function exSave() { EX.heard = [...HEARD]; try { localStorage.setItem(EX_KEY, JSON.stringify(EX)); } catch (e) {} }

@@ -131,7 +131,8 @@ function drawCity(c, x, y, w, h, night) {
 
 // ---------- Peta (kanvas 160x90) ----------
 const MAP_SPOTS = {
-  mountain: [26, 30], home: [64, 24], farm: [62, 56], village: [100, 44], school: [136, 20], office: [146, 50], beach: [124, 76],
+  mountain: [26, 30], home: [62, 22], farm: [62, 56], village: [100, 46], school: [136, 18], office: [148, 46], beach: [126, 76],
+  station: [94, 16], salon: [84, 34], workshop: [148, 66], sushibar: [100, 72], carnival: [122, 46], rocketbase: [22, 70],
 };
 function drawMap(c, cur, t) {
   px(c, 0, 0, 160, 90, '#8fd06a');
@@ -149,7 +150,8 @@ function drawMap(c, cur, t) {
     const [x1, y1] = S[a], [x2, y2] = S[b], n = Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1)) * 2;
     for (let i = 0; i <= n; i++) px(c, x1 + (x2 - x1) * i / n - w / 2, y1 + (y2 - y1) * i / n - w / 2, w, w, col);
   };
-  const ROADS = [['mountain', 'farm'], ['home', 'farm'], ['farm', 'village'], ['village', 'school'], ['school', 'office'], ['village', 'beach']];
+  const ROADS = [['mountain', 'farm'], ['home', 'farm'], ['farm', 'village'], ['village', 'school'], ['school', 'office'], ['village', 'beach'],
+    ['village', 'station'], ['village', 'salon'], ['office', 'workshop'], ['beach', 'sushibar'], ['school', 'carnival'], ['mountain', 'rocketbase']];
   // laut di pojok kanan bawah
   for (let y = 66; y < 90; y += 0.5) {
     const x0 = 166 - (y - 66) * 3;
@@ -159,7 +161,7 @@ function drawMap(c, cur, t) {
   ROADS.forEach(([a, b]) => roadLine(a, b, 4, '#c9a46a'));
   ROADS.forEach(([a, b]) => roadLine(a, b, 3, '#e8cf98'));
   // pohon kecil
-  [[8, 62], [16, 72], [32, 78], [44, 68], [84, 16], [92, 6], [118, 8], [108, 28], [14, 52], [78, 74], [152, 30]].forEach(([a, b]) => {
+  [[44, 68], [76, 6], [118, 6], [108, 30], [44, 82], [78, 74], [154, 28], [8, 46]].forEach(([a, b]) => {
     oval(c, a, b + 0.5, 3, 1, 'rgba(30,45,20,0.22)'); px(c, a - 0.5, b - 2, 1, 2, '#7d5230');
     disc(c, a, b - 4, 3, PAL.leafD); disc(c, a - 0.5, b - 4.5, 2.5, PAL.leaf); disc(c, a - 1, b - 5.5, 1, PAL.leafL);
   });
@@ -189,6 +191,16 @@ function drawMap(c, cur, t) {
   const [ox2, oy2] = S.office;
   px(c, ox2 - 6, oy2 - 14, 12, 20, '#a9b6c4'); px(c, ox2 + 6, oy2 - 8, 7, 14, '#c9d4e0');
   for (let wy = oy2 - 12; wy < oy2 + 4; wy += 3) { px(c, ox2 - 4, wy, 2, 2, '#e8f6fc'); px(c, ox2, wy, 2, 2, '#e8f6fc'); px(c, ox2 + 8, wy + 1, 2, 1, '#e8f6fc'); }
+  // tempat-tempat baru
+  { const [x, y] = S.station; px(c, x - 8, y + 2, 16, 1, '#7c8088'); px(c, x - 8, y + 3.5, 16, 0.5, '#7c8088'); for (let i = -8; i < 8; i += 2) px(c, x + i, y + 1.5, 1, 3, PAL.woodD);
+    px(c, x - 6, y - 5, 12, 6, '#fbefd0'); for (let k = 0; k < 4; k++) px(c, x - 7 + k, y - 6 - k, 14 - k * 2, 1, '#d9483b'); px(c, x - 1, y - 2, 2, 3, PAL.wood); }
+  { const [x, y] = S.salon; px(c, x - 6, y - 4, 12, 7, '#f3e3c0'); for (let k = 0; k < 4; k++) px(c, x - 7 + k, y - 5 - k, 14 - k * 2, 1, '#4f86e0'); px(c, x - 1, y - 1, 2, 4, PAL.wood);
+    px(c, x + 6, y - 6, 2, 9, '#ffffff'); for (let k = 0; k < 4; k++) px(c, x + 6, y - 5 + k * 2, 2, 1, k % 2 ? '#4f86e0' : '#e2483d'); }
+  { const [x, y] = S.workshop; px(c, x - 6, y - 6, 12, 9, '#c9d4e0'); px(c, x - 6, y - 6, 12, 1, '#e8eef2'); px(c, x - 4, y - 4, 8, 4, '#2a3a4a'); px(c, x - 3, y - 3, 2, 2, '#7cf0c4'); px(c, x + 1, y - 3, 2, 2, '#7cf0c4'); px(c, x, y - 9, 1, 3, '#7d8a98'); disc(c, x, y - 9.5, 1, '#e2483d'); }
+  { const [x, y] = S.sushibar; px(c, x - 6, y - 3, 12, 6, '#e8d8b4'); for (let k = 0; k < 4; k++) px(c, x - 7 + k, y - 4 - k, 14 - k * 2, 1, '#2f4a7a'); for (let i = 0; i < 3; i++) px(c, x - 5 + i * 4, y - 3, 3, 3, '#e2483d'); }
+  { const [x, y] = S.carnival; px(c, x - 0.5, y - 6, 1, 9, '#7d8a98'); for (let k = 0; k < 24; k++) { const a = k / 24 * 6.283 + t * 0.5; px(c, x + Math.cos(a) * 7, y - 6 + Math.sin(a) * 7, 1, 1, ['#e2483d', '#f4cf3a', '#4f86e0', '#58a84a'][k % 4]); } disc(c, x, y - 6, 1, '#f4cf3a'); }
+  { const [x, y] = S.rocketbase; px(c, x - 7, y + 2, 14, 2, '#a9a6a0'); px(c, x - 2, y - 10, 4, 12, '#ffffff'); for (let k = 0; k < 4; k++) px(c, x - 2 + k * 0.5, y - 14 + k, 4 - k, 1, '#e2483d'); px(c, x - 4, y - 1, 2, 3, '#e2483d'); px(c, x + 2, y - 1, 2, 3, '#e2483d'); disc(c, x, y - 6, 1, '#4f86e0');
+    if (Math.floor(t * 3) % 2) { px(c, x - 1, y + 2, 2, 2, '#ffd84a'); } }
   // penanda posisi Russel
   if (S[cur]) {
     const [px0, py0] = S[cur], b = Math.round(Math.abs(Math.sin(t * 4)) * 3);

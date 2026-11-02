@@ -27,7 +27,7 @@ function panelFrame(dt) {
   if (G.panel === 'flower') flowerDraw(dt);
   if (G.panel === 'mirror') mirrorDraw(dt);
   if (G.panel === 'count') countDraw(dt);
-  if (G.panel === 'map') { PX = 2; try { drawMap(MP.ctx, { classroom: 'school', barn: 'farm', workshop: 'office', station: 'village', trainride: 'village', sushibar: 'beach', carnival: 'school' }[G.scene.id] || G.scene.id, G.t); if (window.mapExtra) mapExtra(MP.ctx, G.t); } finally { PX = 1; } }
+  if (G.panel === 'map') { PX = 2; try { drawMap(MP.ctx, { classroom: 'school', barn: 'farm', trainride: 'station', moon: 'rocketbase' }[G.scene.id] || G.scene.id, G.t); if (window.mapExtra) mapExtra(MP.ctx, G.t); } finally { PX = 1; } }
 }
 function cvPoint(c, e) { const r = c.getBoundingClientRect(); return [(e.clientX - r.left) / r.width * c.width, (e.clientY - r.top) / r.height * c.height]; }
 function tile(key, opts = {}) {
@@ -54,7 +54,7 @@ function goPlace(key) {
   Object.entries(MAP_SPOTS).forEach(([key, [x, y]]) => {
     const w = word(key), b = document.createElement('button');
     b.type = 'button'; b.className = 'map-label';
-    b.style.left = (x / 160 * 100) + '%'; b.style.top = ((y + 9) / 90 * 100) + '%';
+    b.style.left = (x / 160 * 100) + '%'; b.style.top = ((y + 6) / 90 * 100) + '%';
     b.innerHTML = rubyHTML(w.zh, w.py); b.dataset.key = key;
     b.setAttribute('aria-label', w.id);
     b.addEventListener('click', () => goPlace(key));

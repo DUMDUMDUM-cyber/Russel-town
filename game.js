@@ -445,6 +445,7 @@ function enterScene(id, at) {
   const pw = word(s.place);
   $('place').innerHTML = rubyHTML(pw.zh, pw.py);
   $('place').setAttribute('aria-label', 'Nama tempat: ' + pw.id);
+  fitPlace();
   Snd.mood({ outdoor: s.outdoor });
   if (s.enter) s.enter();
 }
@@ -684,8 +685,19 @@ function fit() {
   box.style.width = w + 'px'; box.style.height = (w * 9 / 16) + 'px';
   box.style.setProperty('--u', (w / 100) + 'px');
   $('rotate').hidden = !(window.innerHeight > window.innerWidth * 1.1);
+  fitPlace();
 }
 window.addEventListener('resize', fit);
+// Nama tempat yang panjang (mis. dalam bahasa Jepang) dikecilkan supaya tidak menabrak tombol kanan
+function fitPlace() {
+  const p = $('place'), r = document.querySelector('.hud-right');
+  p.style.fontSize = ''; p.style.maxWidth = ''; p.style.whiteSpace = '';
+  if (!r || !r.offsetWidth || !p.offsetWidth) return;
+  const room = r.offsetLeft - p.offsetLeft - p.parentElement.offsetLeft - 6;
+  for (let s = 2.6, i = 0; p.offsetWidth > room && s > 1.4 && i < 12; i++) { s *= 0.92; p.style.fontSize = 'calc(var(--u) * ' + s.toFixed(2) + ')'; }
+  // masih terlalu panjang: boleh turun ke baris kedua
+  if (p.offsetWidth > room) { p.style.maxWidth = room + 'px'; p.style.whiteSpace = 'normal'; }
+}
 
 // ---------- Mulai ----------
 function start() {

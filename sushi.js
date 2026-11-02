@@ -2,12 +2,28 @@
 
 LOOKS.chef = { skin: '#f3c6a0', hair: '#2a1d18', style: 'cap', cap: '#ffffff', capD: '#d9dfe8', shirt: '#fbf8f0', shirtD: '#d9dfe8', pants: '#3a3a4a', shoes: '#2a2a2a' };
 
-const SUSHI_KINDS = ['salmon', 'tuna', 'shrimp', 'eggsushi', 'cucumber'];
-const SUSHI_PLATE = { salmon: '#4f86e0', tuna: '#e2483d', shrimp: '#f4cf3a', eggsushi: '#58a84a', cucumber: '#f39ac0' };
+const SUSHI_KINDS = ['salmon', 'tuna', 'shrimp', 'eggsushi', 'cucumber', 'gunkan', 'tamagoroll'];
+const SUSHI_PLATE = { salmon: '#4f86e0', tuna: '#e2483d', shrimp: '#f4cf3a', eggsushi: '#58a84a', cucumber: '#f39ac0', gunkan: '#9b6bd6', tamagoroll: '#f08a32' };
 SUSHI_KINDS.forEach(k => { ITEMS[k] = { food: 1 }; });
 
 // ================= GAMBAR SUSHI (x = tengah, y = bawah) =================
 function drawSushi(c, x, y, k) {
+  if (k === 'gunkan') {
+    // nasi dibungkus rumput laut, di atasnya telur ikan oranye
+    px(c, x - 6, y - 7, 12, 7, '#1f3a2a'); px(c, x - 6, y - 7, 2, 7, '#35574a'); px(c, x + 4, y - 7, 2, 7, '#152a1e');
+    oval(c, x, y - 8, 6, 1.5, '#fbfaf2');
+    for (const [a, b] of [[-4, -9], [-1, -10], [2, -9], [4, -10], [-2, -8], [1, -8], [5, -8], [-5, -8], [0, -11], [3, -11]]) { disc(c, x + a, y + b, 1, '#f08a32'); px(c, x + a, y + b - 1, 1, 1, '#ffd0a0'); }
+    return;
+  }
+  if (k === 'tamagoroll') {
+    // dua potong telur gulung: terlihat lapisan melingkar
+    for (const dx of [-4, 4]) {
+      oval(c, x + dx, y - 4, 4, 4, '#d9a02a'); oval(c, x + dx, y - 4.5, 3.5, 3.5, '#f4cf3a');
+      oval(c, x + dx, y - 4.5, 2.5, 2.5, '#e8b83a'); oval(c, x + dx, y - 4.5, 1.5, 1.5, '#f8de6a'); px(c, x + dx, y - 5, 1, 1, '#e8b83a');
+      px(c, x + dx - 2, y - 8, 2, 1, '#fff2a8');
+    }
+    return;
+  }
   if (k === 'cucumber') {
     for (const dx of [-4, 4]) {
       disc(c, x + dx, y - 4, 4, '#1f3a2a'); disc(c, x + dx, y - 4, 3, '#fbfaf2'); disc(c, x + dx, y - 4, 1.5, '#58a84a'); px(c, x + dx - 3, y - 7, 2, 1, '#35574a');
@@ -69,7 +85,7 @@ function suRice() {
 function suTop(k) {
   if (SU.step !== 'top') return;
   SU.kind = k; SU.drop = 1; SU.step = 'serve'; sfx('tap'); suRender();
-  say(k === 'eggsushi' || k === 'cucumber' ? [{ k }, { k: 'seaweed' }, { k: 'plate' }] : [{ k }, { k: 'plate' }]);
+  say(k === 'eggsushi' || k === 'cucumber' || k === 'gunkan' ? [{ k }, { k: 'seaweed' }, { k: 'plate' }] : [{ k }, { k: 'plate' }]);
 }
 function suServe() {
   if (SU.step !== 'serve') return;
@@ -107,7 +123,7 @@ PANEL_HOOK.sushi = dt => {
     oval(c, 80, 86, 22, 9, '#e4e0d0'); oval(c, 80, 83, 22, 8, '#ffffff'); for (const [a, b] of [[-12, 84], [-3, 81], [8, 85], [14, 81]]) px(c, 80 + a, b, 3, 1, '#ece8da');
   } else {
     const dy = Math.round(-SU.drop * SU.drop * 50);
-    if (SU.kind === 'cucumber' || SU.step === 'done') {
+    if (SU.kind === 'cucumber' || SU.kind === 'gunkan' || SU.kind === 'tamagoroll' || SU.step === 'done') {
       if (SU.step === 'done') { oval(c, 80, 92, 34, 7, '#d9dfe8'); oval(c, 80, 90, 34, 6, SUSHI_PLATE[SU.kind]); oval(c, 80, 89, 30, 5, '#ffffff'); }
       drawBig(c, 80, 88 + (SU.step === 'done' ? 0 : dy), 3, (cc, ax, ay) => drawSushi(cc, ax, ay, SU.kind));
     } else {
@@ -194,13 +210,13 @@ SCENES.sushibar = (() => {
   const released = p => { p.hold = false; p.holdT = 0; };
   for (let i = 0; i < 6; i++) {
     S.objs.push({
-      kind: SUSHI_KINDS[i % 5], x: COUNTER[0] + 34 + i * 44, y: 101, gone: 0, hold: false, holdT: 0,
+      kind: SUSHI_KINDS[i % SUSHI_KINDS.length], x: COUNTER[0] + 34 + i * 44, y: 101, gone: 0, hold: false, holdT: 0,
       get hidden() { return this.gone > 0; },
       get hit() { return [this.x - 12, 78, 24, 18]; },
       get go() { return [Math.max(16, Math.min(304, this.x)), 122]; },
       draw(c) { drawItem(c, this.x, 94, this.kind); },
       update(dt) {
-        if (this.gone > 0) { this.gone -= dt; if (this.gone <= 0) { this.x = COUNTER[0] + 2; this.kind = SUSHI_KINDS[Math.floor(Math.random() * 5)]; } return; }
+        if (this.gone > 0) { this.gone -= dt; if (this.gone <= 0) { this.x = COUNTER[0] + 2; this.kind = SUSHI_KINDS[Math.floor(Math.random() * SUSHI_KINDS.length)]; } return; }
         if (this.hold) { this.holdT -= dt; if (this.holdT <= 0) released(this); return; }
         this.x += 11 * dt;
         if (this.x > COUNTER[1] - 6) this.x = COUNTER[0] + 6;
@@ -306,7 +322,7 @@ Object.assign(ST_ART, {
   sushibar: (c, x, y) => { drawHouse(c, x - 16, y - 28, 32, 26, { roof: '#2f4a7a', roofD: '#1f3258', roofL: '#4f6f9f', wall: '#e8d8b4', wallD: '#d4c098' }); for (let i = 0; i < 3; i++) { px(c, x - 12 + i * 8, y - 15, 7, 8, '#e2483d'); } },
   sushi: (c, x, y) => { drawItem(c, x - 8, y, 'salmon'); drawItem(c, x + 8, y, 'tuna'); },
   chef: (c, x, y) => drawPerson(c, x, y, { look: 'chef', dir: 'down', mood: 'happy', noShadow: true }),
-  salmon: stSushi('salmon'), tuna: stSushi('tuna'), shrimp: stSushi('shrimp'), eggsushi: stSushi('eggsushi'), cucumber: stSushi('cucumber'),
+  salmon: stSushi('salmon'), tuna: stSushi('tuna'), shrimp: stSushi('shrimp'), eggsushi: stSushi('eggsushi'), cucumber: stSushi('cucumber'), gunkan: stSushi('gunkan'), tamagoroll: stSushi('tamagoroll'),
   seaweed: (c, x, y) => { px(c, x - 9, y - 14, 18, 14, '#1f3a2a'); px(c, x - 9, y - 14, 18, 2, '#35574a'); for (const [a, b] of [[-6, -10], [1, -8], [5, -4], [-4, -4]]) px(c, x + a, y + b, 3, 1, '#35574a'); },
   chopsticks: (c, x, y) => { for (let k = 0; k < 18; k++) { px(c, x - 8 + Math.round(k * 0.7), y - k, 2, 1, '#a8743c'); px(c, x - 3 + Math.round(k * 0.7), y - k, 2, 1, '#7d5230'); } },
   plate: (c, x, y) => { oval(c, x, y - 3, 12, 3, '#4f86e0'); oval(c, x, y - 4, 11, 2, '#ffffff'); },
