@@ -233,6 +233,13 @@ SCENES.office = (() => {
     // permadani di tengah ruangan
     oval(c, 160, 101, 53, 15, 'rgba(40,50,70,0.18)');
     oval(c, 160, 100, 53, 15, '#6f84a0'); oval(c, 160, 100, 51, 13, '#8fa4bc'); oval(c, 160, 100, 44, 10, '#a3b6cc'); oval(c, 160, 100, 42, 9, '#8fa4bc');
+    // pintu ke bengkel robot: keset dan papan bergambar kepala robot
+    px(c, 316, 92, 4, 32, '#4a5866'); px(c, 300, 96, 16, 24, '#6f7f92'); px(c, 301, 97, 14, 22, '#8497ab');
+    for (let y = 99; y < 118; y += 4) px(c, 302, y, 12, 1, '#6f7f92');
+    bgOutlined(c, cc => {
+      px(cc, 303, 76, 15, 13, PAL.woodD); px(cc, 304, 77, 13, 11, PAL.wood); px(cc, 304, 77, 13, 1, PAL.woodL);
+      px(cc, 306, 80, 9, 6, '#e8eef2'); px(cc, 307, 81, 7, 3, '#2a3a4a'); px(cc, 308, 82, 1, 1, '#7cf0c4'); px(cc, 312, 82, 1, 1, '#7cf0c4'); px(cc, 310, 78, 1, 2, '#e2483d');
+    });
   };
   S.objs.push({ flat: true, y: 0, hit: [152, 10, 16, 16], go: [160, 64], draw(c, t) { drawClock(c, 160, 18, t); }, tap() { say([{ k: 'clock' }]); sfx('chime'); } });
   S.objs.push({ flat: true, y: 0, hit: [104, 2, 48, 52], go: [128, 64], draw(c) { drawBookshelf(c, 104, 4, 48, 50); }, tap() { say([{ k: 'book' }]); } });
@@ -398,7 +405,10 @@ SCENES.office = (() => {
   };
   S.objs.push(robot);
 
-  S.exits = [{ hit: [0, 120, 26, 40], arrow: [12, 140, 'left'], go: [6, 140], to: 'school', at: [304, 150] }];
+  S.exits = [
+    { hit: [0, 120, 26, 40], arrow: [12, 140, 'left'], go: [6, 140], to: 'school', at: [304, 150] },
+    { hit: [294, 90, 26, 34], arrow: [306, 108, 'right'], go: [314, 108], to: 'workshop', at: [18, 130] },
+  ];
   return S;
 })();
 
