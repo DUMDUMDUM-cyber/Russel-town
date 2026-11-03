@@ -114,7 +114,7 @@ $('sa-title').innerHTML = rubyHTML(word('sailing').zh, word('sailing').py);
 $('sa-title').addEventListener('click', () => say([{ k: 'sailing' }]));
 
 // ================= PERAHU LAYAR DI PANTAI =================
-SCENES.beach.objs.push({ x: 60, y: 104, hit: [44, 68, 34, 40], go: [74, 114],
+SCENES.beach.objs.push({ x: 60, y: 104, hit: [44, 68, 34, 40], go: [74, 114], skin: 'obj-perahu-layar',
   draw(c, t) { shadow(c, 60, 105, 14); drawSailboatSmall(c, 60, 103, t); },
   tap() { say([{ k: 'boat' }, { k: 'sailing' }]); },
   arrive() { G.boy.dir = 'left'; openPanel('sail'); saOpen(); } });

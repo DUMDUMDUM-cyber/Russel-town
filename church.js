@@ -49,7 +49,7 @@ SCENES.church = (() => {
   };
 
   // tali lonceng di dekat pintu
-  S.objs.push({ x: 22, y: 160, pull: 0, hit: [12, 92, 22, 70], go: [34, 160],
+  S.objs.push({ x: 22, y: 160, pull: 0, hit: [12, 92, 22, 70], go: [34, 160], skin: 'fn:bellRope',
     draw(c, t) {
       const d = Math.round(Math.sin(this.pull * 12) * 3 * Math.min(1, this.pull));
       px(c, 21, 0, 2, 140 + d, '#c9a873'); px(c, 22, 0, 1, 140 + d, '#e3c48c');
@@ -60,7 +60,7 @@ SCENES.church = (() => {
     arrive() { G.boy.dir = 'left'; doAct(G.boy, 'wave', 1.2); this.pull = 1.4; churchBell(); say([{ k: 'churchbell' }, { k: 'dingdong' }]); } });
 
   // tempat lilin
-  const candles = { x: 222, y: 92, lit: false, hit: [210, 66, 24, 28], go: [222, 102],
+  const candles = { x: 222, y: 92, lit: false, hit: [210, 66, 24, 28], go: [222, 102], skin: 'fn:candles',
     draw(c, t) {
       shadow(c, 222, 92, 8);
       px(c, 221, 80, 3, 12, PAL.woodD); px(c, 212, 78, 21, 3, PAL.woodD); px(c, 212, 78, 21, 1, PAL.wood);
@@ -78,7 +78,7 @@ SCENES.church = (() => {
   // organ dan paduan suara anak
   const choir = [npc('kid1', 246, 86, 'down', { lines: [[{ k: 'hello', by: 'me' }, { k: 'sing', by: 'np' }]] }), npc('kid4', 262, 88, 'down', { lines: [[{ k: 'hello', by: 'me' }, { k: 'sing', by: 'np' }]] }), npc('kid3', 278, 86, 'down', { lines: [[{ k: 'hello', by: 'me' }, { k: 'quiet', by: 'np' }]] })];
   choir.forEach(k => S.objs.push(k));
-  S.objs.push({ x: 92, y: 96, hit: [72, 72, 40, 26], go: [92, 104],
+  S.objs.push({ x: 92, y: 96, hit: [72, 72, 40, 26], go: [92, 104], skin: 'obj-organ',
     draw(c) {
       shadow(c, 92, 96, 18);
       px(c, 74, 78, 36, 18, PAL.woodD); px(c, 74, 78, 36, 2, PAL.wood); px(c, 76, 84, 32, 4, '#ffffff'); for (let k = 0; k < 8; k++) px(c, 77 + k * 4, 84, 1, 4, '#c9c6c0');
@@ -105,7 +105,7 @@ SCENES.church = (() => {
 
   // bangku panjang: yang duduk menghadap altar, terlihat kepala dan bahunya
   const PEWS = [[40, 120], [180, 120], [40, 142], [180, 142], [40, 164], [180, 164]];
-  PEWS.forEach(([px0, py], i) => S.objs.push({ x: px0 + 50, y: py, hit: [px0, py - 16, 100, 18], go: [px0 + 50, py + 6],
+  PEWS.forEach(([px0, py], i) => S.objs.push({ x: px0 + 50, y: py, hit: [px0, py - 16, 100, 18], go: [px0 + 50, py + 6], skin: 'near:obj-bangku-',
     draw(c) {
       shadowRect(c, px0, py + 1, 100, 2);
       px(c, px0, py - 14, 100, 8, PAL.woodD); px(c, px0, py - 14, 100, 2, PAL.wood); px(c, px0 + 1, py - 12, 98, 1, '#c08a52');

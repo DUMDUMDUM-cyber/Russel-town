@@ -8,14 +8,14 @@ const G = {
   fade: 0, fadeDir: 0, fadeMid: null, fadeAfter: null, bgDirty: true, marker: null, sleepT: 0, sleepStep: 0,
 };
 const SAVE_KEY = 'anan-village-v1';
-G.bag = []; G.giving = null; G.hd = true; G.cardPos = null; G.hudOff = false;
-function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ outfit: G.outfit, music: Snd.on, alsoId: Talk.alsoId, bag: G.bag, hd: G.hd, cardPos: G.cardPos, hudOff: G.hudOff, lang: LANG })); } catch (e) {} }
+G.bag = []; G.giving = null; G.hd = true; G.cardPos = null; G.hudOff = false; G.cardOff = false;
+function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ outfit: G.outfit, music: Snd.on, alsoId: Talk.alsoId, bag: G.bag, hd: G.hd, cardPos: G.cardPos, hudOff: G.hudOff, cardOff: G.cardOff, lang: LANG })); } catch (e) {} }
 (function load() {
   try {
     const d = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
     if (d) {
       Object.assign(G.outfit, d.outfit || {}); Snd.on = d.music !== false; Talk.alsoId = !!d.alsoId;
-      G.bag = (d.bag || []).filter(k => ITEMS[k]).slice(0, 8); G.hd = d.hd !== false; G.cardPos = d.cardPos || null; G.hudOff = !!d.hudOff;
+      G.bag = (d.bag || []).filter(k => ITEMS[k]).slice(0, 8); G.hd = d.hd !== false; G.cardPos = d.cardPos || null; G.hudOff = !!d.hudOff; G.cardOff = !!d.cardOff;
     }
   } catch (e) {}
 })();
@@ -357,6 +357,8 @@ function rubyHTML(zh, py) {
 }
 function showCard(card, zh) {
   const el = $('card');
+  // kartu kata bisa dimatikan di menu orang tua: kata tetap diucapkan, hanya tulisannya tidak tampil
+  if (G.cardOff) { cardZh = zh || card.zh; el.hidden = true; return; }
   // kartu Jepang: kana besar, romaji kecil di bawahnya
   $('card-zh').innerHTML = LANG === 'ja' ? `<span class="plain">${card.zh}</span>` + (card.py ? `<span class="plainpy">${card.py}</span>` : '') : rubyHTML(card.zh, card.py);
   const len = [...card.zh].length, lim = { zh: [6, 99], en: [12, 24], ja: [7, 13] }[LANG];
@@ -432,6 +434,7 @@ function setWeather(w) {
 function fadeTo(mid, after) { G.fadeDir = 1; G.fadeMid = mid; G.fadeAfter = after || null; }
 function updateFade(dt) {
   if (!G.fadeDir) return;
+  if (G.fadeDir < 0 && G.fade >= 1 && typeof Skin !== 'undefined' && Skin.waiting()) return;
   G.fade += G.fadeDir * dt * 3;
   if (G.fadeDir > 0 && G.fade >= 1) { G.fade = 1; G.fadeDir = -1; if (G.fadeMid) G.fadeMid(); G.fadeMid = null; }
   if (G.fadeDir < 0 && G.fade <= 0) { G.fade = 0; G.fadeDir = 0; const a = G.fadeAfter; G.fadeAfter = null; if (a) a(); }
@@ -508,6 +511,8 @@ cv.addEventListener('pointerdown', e => {
 
 // ---------- Gambar dunia ----------
 function render(dt) {
+  // tempat yang sudah memakai gambar desain baru digambar oleh skin.js
+  if (typeof Skin !== 'undefined') { if (Skin.use()) { Skin.render(dt); return; } Skin.pixel(); }
   const s = G.scene, c = ctx;
   if (G.bgDirty) { bgCtx.clearRect(0, 0, W, H); s.bg(bgCtx); G.bgDirty = false; }
   c.drawImage(bgCv, 0, 0);

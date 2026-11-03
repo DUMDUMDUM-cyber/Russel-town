@@ -117,7 +117,7 @@ SCENES.zoo = (() => {
     });
   };
   // pagar depan kandang atas (di depan hewan, di belakang Russel)
-  S.objs.push({ y: 111, draw(c) {
+  S.objs.push({ y: 111, skin: 'obj-pagar-depan', draw(c) {
     shadowRect(c, 8, 112, 304, 2);
     for (const [a, b] of [[8, 106], [112, 204], [210, 312]]) { for (let x = a; x <= b; x += 8) { px(c, x, 100, 3, 12, PAL.woodD); px(c, x, 100, 2, 11, PAL.wood); } px(c, a, 102, b - a + 2, 2, PAL.woodL); px(c, a, 106, b - a + 2, 2, PAL.woodL); }
   } });

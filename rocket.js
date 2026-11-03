@@ -124,7 +124,7 @@ SCENES.rocketbase = (() => {
     });
   };
   // roket besar di landasan
-  const rocketObj = { x: 228, y: 118, hit: [212, 28, 34, 92], go: [228, 128],
+  const rocketObj = { x: 228, y: 118, hit: [212, 28, 34, 92], go: [228, 128], skin: 'obj-roket',
     draw(c, t) { shadow(c, 228, 118, 16); px(c, 212, 114, 32, 5, '#7d8a98'); px(c, 212, 114, 32, 1, '#a9b6c4'); drawRocket(c, 228, 114, t, false); },
     tap() { say([{ k: 'rocket' }]); },
     arrive() { G.boy.dir = 'up'; openPanel('launch'); laOpen(); } };
@@ -139,7 +139,7 @@ SCENES.rocketbase = (() => {
     ],
   }));
   // kendaraan penjelajah kecil
-  S.objs.push({ x: 120, y: 150, t0: 0, dir: 1,
+  S.objs.push({ x: 120, y: 150, t0: 0, dir: 1, skin: 'fn:rover',
     get hit() { return [this.x - 12, this.y - 16, 24, 17]; }, get go() { return [this.x + (G.boy.x < this.x ? -18 : 18), this.y + 1]; },
     draw(c, t) {
       const x = Math.round(this.x), y = Math.round(this.y);
@@ -168,7 +168,7 @@ SCENES.moon = (() => {
     [[40, 120, 16, 5], [110, 160, 22, 6], [200, 118, 12, 4], [286, 132, 18, 5], [60, 168, 10, 3], [170, 140, 9, 3]].forEach(([x, y, rx, ry]) => { oval(c, x, y, rx, ry, '#8f96a3'); oval(c, x + 1, y + 1, rx - 2, ry - 1, '#9ca2ae'); px(c, x - rx + 2, y - ry, rx, 1, '#c9ced8'); });
   };
   // bumi di langit
-  S.objs.push({ flat: true, y: 0, hit: [32, 24, 44, 44], go: null,
+  S.objs.push({ flat: true, y: 0, hit: [32, 24, 44, 44], go: null, skin: 'obj-bumi',
     draw(c, t) {
       disc(c, 54, 46, 17, '#2f5bab'); disc(c, 53, 45, 16, '#4f86e0');
       for (const [a, b, rr] of [[-6, -6, 5], [5, 2, 6], [-3, 8, 3], [8, -8, 3]]) disc(c, 54 + a, 46 + b, rr, '#58a84a');
@@ -177,11 +177,11 @@ SCENES.moon = (() => {
     },
     tap() { say([{ k: 'earth' }]); sfx('chime'); } });
   // bendera
-  S.objs.push({ x: 90, y: 118, hit: [84, 92, 22, 28], go: [98, 124],
+  S.objs.push({ x: 90, y: 118, hit: [84, 92, 22, 28], go: [98, 124], skin: 'obj-bendera',
     draw(c, t) { shadow(c, 90, 118, 4); px(c, 89, 94, 2, 24, RB_ML); const w = Math.round(Math.sin(t * 2)); px(c, 91, 95 + w * 0, 14, 9, '#f4cf3a'); px(c, 91, 95, 14, 1, '#fff2a8'); drawStar(c, 98, 100, '#e2483d'); },
     tap() { say([{ k: 'flag' }]); } });
   // roket mendarat: ketuk untuk pulang
-  S.objs.push({ x: 266, y: 158, hit: [250, 66, 34, 94], go: [240, 160],
+  S.objs.push({ x: 266, y: 158, hit: [250, 66, 34, 94], go: [240, 160], skin: 'fn:moonRocket',
     draw(c, t) { shadow(c, 266, 158, 16); px(c, 254, 150, 3, 8, RB_MD); px(c, 276, 150, 3, 8, RB_MD); drawRocket(c, 266, 154, t, false); if (Math.floor(t * 2) % 2) drawArrow(c, 240, 136, 'right', t); },
     tap() { say([{ k: 'rocket' }, { k: 'gohome' }]); },
     arrive() {
@@ -197,7 +197,7 @@ SCENES.moon = (() => {
   // batu bulan untuk dibawa pulang
   [[60, 140], [140, 128], [210, 166], [300, 116]].forEach(([x, y]) => S.objs.push(pickup('moonrock', x, y, { respawn: 20 })));
   // bintang-bintang bisa diketuk
-  S.objs.push({ flat: true, y: 0, hit: [90, 0, 230, 60], go: null, draw(c, t) { for (const [a, b] of [[120, 20], [190, 12], [250, 30], [300, 16]]) if (Math.floor(t * 2 + a) % 3) drawStar(c, a, b, '#fff2a8'); }, tap() { say([{ k: 'star' }]); sfx('chime'); } });
+  S.objs.push({ flat: true, y: 0, hit: [90, 0, 230, 60], go: null, skin: 'fn:moonStars', draw(c, t) { for (const [a, b] of [[120, 20], [190, 12], [250, 30], [300, 16]]) if (Math.floor(t * 2 + a) % 3) drawStar(c, a, b, '#fff2a8'); }, tap() { say([{ k: 'star' }]); sfx('chime'); } });
   S.objs.push(helmetObj);
   // gravitasi rendah: Russel melompat tinggi saat berjalan
   let hopSaid = false;

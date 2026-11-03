@@ -30,7 +30,7 @@ SCENES.beach = (() => {
   };
 
   // ombak di tepi laut
-  S.objs.push({ flat: true, y: 0, i: 0, hit: [0, 34, W, 64], get go() { return [G.boy.x, 104]; },
+  S.objs.push({ flat: true, y: 0, i: 0, hit: [0, 34, W, 64], get go() { return [G.boy.x, 104]; }, skin: 'fn:waves',
     draw(c, t) {
       const off = Math.round(Math.sin(t * 1.3) * 3);
       for (let x = 0; x < W; x += 2) { const yy = 96 + off + Math.round(Math.sin(x / 9 + t * 2) * 1.5); px(c, x, yy, 2, 2, '#ffffff'); px(c, x, yy + 2, 2, 1, 'rgba(255,255,255,0.5)'); }
@@ -38,7 +38,7 @@ SCENES.beach = (() => {
     },
     tap() { this.i++; say([{ k: this.i % 2 ? 'sea' : 'wave' }]); sfx('splash'); },
     arrive() { fx('splash', G.boy.x, 100, 5); } });
-  S.objs.push({ flat: true, y: 0, i: 0, hit: [256, 0, 32, 30], go: [272, 104],
+  S.objs.push({ flat: true, y: 0, i: 0, hit: [256, 0, 32, 30], go: [272, 104], skin: 'fn:beachSun',
     draw(c) { if (G.night) { disc(c, 272, 14, 7, '#fff2c0'); disc(c, 275, 12, 6, '#2c3a6e'); } else { disc(c, 272, 14, 8, '#ffd84a'); disc(c, 272, 14, 5, '#fff2a8'); } },
     tap() { this.i++; say([{ k: G.night ? (this.i % 2 ? 'moon' : 'star') : 'sun' }]); } });
   S.objs.push({ x: 120, y: 76, dir: 1, top: true, get hit() { return [this.x - 42, this.y - 28, 86, 30]; },
@@ -56,12 +56,12 @@ SCENES.beach = (() => {
     update(dt) { if (this.wait > 0) { this.wait -= dt; return; } const d = this.tx - this.x; if (Math.abs(d) < 1) { this.tx = rand(150, 290); this.wait = rand(1, 3); return; } this.x += Math.sign(d) * 10 * dt; },
     tap() { say([{ k: 'seagull' }]); this.tx = this.x + (Math.random() < 0.5 ? -40 : 40); this.wait = 0; } });
 
-  S.objs.push({ x: 24, y: 128, hit: [14, 92, 30, 38], go: [40, 134], draw(c, t) { drawPalm(c, 24, 128, t); }, tap() { say([{ k: 'palm' }]); sfx('shake'); } });
-  S.objs.push({ x: 300, y: 166, hit: [290, 130, 30, 38], go: [284, 170], draw(c, t) { drawPalm(c, 300, 166, t); }, tap() { say([{ k: 'palm' }]); sfx('shake'); } });
-  S.objs.push({ x: 226, y: 138, hit: [208, 94, 36, 20], go: [226, 148], draw(c) { drawParasol(c, 226, 138); }, tap() { say([{ k: 'parasol' }]); } });
+  S.objs.push({ x: 24, y: 128, hit: [14, 92, 30, 38], go: [40, 134], skin: 'fn:palm', draw(c, t) { drawPalm(c, 24, 128, t); }, tap() { say([{ k: 'palm' }]); sfx('shake'); } });
+  S.objs.push({ x: 300, y: 166, hit: [290, 130, 30, 38], go: [284, 170], skin: 'fn:palm', draw(c, t) { drawPalm(c, 300, 166, t); }, tap() { say([{ k: 'palm' }]); sfx('shake'); } });
+  S.objs.push({ x: 226, y: 138, hit: [208, 94, 36, 20], go: [226, 148], skin: 'obj-payung-pantai', draw(c) { drawParasol(c, 226, 138); }, tap() { say([{ k: 'parasol' }]); } });
 
   // istana pasir: diketuk = dibangun makin tinggi
-  S.objs.push({ x: 150, y: 162, lvl: 1, hit: [136, 130, 28, 34], go: [150, 172], draw(c) { drawSandcastle(c, 150, 162, this.lvl); },
+  S.objs.push({ x: 150, y: 162, lvl: 1, hit: [136, 130, 28, 34], go: [150, 172], skin: 'fn:sandcastle', draw(c) { drawSandcastle(c, 150, 162, this.lvl); },
     tap() { sfx('tap'); },
     arrive() {
       G.boy.dir = 'down'; doAct(G.boy, 'wash', 1);
@@ -137,7 +137,7 @@ SCENES.classroom = (() => {
   };
 
   // jendela (langit ikut siang/malam)
-  S.objs.push({ flat: true, y: 0, hit: [12, 6, 64, 36], go: [44, 100],
+  S.objs.push({ flat: true, y: 0, hit: [12, 6, 64, 36], go: [44, 100], skin: 'bg',
     draw(c, t) {
       px(c, 12, 6, 64, 36, PAL.woodD); px(c, 14, 8, 60, 32, G.night ? '#26305e' : '#8fd0f2');
       if (G.night) { disc(c, 60, 16, 4, '#fff2c0'); px(c, 24, 14, 1, 1, '#ffffff'); px(c, 40, 30, 1, 1, '#ffffff'); }
@@ -151,7 +151,7 @@ SCENES.classroom = (() => {
   S.objs.push({ flat: true, y: 0, hit: [238, 6, 56, 34], go: [266, 66], draw() {}, tap() { say([{ k: 'red' }, { k: 'yellow' }, { k: 'blue' }]); } });
 
   // piano: diketuk = nada pentatonik
-  S.objs.push({ x: 38, y: 96, hit: [12, 62, 52, 36], go: [40, 106],
+  S.objs.push({ x: 38, y: 96, hit: [12, 62, 52, 36], go: [40, 106], skin: 'obj-piano',
     draw(c) {
       shadow(c, 38, 96, 24);
       px(c, 14, 66, 48, 28, '#2a1d18'); px(c, 14, 66, 48, 2, '#4a3a30'); px(c, 16, 70, 44, 2, '#5a4a40');
@@ -163,7 +163,7 @@ SCENES.classroom = (() => {
     arrive() { G.boy.dir = 'down'; doAct(G.boy, 'wash', 1.2); fx('note', 38, 62, 3); openPanel('piano'); } });
   // drum: diketuk = permainan drum
   S.blocks.push([272, 84, 36, 16]);
-  S.objs.push({ x: 292, y: 98, hit: [270, 66, 40, 34], go: [266, 102], hitT: 0,
+  S.objs.push({ x: 292, y: 98, hit: [270, 66, 40, 34], go: [266, 102], hitT: 0, skin: 'fn:drumKit',
     draw(c, t) { drawDrumKit(c, 292, 98, t, this.hitT); },
     update(dt) { if (this.hitT > 0) this.hitT -= dt; },
     tap() { say([{ k: 'drum' }]); },
@@ -171,7 +171,7 @@ SCENES.classroom = (() => {
 
   // meja, kursi di belakang meja (duduk menghadap depan), pensil & krayon di atas meja
   DESKS.forEach(([x, y], i) => {
-    S.objs.push({ x, y: y - 9, hit: [x - 7, y - 22, 14, 11], get go() { return [x + 18, y + 2]; },
+    S.objs.push({ x, y: y - 9, hit: [x - 7, y - 22, 14, 11], get go() { return [x + 18, y + 2]; }, skin: 'obj-kursi-' + (i + 1),
       draw(c) { px(c, x - 6, y - 16, 12, 2, '#a8743c'); px(c, x - 6, y - 14, 2, 6, '#7d5230'); px(c, x + 4, y - 14, 2, 6, '#7d5230'); px(c, x - 7, y - 18, 14, 3, '#c08a52'); },
       tap() { say([{ k: 'chair' }]); },
       arrive() {
@@ -181,7 +181,7 @@ SCENES.classroom = (() => {
         b.rideEnd = () => { b.x = x + 18; b.y = y + 4; };
         say([{ k: 'chair' }, { k: 'sitdown' }]);
       } });
-    S.objs.push({ x, y, hit: [x - 14, y - 12, 28, 12], go: [x, y + 10],
+    S.objs.push({ x, y, hit: [x - 14, y - 12, 28, 12], go: [x, y + 10], skin: 'obj-meja-' + (i + 1),
       draw(c) {
         shadow(c, x, y, 13);
         px(c, x - 14, y - 12, 28, 7, '#e8c08a'); px(c, x - 14, y - 12, 28, 1, '#f4d8a8'); px(c, x - 14, y - 5, 28, 3, '#b8844f');
@@ -189,7 +189,7 @@ SCENES.classroom = (() => {
       },
       tap() { say([{ k: 'desk' }]); } });
     const type = i % 2 ? 'crayon' : 'pencil';
-    S.objs.push({ x, y: y + 0.5, gone: 0, get hidden() { return this.gone > 0; }, hit: [x + 1, y - 13, 12, 8], go: [x, y + 10],
+    S.objs.push({ x, y: y + 0.5, gone: 0, kind: type, skin: 'fn:deskItem', get hidden() { return this.gone > 0; }, hit: [x + 1, y - 13, 12, 8], go: [x, y + 10],
       draw(c) { drawItem(c, x + 7, y - 6, type); },
       update(dt) { if (this.gone > 0) this.gone -= dt; },
       tap() { say([{ k: type }]); },
@@ -295,7 +295,7 @@ SCENES.barn = (() => {
     },
     receive: animalReceive('moo') };
   S.objs.push(cow);
-  S.objs.push({ x: 90, y: 112, get hidden() { return cow.busy <= 0; }, draw(c, t) {
+  S.objs.push({ x: 90, y: 112, skin: 'fn:milkPail', get hidden() { return cow.busy <= 0; }, draw(c, t) {
     px(c, 84, 104, 12, 8, '#a9b6c4'); px(c, 83, 103, 14, 2, '#c9d4e0'); px(c, 85, 105, 10, 2, '#ffffff');
     if (Math.floor(t * 8) % 2) px(c, 89, 98, 1, 4, '#ffffff');
   } });
@@ -322,12 +322,12 @@ SCENES.barn = (() => {
   S.objs.push(sheep);
 
   // tempat minum & jerami
-  S.objs.push({ x: 202, y: 92, hit: [186, 80, 32, 14], go: [202, 102], draw(c) {
+  S.objs.push({ x: 202, y: 92, hit: [186, 80, 32, 14], go: [202, 102], skin: 'obj-palung-air', draw(c) {
     shadow(c, 202, 93, 16);
     px(c, 186, 82, 32, 10, PAL.woodD); px(c, 188, 83, 28, 5, PAL.water); px(c, 188, 83, 28, 1, PAL.waterD); px(c, 190, 85, 8, 1, PAL.waterL); px(c, 204, 86, 5, 1, PAL.waterL);
     px(c, 187, 88, 30, 3, PAL.wood); px(c, 187, 88, 30, 1, PAL.woodL); px(c, 197, 88, 1, 3, PAL.woodD); px(c, 208, 88, 1, 3, PAL.woodD);
   }, tap() { say([{ k: 'water' }]); } });
-  [[30, 150], [54, 162], [290, 150]].forEach(([x, y]) => S.objs.push({ x, y, hit: [x - 12, y - 14, 24, 15], go: [x, y + 6], draw(c) {
+  [[30, 150], [54, 162], [290, 150]].forEach(([x, y], i) => S.objs.push({ x, y, hit: [x - 12, y - 14, 24, 15], go: [x, y + 6], skin: 'obj-jerami-' + (i + 1), draw(c) {
     shadow(c, x, y, 13);
     px(c, x - 11, y - 12, 22, 12, '#e3c46a'); px(c, x - 11, y - 12, 22, 2, '#f0d684'); px(c, x + 7, y - 10, 4, 10, '#d0ae56');
     [[-9, -9, 5], [-1, -8, 6], [4, -5, 5], [-8, -4, 4], [1, -3, 4]].forEach(([a, b, w]) => px(c, x + a, y + b, w, 1, '#c9a24a'));
@@ -351,7 +351,7 @@ SCENES.barn = (() => {
     tap() { say([{ k: 'chicken' }, { k: 'cluck' }]); this.wait = 1.5; fx('note', this.x, this.y - 14, 1); },
     receive: animalReceive('cluck'),
   });
-  S.objs.push({ flat: true, y: 0, eggs: 3, timer: 0, hit: [240, 30, 72, 26], go: [276, 72],
+  S.objs.push({ flat: true, y: 0, eggs: 3, timer: 0, hit: [240, 30, 72, 26], go: [276, 72], skin: 'fn:barnEggs',
     draw(c) { for (let k = 0; k < this.eggs; k++) drawFood(c, 252 + k * 23, 48, 'eggraw'); },
     update(dt) { this.timer += dt; if (this.timer > 8 && this.eggs < 3) { this.eggs++; this.timer = 0; } },
     tap() { say([{ k: 'egg' }]); },

@@ -131,7 +131,7 @@ SCENES.farm = (() => {
 
   // pagar depan kandang; pintunya membawa Russel ke Rumah Hewan (tempat sendiri)
   S.blocks.push([236, 88, 26, 10]);
-  const gate = { x: 249, y: 96, open: false, draw(c) { drawFenceH(c, 196, 96, 38); drawFenceH(c, 262, 96, 46); drawGate(c, 237, 96, this.open); } };
+  const gate = { x: 249, y: 96, open: false, skin: 'fn:farmGate', draw(c) { drawFenceH(c, 196, 96, 38); drawFenceH(c, 262, 96, 46); drawGate(c, 237, 96, this.open); } };
   S.objs.push(gate);
   S.enter = () => { gate.open = false; };
 
@@ -165,7 +165,7 @@ SCENES.farm = (() => {
   }
 
   S.objs.push({
-    x: 214, y: 90, eggs: 2, timer: 0, hit: [202, 76, 26, 16], go: [214, 104],
+    x: 214, y: 90, eggs: 2, timer: 0, hit: [202, 76, 26, 16], go: [214, 104], skin: 'fn:nest',
     draw(c) {
       oval(c, this.x, this.y - 3, 9, 4, '#c9a24a'); oval(c, this.x, this.y - 4, 7, 2, '#e3c46a');
       for (let i = 0; i < this.eggs; i++) drawFood(c, this.x - 4 + i * 4, this.y - 3, 'eggraw');
@@ -184,7 +184,7 @@ SCENES.farm = (() => {
 
   const tree = {
     x: 150, y: 62, apples: [[-8, -6], [6, -9], [10, 3], [-4, 5], [1, -2]], has: [1, 1, 1, 1, 1], shake: 0, regrow: 0,
-    hit: [130, 14, 40, 50], go: [150, 78],
+    hit: [130, 14, 40, 50], go: [150, 78], skin: 'fn:appleTree',
     draw(c, t) {
       const s = this.shake > 0 ? Math.round(Math.sin(t * 50)) : 0;
       drawTree(c, this.x, this.y, { r: 18, shake: s, apples: this.apples.filter((a, i) => this.has[i]) });
@@ -224,7 +224,7 @@ SCENES.farm = (() => {
     };
   }
 
-  S.objs.push({ x: 72, y: 98, draw(c, t) {
+  S.objs.push({ x: 72, y: 98, skin: 'bg', draw(c, t) {
     px(c, 71, 76, 2, 22, '#5a3a22'); px(c, 71, 76, 8, 2, '#5a3a22');
     const sw = Math.sin(t * 1.5) > 0.7 ? 1 : 0;
     px(c, 75 + sw, 78, 1, 2, '#5a3a22'); oval(c, 75 + sw, 84, 3, 4, '#e2483d'); px(c, 73 + sw, 80, 5, 1, '#f4cf3a'); px(c, 73 + sw, 88, 5, 1, '#f4cf3a');
@@ -243,7 +243,7 @@ SCENES.farm = (() => {
   CROPS.forEach((type, i) => {
     const x = 12 + (i % 3) * 22, y = 138 + Math.floor(i / 3) * 20;
     S.objs.push({
-      flat: true, x: x + 9, y: y + 14, type, stage: i === 1 ? 4 : 0, wet: false, grow: 0,
+      flat: true, x: x + 9, y: y + 14, type, stage: i === 1 ? 4 : 0, wet: false, grow: 0, skin: 'fn:crop',
       // Russel berdiri di atas petak (kakinya di tepi atas), jadi petak yang ditanam tetap terlihat
       hit: [x - 1, y - 8, 20, 23], go: [x + 9, y - 4],
       draw(c, t) { drawPlot(c, x, y, 18, 14, this.wet); drawCrop(c, x + 9, y + 12, this.type, this.stage, t); },
@@ -275,7 +275,7 @@ SCENES.farm = (() => {
   FLOWER_COLORS.forEach((col, i) => {
     const x = 106 + i * 11, y = 158 + (i % 2) * 12;
     S.objs.push({
-      x, y, hit: [x - 6, y - 16, 12, 17], go: [x, y + 5],
+      x, y, hit: [x - 6, y - 16, 12, 17], go: [x, y + 5], ci: i, skin: 'fn:flower',
       draw(c, t) { drawFlower(c, this.x, this.y, col, t); },
       tap() { const p = colorFlowerWord(i); say([{ card: p, zh: p.zh }]); },
       arrive() { openPanel('flower', i); },
@@ -373,7 +373,7 @@ SCENES.home = (() => {
   };
 
   S.objs.push({
-    flat: true, y: 0, starI: 0, hit: [134, 4, 52, 32], go: [160, 64],
+    flat: true, y: 0, starI: 0, hit: [134, 4, 52, 32], go: [160, 64], skin: 'fn:homeWindow',
     draw(c, t) {
       const x = 136, y = 6;
       px(c, x - 2, y - 2, 52, 32, PAL.woodD);
@@ -396,7 +396,7 @@ SCENES.home = (() => {
 
   // Tidur: urutan diatur oleh waktu (bukan oleh suara), jadi Russel selalu bangun lagi
   const bed = {
-    flat: true, x: 37, y: 104, hit: [10, 48, 56, 58], go: [38, 112],
+    flat: true, x: 37, y: 104, hit: [10, 48, 56, 58], go: [38, 112], skin: 'fn:bed',
     draw(c) {
       shadowRect(c, 9, 107, 57, 3);
       px(c, 9, 47, 56, 60, '#3a2616');
@@ -436,7 +436,7 @@ SCENES.home = (() => {
 
   S.objs.push({ flat: true, y: 0, st: 0, draw() {}, update(dt) { this.st += dt; if (this.st > 0.5) { this.st = 0; fx('steam', 63, 16, 1); } } });
 
-  S.objs.push({ flat: true, y: 0, hit: [258, 30, 12, 16], go: [266, 64], draw(c) { px(c, 262, 36, 6, 6, '#4f86e0'); px(c, 263, 31, 1, 6, '#f4cf3a'); px(c, 265, 30, 1, 7, '#e2483d'); px(c, 263, 30, 1, 2, '#ffffff'); },
+  S.objs.push({ flat: true, y: 0, hit: [258, 30, 12, 16], go: [266, 64], skin: 'bg', draw(c) { px(c, 262, 36, 6, 6, '#4f86e0'); px(c, 263, 31, 1, 6, '#f4cf3a'); px(c, 265, 30, 1, 7, '#e2483d'); px(c, 263, 30, 1, 2, '#ffffff'); },
     tap() { sfx('tap'); }, arrive() { G.boy.dir = 'down'; doAct(G.boy, 'brush', 2.4); say([{ k: 'brush' }]); sfx('bubbles'); fx('bubble', G.boy.x + 2, G.boy.y - 18, 6); } });
   S.objs.push({ flat: true, y: 0, hit: [276, 34, 24, 14], go: [286, 64], draw() {},
     tap() { sfx('tap'); }, arrive() { G.boy.dir = 'down'; doAct(G.boy, 'wash', 2.2); say([{ k: 'wash' }]); sfx('water'); fx('bubble', G.boy.x, G.boy.y - 8, 8); } });
@@ -444,7 +444,7 @@ SCENES.home = (() => {
   S.objs.push({ flat: true, y: 0, hit: [210, 2, 38, 56], go: [229, 66], draw() {}, tap() { say([{ k: 'shirt' }]); }, arrive() { openPanel('mirror', 'clothes'); } });
 
   // meja makan besar; makanan digambar besar pada ukuran aslinya supaya jelas
-  S.objs.push({ flat: true, y: 0, draw(c) {
+  S.objs.push({ flat: true, y: 0, skin: 'bg', draw(c) {
     shadowRect(c, 105, 126, 126, 3);
     px(c, 132, 74, 16, 10, '#3a2616'); px(c, 133, 75, 14, 9, PAL.woodD); px(c, 133, 75, 14, 1, PAL.wood); px(c, 188, 74, 16, 10, '#3a2616'); px(c, 189, 75, 14, 9, PAL.woodD); px(c, 189, 75, 14, 1, PAL.wood);
     px(c, 106, 119, 6, 8, '#3a2616'); px(c, 224, 119, 6, 8, '#3a2616'); px(c, 107, 119, 4, 7, '#6b4226'); px(c, 225, 119, 4, 7, '#6b4226');
@@ -456,7 +456,7 @@ SCENES.home = (() => {
   } });
   [['rice', 126, 100], ['noodles', 154, 100], ['dumpling', 182, 100], ['bun', 210, 100], ['egg', 140, 113], ['milk', 168, 113], ['fish', 196, 113]].forEach(([f, x, y]) => {
     S.objs.push({
-      x, y, flat: true, gone: 0, get hit() { return this.gone > 0 ? [0, 0, 0, 0] : [x - 13, y - 22, 26, 24]; }, go: [x, 134],
+      x, y, flat: true, gone: 0, food: f, skin: 'fn:tableFood', get hit() { return this.gone > 0 ? [0, 0, 0, 0] : [x - 13, y - 22, 26, 24]; }, go: [x, 134],
       draw(c) { if (this.gone <= 0) drawOutlined(c, x, y, 1, (cc, ax, ay) => drawFoodBig(cc, ax, ay, f)); },
       update(dt) { if (this.gone > 0) this.gone -= dt; },
       tap() { say([{ k: f }]); },
@@ -478,7 +478,7 @@ SCENES.home = (() => {
       },
     });
   });
-  S.objs.push({ y: 128, draw(c) { for (const x of [133, 189]) { px(c, x, 121, 14, 8, PAL.wood); px(c, x, 127, 14, 2, PAL.woodD); } } });
+  S.objs.push({ y: 128, skin: 'bg', draw(c) { for (const x of [133, 189]) { px(c, x, 121, 14, 8, PAL.wood); px(c, x, 127, 14, 2, PAL.woodD); } } });
 
   // Keluarga: menyapa lalu bertanya
   const greet = (who, k) => [{ k, by: 'me' }, { k: greetNow(), by: 'np' }];
@@ -488,7 +488,7 @@ SCENES.home = (() => {
   const grandma = npc('grandma', 84, 162, 'left', { lines: () => [greet(grandma, 'grandma'), [{ k: 'q_hungry', by: 'np' }, { k: 'a_hungry', by: 'me' }], [{ k: 'q_apple', by: 'np' }, { k: 'a_like', by: 'me' }]] });
   [mom, dad, grandpa, grandma].forEach(p => S.objs.push(p));
   mom.go = [92, 90]; dad.go = [272, 116]; grandpa.go = [66, 158]; grandma.go = [102, 162];
-  S.objs.push({ y: 164, draw(c) { disc(c, 72, 160, 3, '#e2483d'); px(c, 71, 159, 3, 1, '#f39ac0'); px(c, 74, 158, 6, 1, '#e2483d'); } });
+  S.objs.push({ y: 164, skin: 'obj-benang', draw(c) { disc(c, 72, 160, 3, '#e2483d'); px(c, 71, 159, 3, 1, '#f39ac0'); px(c, 74, 158, 6, 1, '#e2483d'); } });
 
   S.exits = [{ hit: [140, 160, 40, 20], arrow: [160, 168, 'down'], go: [160, 176], to: 'farm', at: [78, 96] }];
   return S;
@@ -545,10 +545,11 @@ SCENES.village = (() => {
     });
   };
 
-  S.objs.push({ x: 116, y: 40, draw(c) { drawTree(c, 116, 40, { r: 12 }); } });
-  S.objs.push({ x: 190, y: 40, draw(c) { drawTree(c, 190, 40, { r: 13 }); } });
-  S.objs.push({ y: 138, draw(c) { drawBush(c, 60, 137, '#f39ac0'); drawBush(c, 170, 137, '#ffffff'); } });
-  [100, 240].forEach(x => S.objs.push({ y: 117, draw(c) {
+  // skin: gambar gaya baru (skin.js) — 'bg' = sudah ada di gambar latar, 'obj-…' = potongan desain
+  S.objs.push({ x: 116, y: 40, skin: 'bg', draw(c) { drawTree(c, 116, 40, { r: 12 }); } });
+  S.objs.push({ x: 190, y: 40, skin: 'bg', draw(c) { drawTree(c, 190, 40, { r: 13 }); } });
+  S.objs.push({ y: 138, skin: 'bg', draw(c) { drawBush(c, 60, 137, '#f39ac0'); drawBush(c, 170, 137, '#ffffff'); } });
+  [100, 240].forEach((x, i) => S.objs.push({ y: 117, skin: 'obj-lampu-jalan-' + (i + 1), draw(c) {
     px(c, x - 1, 92, 3, 25, '#4a4a52'); px(c, x - 3, 115, 7, 2, '#4a4a52');
     px(c, x - 3, 88, 7, 6, '#3a3a42'); px(c, x - 2, 89, 5, 4, G.night ? '#ffe28a' : '#e8eef2');
   } }));
@@ -580,6 +581,7 @@ SCENES.village = (() => {
     flat: true, x: 200, y: 160, i: 0, get hidden() { return !G.night; }, hit: [186, 146, 28, 22], go: [200, 134],
     draw(c, t) { const w = Math.round(Math.sin(t * 2)); oval(c, 200 + w, 156, 5, 2, '#fff2c0'); px(c, 196 - w, 160, 8, 1, '#fff2c0'); px(c, 198 + w, 163, 4, 1, '#fff2c0');
       [[150, 150], [240, 168], [120, 172], [270, 146]].forEach(([a, b], k) => { if ((Math.floor(t * 2) + k) % 3) px(c, a, b, 1, 1, '#ffffff'); }); },
+    skin(c, t) { skinGlints(c, t, 200, 158, [[150, 150], [240, 168], [120, 172], [270, 146]]); },
     tap() { this.i++; say([{ k: this.i % 2 ? 'moon' : 'star' }]); },
   });
 

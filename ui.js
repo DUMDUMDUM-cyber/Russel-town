@@ -73,7 +73,7 @@ function fitMapLabels() {
   });
 }
 MP.cv.addEventListener('pointerdown', e => {
-  const [x, y] = cvPoint(MP.cv, e).map(v => v / 2);
+  const [x, y] = cvPoint(MP.cv, e).map(v => v / (MP.cv.width / 160));
   let best = null, bd = 18;
   for (const [key, [sx, sy]] of Object.entries(MAP_SPOTS)) { const d = Math.hypot(sx - x, sy - y); if (d < bd) { bd = d; best = key; } }
   if (best) goPlace(best);
@@ -434,13 +434,15 @@ function joinPy(py) {
   });
   $('word-total').textContent = Object.keys(WORDS).length;
 })();
-function syncParentSettings() { $('set-music').checked = Snd.on; $('set-id').checked = Talk.alsoId; $('set-hd').checked = G.hd; $('set-lang').value = LANG; }
+function syncParentSettings() { $('set-music').checked = Snd.on; $('set-id').checked = Talk.alsoId; $('set-hd').checked = G.hd; $('set-lang').value = LANG; $('set-skin').checked = typeof Skin !== 'undefined' && Skin.on; $('set-card').checked = !G.cardOff; }
 // ganti bahasa: simpan lalu muat ulang supaya semua kata, tombol, lagu, dan cerita ikut berganti
 $('set-lang').addEventListener('change', e => {
   LANG = ['en', 'ja'].includes(e.target.value) ? e.target.value : 'zh'; save();
   Talk.cancel(); location.reload();
 });
 $('set-hd').addEventListener('change', e => { G.hd = e.target.checked; save(); });
+$('set-skin').addEventListener('change', e => { if (typeof Skin !== 'undefined') Skin.set(e.target.checked); });
+$('set-card').addEventListener('change', e => { G.cardOff = !e.target.checked; if (G.cardOff) $('card').hidden = true; save(); });
 $('card-reset').addEventListener('click', () => { G.cardPos = null; placeCard(); save(); sfx('pop'); });
 $('set-music').addEventListener('change', e => { Snd.init(); Snd.setMusic(e.target.checked); updateIcons(); save(); });
 $('set-id').addEventListener('change', e => { Talk.alsoId = e.target.checked; save(); });

@@ -122,14 +122,14 @@ SCENES.salon = (() => {
     });
   };
   // tiang barbershop berputar
-  S.objs.push({ x: 300, y: 104, draw(c, t) {
+  S.objs.push({ x: 300, y: 104, skin: 'obj-tiang-salon', draw(c, t) {
     shadow(c, 300, 104, 5);
     px(c, 296, 66, 8, 36, '#ffffff'); px(c, 296, 66, 8, 2, '#c9d4e0'); px(c, 296, 100, 8, 3, '#a9a6a0');
     for (let y = 68; y < 100; y++) { const k = (y + Math.floor(t * 12)) % 8; px(c, 296 + (k % 8), y, 2, 1, k < 4 ? '#e2483d' : '#4f86e0'); }
     disc(c, 300, 65, 3, '#a9a6a0');
   }, hit: [292, 62, 16, 44], go: [290, 110], tap() { say([{ k: 'salon' }]); } });
   // kursi potong: Russel duduk lalu jendela potong rambut terbuka
-  [56, 136].forEach((x, i) => S.objs.push({ x, y: 108, hit: [x - 12, 80, 24, 30], go: [x, 112],
+  [56, 136].forEach((x, i) => S.objs.push({ x, y: 108, hit: [x - 12, 80, 24, 30], go: [x, 112], skin: 'near:obj-kursi-salon-',
     draw(c) {
       shadow(c, x, 108, 12);
       px(c, x - 1, 100, 3, 8, RB_MD); oval(c, x, 107, 8, 2, RB_MD);
@@ -150,7 +150,7 @@ SCENES.salon = (() => {
   const grandpaSit = npc('grandpa', 136, 96, 'up', { go: [150, 112], lines: [[{ k: 'grandpa', by: 'me' }, { k: 'q_tired', by: 'np' }, { k: 'a_tired', by: 'me' }], [{ k: 'handsome', by: 'me' }]] });
   S.objs.push(grandpaSit);
   // kursi tunggu dengan teman membaca
-  S.objs.push({ x: 264, y: 150, hit: [232, 128, 66, 24], go: [264, 160], draw(c) {
+  S.objs.push({ x: 264, y: 150, hit: [232, 128, 66, 24], go: [264, 160], skin: 'obj-bangku-tunggu', draw(c) {
     shadow(c, 264, 150, 32);
     px(c, 232, 132, 64, 8, '#e88aa2'); px(c, 232, 132, 64, 1, '#f8b8cc'); px(c, 230, 140, 68, 5, '#c2667f'); px(c, 230, 140, 68, 1, '#e88aa2');
     for (const x of [234, 292]) px(c, x, 145, 3, 5, '#5a3a3a');

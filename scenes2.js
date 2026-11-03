@@ -25,14 +25,14 @@ SCENES.school = (() => {
     // pagar semak rendah di tepi halaman
     for (let x = 0; x < W; x += 9) { px(c, x, 174, 6, 2, PAL.grassD); px(c, x + 1, 173, 4, 1, PAL.grass); }
   };
-  S.objs.push({ flat: true, y: 0, draw(c, t) {
+  S.objs.push({ flat: true, y: 0, skin: 'fn:schoolFlag', draw(c, t) {
     // bendera merah putih
     for (let i = 0; i < 18; i++) { const w = Math.round(Math.sin(t * 4 - i * 0.5) * 1.2); px(c, 274 + i, 6 + w, 1, 6, '#e2483d'); px(c, 274 + i, 12 + w, 1, 6, '#ffffff'); }
   } });
   S.objs.push({ y: 20, hit: [70, 0, 180, 62], go: [160, 72], draw() {}, tap() { say([{ k: 'school' }]); } });
 
   // bak pasir kecil di halaman (papan tulis pindah ke ruang kelas)
-  S.objs.push({ flat: true, y: 0, hit: [36, 84, 52, 24], go: [62, 112],
+  S.objs.push({ flat: true, y: 0, hit: [36, 84, 52, 24], go: [62, 112], skin: 'bg',
     draw(c) {
       shadowRect(c, 36, 106, 53, 2);
       px(c, 35, 85, 54, 22, '#3a2616'); px(c, 36, 86, 52, 20, PAL.woodD); px(c, 36, 86, 52, 1, PAL.woodL); px(c, 36, 104, 52, 2, PAL.wood);
@@ -59,7 +59,7 @@ SCENES.school = (() => {
   // Měiměi main ayunan
   // dua ayunan: kiri untuk Evelyn, kanan bisa dinaiki Russel (ketuk lagi di mana saja = turun)
   const swing = {
-    x: 182, y: 100, o: 0, o2: 0, hit: [180, 64, 32, 38], go: [194, 112],
+    x: 182, y: 100, o: 0, o2: 0, hit: [180, 64, 32, 38], go: [194, 112], skin: 'fn:swing',
     draw(c) {
       px(c, 156, 68, 3, 32, PAL.woodD); px(c, 208, 68, 3, 32, PAL.woodD); px(c, 154, 66, 59, 3, PAL.wood);
       [[170, this.o, '#e2483d', '#a8352b'], [194, this.o2, '#4f86e0', '#2f5bab']].forEach(([sx, o, k, kd]) => {
@@ -93,7 +93,7 @@ SCENES.school = (() => {
   // Tiāntian naik-turun perosotan
   // perosotan: Russel naik tangga, meluncur, lalu turun di bawah
   const slide = {
-    x: 266, y: 106, hit: [240, 70, 56, 38], go: [247, 112],
+    x: 266, y: 106, hit: [240, 70, 56, 38], go: [247, 112], skin: 'obj-perosotan',
     arrive() {
       const b = G.boy; if (b.ride) return;
       if (!G.dog.hidden) { b.dogFollow = true; G.dog.trail = []; }
@@ -137,6 +137,7 @@ SCENES.school = (() => {
 
   // Xiǎoyǔ lompat tali
   const xiaoyu = npc('xiaoyu', 128, 150, 'down', {
+    skin: 'fn:jumpRope',
     draw(c, t) {
       const ph = Math.sin(t * 9), bob = this.talkT > 0 ? 0 : Math.round(Math.max(0, ph) * 3);
       const x = Math.round(this.x), y = Math.round(this.y);
@@ -160,7 +161,7 @@ SCENES.school = (() => {
   S.objs.push(lele);
 
   const ball = {
-    x: 222, y: 152, vx: 0, vy: 0, h: 0, vh: 0, hitLele: false,
+    x: 222, y: 152, vx: 0, vy: 0, h: 0, vh: 0, hitLele: false, skin: 'fn:ball',
     get hit() { return [this.x - 8, this.y - 10, 16, 12]; }, get go() { return [this.x - (G.boy.x < this.x ? 8 : -8), this.y + 1]; },
     draw(c) {
       shadow(c, Math.round(this.x), Math.round(this.y), 3);
@@ -196,7 +197,7 @@ SCENES.school = (() => {
     sfx('bounce');
   }
   S.objs.push(ball);
-  S.objs.push({ y: 176, draw(c) { drawBush(c, 300, 176, '#f4cf3a'); drawBush(c, 140, 178, null); } });
+  S.objs.push({ y: 176, skin: 'bg', draw(c) { drawBush(c, 300, 176, '#f4cf3a'); drawBush(c, 140, 178, null); } });
 
   S.exits = [
     { hit: [0, 128, 26, 44], arrow: [12, 150, 'left'], go: [6, 150], to: 'village', at: [300, 126],
@@ -241,20 +242,20 @@ SCENES.office = (() => {
       px(cc, 306, 80, 9, 6, '#e8eef2'); px(cc, 307, 81, 7, 3, '#2a3a4a'); px(cc, 308, 82, 1, 1, '#7cf0c4'); px(cc, 312, 82, 1, 1, '#7cf0c4'); px(cc, 310, 78, 1, 2, '#e2483d');
     });
   };
-  S.objs.push({ flat: true, y: 0, hit: [152, 10, 16, 16], go: [160, 64], draw(c, t) { drawClock(c, 160, 18, t); }, tap() { say([{ k: 'clock' }]); sfx('chime'); } });
-  S.objs.push({ flat: true, y: 0, hit: [104, 2, 48, 52], go: [128, 64], draw(c) { drawBookshelf(c, 104, 4, 48, 50); }, tap() { say([{ k: 'book' }]); } });
-  S.objs.push({ x: 180, y: 56, hit: [172, 26, 16, 32], go: [180, 66], draw(c) { drawCooler(c, 180, 56); },
+  S.objs.push({ flat: true, y: 0, hit: [152, 10, 16, 16], go: [160, 64], skin: 'bg', draw(c, t) { drawClock(c, 160, 18, t); }, tap() { say([{ k: 'clock' }]); sfx('chime'); } });
+  S.objs.push({ flat: true, y: 0, hit: [104, 2, 48, 52], go: [128, 64], skin: 'bg', draw(c) { drawBookshelf(c, 104, 4, 48, 50); }, tap() { say([{ k: 'book' }]); } });
+  S.objs.push({ x: 180, y: 56, hit: [172, 26, 16, 32], go: [180, 66], skin: 'obj-dispenser-air', draw(c) { drawCooler(c, 180, 56); },
     tap() { say([{ k: 'water' }]); }, arrive() { G.boy.dir = 'down'; doAct(G.boy, 'eat', 1.2); sfx('water'); } });
-  [[60, 60], [300, 62], [16, 172]].forEach(([x, y]) => S.objs.push({ x, y, draw(c) { drawPlantPot(c, x, y); } }));
+  [[60, 60], [300, 62], [16, 172]].forEach(([x, y]) => S.objs.push({ x, y, skin: 'near:obj-tanaman-', draw(c) { drawPlantPot(c, x, y); } }));
 
   const desks = [[90, 102], [230, 102], [160, 144]].map(([x, y], i) => {
-    const d = { x, y, ring: 0, hit: [x - 1, y - 30, 18, 16], go: [x + 8, y + 10],
+    const d = { x, y, ring: 0, hit: [x - 1, y - 30, 18, 16], go: [x + 8, y + 10], skin: 'near:obj-meja-',
       draw(c, t) { drawDesk(c, x, y, i === 2 ? null : (i === 1 || !dad.hidden), t); },
       tap() { say([{ k: 'computer' }]); sfx('tap'); } };
     return d;
   });
   desks.forEach(d => S.objs.push(d));
-  S.objs.push({ x: 73, y: 102.5, ring: 0, hit: [64, 84, 18, 14], go: [66, 112],
+  S.objs.push({ x: 73, y: 102.5, ring: 0, hit: [64, 84, 18, 14], go: [66, 112], skin: 'fn:phoneRing',
     draw(c, t) { drawPhone(c, 74, 95, this.ring > 0, t); },
     update(dt) { if (this.ring > 0) this.ring -= dt; },
     tap() { this.ring = 1.2; sfx('chime'); say([{ k: 'phone' }, { k: 'hellophone', zh: '喂？', by: dad.hidden ? G.boy : dad }]); } });
@@ -269,17 +270,17 @@ SCENES.office = (() => {
   });
   S.objs.push(dad);
   // akuarium dengan ikan berenang
-  S.objs.push({ x: 282, y: 172, hit: [258, 128, 48, 44], go: [282, 176], draw(c, t) { drawAquarium(c, 282, 172, t); },
+  S.objs.push({ x: 282, y: 172, hit: [258, 128, 48, 44], go: [282, 176], skin: 'obj-akuarium', draw(c, t) { drawAquarium(c, 282, 172, t); },
     tap() { say([{ k: 'aquarium' }, { k: 'fish' }]); sfx('bubbles'); } });
   // laptop di meja tengah
-  S.objs.push({ x: 160, y: 144.5, hit: [144, 120, 22, 14], go: [160, 156], draw(c, t) { drawLaptop(c, 152, 132, t); },
+  S.objs.push({ x: 160, y: 144.5, hit: [144, 120, 22, 14], go: [160, 156], skin: 'bg', draw(c, t) { drawLaptop(c, 152, 132, t); },
     tap() { say([{ k: 'laptop' }]); sfx('tap'); } });
   S.objs.push(npc('colleague', 196, 122, 'right', { path: [[196, 122], [250, 122], [250, 160], [196, 160]], sp: 13,
     lines: [[{ k: 'auntie', zh: '阿姨好！', by: 'me' }, { k: 'q_son', by: 'np' }, { k: 'a_son', by: 'me' }], [{ k: 'q_howru', by: 'np' }, { k: 'a_howru', by: 'me' }]] }));
   S.objs.push(npc('uncle', 220, 92, 'down', { lines: [[{ k: 'uncle', zh: '叔叔好！', by: 'me' }, { k: 'q_name', by: 'np' }, { k: 'a_name', by: 'me' }]] }));
 
   // mesin kopi: Russel bisa mengambil kopi sendiri, lalu memberikannya ke Ayah
-  const machine = { x: 218, y: 58, brewing: false, own: 0, noCup: 0, hit: [202, 26, 34, 32], go: [218, 68],
+  const machine = { x: 218, y: 58, brewing: false, own: 0, noCup: 0, hit: [202, 26, 34, 32], go: [218, 68], skin: 'fn:coffeeMachine',
     draw(c, t) { drawCoffeeMachine(c, 218, 58, this.brewing, t, this.noCup > 0); },
     update(dt) {
       if (this.noCup > 0) this.noCup -= dt;
@@ -510,11 +511,11 @@ SCENES.mountain = (() => {
   };
 
   S.objs.push({ flat: true, y: 0, hit: [100, 4, 220, 56], go: [200, 92], draw() {}, tap() { say([{ k: 'mountain' }]); } });
-  S.objs.push({ flat: true, y: 0, i: 0, get hidden() { return !G.night; }, hit: [40, 6, 40, 30], go: [100, 92],
+  S.objs.push({ flat: true, y: 0, i: 0, get hidden() { return !G.night; }, hit: [40, 6, 40, 30], go: [100, 92], skin: 'fn:mtnNight',
     draw(c, t) { disc(c, 60, 18, 7, '#fff2c0'); disc(c, 63, 16, 6, '#2a3462'); [[96, 10], [120, 26], [200, 8], [270, 20], [24, 30], [176, 30]].forEach(([a, b], k) => { if ((Math.floor(t * 2) + k) % 3) px(c, a, b, 1, 1, '#ffffff'); }); },
     tap() { this.i++; say([{ k: this.i % 2 ? 'moon' : 'star' }]); } });
   for (let i = 0; i < 2; i++) S.objs.push({
-    x: 60 + i * 140, y: 14 + i * 12, top: true, get hidden() { return G.night; },
+    x: 60 + i * 140, y: 14 + i * 12, top: true, skin: 'fn:cloud', get hidden() { return G.night; },
     get hit() { return [this.x - 14, this.y - 7, 28, 14]; },
     draw(c) { oval(c, Math.round(this.x), this.y, 12, 4, '#ffffff'); disc(c, Math.round(this.x) - 4, this.y - 3, 4, '#ffffff'); disc(c, Math.round(this.x) + 4, this.y - 2, 3, '#ffffff'); },
     update(dt) { this.x += dt * 4; if (this.x > W + 20) this.x = -20; },
@@ -549,12 +550,12 @@ SCENES.mountain = (() => {
   S.objs.push({ flat: true, y: 0, hit: [24, 126, 28, 54], go: [64, 150], draw() {}, tap() { say([{ k: 'river' }]); sfx('splash'); } });
 
   [[118, 96, 22], [146, 90, 18], [278, 100, 24], [304, 108, 18], [110, 178, 20], [210, 104, 20]].forEach(([x, y, h]) => S.objs.push({
-    x, y, sway: 0, hit: [x - 9, y - h - 8, 18, h + 8], go: [x, y + 6],
+    x, y, sway: 0, hit: [x - 9, y - h - 8, 18, h + 8], go: [x, y + 6], skin: 'fn:pine',
     draw(c) { drawPine(c, x + (this.sway > 0 ? Math.round(Math.sin(G.t * 40)) : 0), y, h); },
     update(dt) { if (this.sway > 0) this.sway -= dt; },
     tap() { this.sway = 0.5; say([{ k: 'tree' }]); sfx('shake'); },
   }));
-  [[184, 124, 4], [250, 172, 5], [98, 128, 3], [68, 168, 4]].forEach(([x, y, rr]) => S.objs.push({ x, y, hit: [x - rr - 3, y - rr * 2 - 3, rr * 2 + 6, rr * 2 + 5], go: [x, y + 6], draw(c) { drawRock(c, x, y, rr); }, tap() { say([{ k: 'rock' }]); },
+  [[184, 124, 4], [250, 172, 5], [98, 128, 3], [68, 168, 4]].forEach(([x, y, rr]) => S.objs.push({ x, y, hit: [x - rr - 3, y - rr * 2 - 3, rr * 2 + 6, rr * 2 + 5], go: [x, y + 6], skin: 'near:obj-batu-', draw(c) { drawRock(c, x, y, rr); }, tap() { say([{ k: 'rock' }]); },
     arrive() { doAct(G.boy, 'hop', 0.9); sfx('bounce'); say([{ k: 'jump', zh: '跳！' }]); } }));
   [[132, 162], [140, 166], [126, 168], [238, 120]].forEach(([x, y]) => S.objs.push(pickup('mushroom', x, y, { respawn: 25 })));
   [[200, 160], [226, 150], [168, 172], [290, 166]].forEach(([x, y]) => S.objs.push(pickup('wildflower', x, y, { respawn: 20 })));
@@ -587,7 +588,7 @@ SCENES.mountain = (() => {
     lines: [[{ k: 'uncle', zh: '叔叔好！', by: 'me' }, { k: 'q_bunny', by: 'np' }, { k: 'a_bunny', by: 'me' }], [{ k: 'q_tired', by: 'np' }, { k: 'a_tired', by: 'me' }]] }));
 
   // piknik keluarga: tikar & keranjang (ambil bakpao), Ayah, Ibu, dan kakak
-  S.objs.push({ flat: true, x: 170, y: 116, hit: [148, 104, 44, 18], go: [170, 126],
+  S.objs.push({ flat: true, x: 170, y: 116, hit: [148, 104, 44, 18], go: [170, 126], skin: 'bg',
     draw(c) { drawPicnic(c, 170, 116); },
     tap() { say([{ k: 'picnic' }]); },
     arrive() { if (bagAdd('bun', 158, 110, true)) say([{ k: 'picnic' }, { k: 'bun' }]); } });

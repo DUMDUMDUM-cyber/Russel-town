@@ -52,7 +52,15 @@ drawItem = function (c, x, y, type, big) {
 };
 
 // ================= MEMBUAT SUSHI (jendela) =================
-const SU = { step: 'rice', n: 0, kind: null, drop: 0, flash: 0, t: 0, cv: $('su-cv'), src: document.createElement('canvas') };
+// Pilih sushi dulu, lalu ikuti langkah sesuai cara membuat sushi itu. 'plate' = taruh di piring (selesai).
+const SU_RECIPE = {
+  salmon: ['rice', 'salmon', 'plate'], tuna: ['rice', 'tuna', 'plate'], shrimp: ['rice', 'shrimp', 'plate'],
+  eggsushi: ['rice', 'egg', 'seaweed', 'plate'],
+  gunkan: ['rice', 'seaweed', 'gunkan', 'plate'],
+  cucumber: ['seaweed', 'rice', 'cucumber', 'plate'],
+  tamagoroll: ['egg', 'tamagoroll', 'plate'],
+};
+const SU = { step: 'pick', i: 0, n: 0, kind: null, drop: 0, flash: 0, t: 0, cv: $('su-cv'), src: document.createElement('canvas') };
 SU.src.width = 160; SU.src.height = 110;
 SU.sctx = SU.src.getContext('2d', { willReadFrequently: true });
 SU.ctx = SU.cv.getContext('2d');
@@ -65,30 +73,36 @@ function suOption(k, onClick, big) {
   b.addEventListener('click', onClick);
   return b;
 }
+const suSteps = () => (SU.kind ? SU_RECIPE[SU.kind] : []);
+// langkah yang sudah dikerjakan (tanpa piring)
+const suDone = () => (SU.step === 'done' ? suSteps().filter(a => a !== 'plate') : suSteps().slice(0, SU.i));
 function suRender() {
   const box = $('su-opts'); box.innerHTML = ''; box.className = 'proc';
-  const order = ['rice', 'top', 'serve'], at = SU.step === 'done' ? 3 : order.indexOf(SU.step);
-  $('su-steps').innerHTML = order.map((s, i) => `<span class="fstar${i < at ? ' on' : ''}" aria-hidden="true"></span>`).join('');
-  $('su-steps').setAttribute('aria-label', 'Langkah ' + Math.min(at + 1, 3) + ' dari 3');
-  if (SU.step === 'rice') box.appendChild(suOption('rice', suRice, true));
-  else if (SU.step === 'top') { box.classList.add('su-grid'); SUSHI_KINDS.forEach(k => box.appendChild(suOption(k, () => suTop(k)))); }
-  else if (SU.step === 'serve') box.appendChild(suOption('plate', suServe, true));
+  const total = (SU.kind ? suSteps().length : 3) + 1, at = SU.step === 'pick' ? 0 : SU.step === 'done' ? total : SU.i + 1;
+  $('su-steps').innerHTML = Array.from({ length: total }, (_, i) => `<span class="fstar${i < at ? ' on' : ''}" aria-hidden="true"></span>`).join('');
+  $('su-steps').setAttribute('aria-label', 'Langkah ' + Math.min(at + 1, total) + ' dari ' + total);
+  if (SU.step === 'pick') { box.classList.add('su-grid'); SUSHI_KINDS.forEach(k => box.appendChild(suOption(k, () => suPick(k)))); }
+  else if (SU.step === 'make') box.appendChild(suOption(suSteps()[SU.i], suDo, true));
   else { box.appendChild(suOption('letseat', suEat)); box.appendChild(suOption('makesushi', suStart)); }
 }
-function suStart() { SU.step = 'rice'; SU.n = 0; SU.kind = null; SU.drop = 0; suRender(); sfx('pop'); say([{ k: 'makesushi' }, { k: 'rice' }]); }
-function suRice() {
-  if (SU.step !== 'rice') return;
-  SU.n++; SU.flash = 0.25; sfx('pop');
-  if (SU.n < 2) { say([{ k: 'rice' }]); return; }
-  SU.step = 'top'; suRender(); say([{ k: 'q_sushi', by: sushiChef }]);
+function suStart() { Object.assign(SU, { step: 'pick', i: 0, n: 0, kind: null, drop: 0 }); suRender(); sfx('pop'); say([{ k: 'makesushi' }, { k: 'q_sushi', by: sushiChef }]); }
+function suPick(k) {
+  if (SU.step !== 'pick') return;
+  Object.assign(SU, { kind: k, step: 'make', i: 0, n: 0, drop: 0 }); sfx('tap'); suRender();
+  say([{ k }, { k: SU_RECIPE[k][0] }]);
 }
-function suTop(k) {
-  if (SU.step !== 'top') return;
-  SU.kind = k; SU.drop = 1; SU.step = 'serve'; sfx('tap'); suRender();
-  say(k === 'eggsushi' || k === 'cucumber' || k === 'gunkan' ? [{ k }, { k: 'seaweed' }, { k: 'plate' }] : [{ k }, { k: 'plate' }]);
+// satu ketukan untuk langkah sekarang; nasi perlu dua ketukan (ambil, lalu dibentuk)
+function suDo() {
+  if (SU.step !== 'make') return;
+  const steps = suSteps(), act = steps[SU.i];
+  if (act === 'plate') { suServe(); return; }
+  SU.n++; SU.flash = 0.25;
+  if (act === 'rice' && SU.n < 2) { sfx('pop'); say([{ k: 'rice' }]); return; }
+  SU.i++; SU.n = 0; SU.drop = 1; sfx(act === 'rice' ? 'pop' : 'tap'); suRender();
+  say([{ k: steps[SU.i] }]);
 }
 function suServe() {
-  if (SU.step !== 'serve') return;
+  if (SU.step !== 'make' || suSteps()[SU.i] !== 'plate') return;
   SU.step = 'done'; SU.t = 0; sfx('sparkle'); suRender();
   const full = !bagAdd(SU.kind, G.boy.x, G.boy.y - 20, true);
   addCoins(1, G.boy.x, G.boy.y - 30);
@@ -114,33 +128,40 @@ PANEL_HOOK.sushi = dt => {
   // tikar bambu
   px(c, 36, 74, 88, 30, '#6f8a3a'); for (let x = 37; x < 124; x += 3) px(c, x, 74, 2, 30, '#a8c060'); px(c, 36, 74, 88, 2, '#5a7030'); px(c, 36, 102, 88, 2, '#5a7030');
   oval(c, 80, 92, 25, 6, 'rgba(30,40,10,0.28)');
-  // sushi besar di atas tikar
-  if (SU.step === 'rice') {
-    if (SU.n === 0) { for (const [a, b] of [[-8, -2], [0, -4], [8, -2], [-4, -7], [4, -7]]) { disc(c, 80 + a, 88 + b, 5, '#e4e0d0'); disc(c, 80 + a, 87 + b, 4, '#ffffff'); } }
-    else { oval(c, 80, 86, 20, 8, '#e4e0d0'); oval(c, 80, 84, 19, 7, '#ffffff'); }
-    if (Math.floor(t * 2.5) % 2) drawStar(c, 110, 74, '#ffd84a');
-  } else if (SU.step === 'top') {
-    oval(c, 80, 86, 22, 9, '#e4e0d0'); oval(c, 80, 83, 22, 8, '#ffffff'); for (const [a, b] of [[-12, 84], [-3, 81], [8, 85], [14, 81]]) px(c, 80 + a, b, 3, 1, '#ece8da');
-  } else {
-    const dy = Math.round(-SU.drop * SU.drop * 50);
-    if (SU.kind === 'cucumber' || SU.kind === 'gunkan' || SU.kind === 'tamagoroll' || SU.step === 'done') {
-      if (SU.step === 'done') { oval(c, 80, 92, 34, 7, '#d9dfe8'); oval(c, 80, 90, 34, 6, SUSHI_PLATE[SU.kind]); oval(c, 80, 89, 30, 5, '#ffffff'); }
-      drawBig(c, 80, 88 + (SU.step === 'done' ? 0 : dy), 3, (cc, ax, ay) => drawSushi(cc, ax, ay, SU.kind));
-    } else {
-      drawBig(c, 80, 90, 3, (cc, ax, ay) => { oval(cc, ax, ay - 3, 6, 3, '#e4e0d0'); oval(cc, ax, ay - 4, 6, 2, '#ffffff'); });
-      drawBig(c, 80, 90 + dy, 3, (cc, ax, ay) => drawSushi(cc, ax, ay, SU.kind));
-    }
-    if (SU.step === 'serve' && Math.floor(t * 2.5) % 2) drawStar(c, 118, 74, '#ffd84a');
-    if (SU.step === 'done') for (let i = 0; i < 6; i++) { const a = t * 2 + i * 1.05; drawStar(c, Math.round(80 + Math.cos(a) * 52), Math.round(62 + Math.sin(a) * 26), i % 2 ? '#ffd84a' : '#fff2a8'); }
+  // sushi di atas tikar, sesuai langkah yang sudah dikerjakan
+  const k = SU.kind, done = suDone(), has = a => done.includes(a), last = done[done.length - 1];
+  const dy = a => (a === last ? Math.round(-SU.drop * SU.drop * 40) : 0), big = (y, fn) => drawBig(c, 80, y, 3, fn);
+  const riceBall = () => big(90, (cc, ax, ay) => { oval(cc, ax, ay - 3, 6, 3, '#e4e0d0'); oval(cc, ax, ay - 4, 6, 2, '#ffffff'); });
+  if (SU.step === 'done') { oval(c, 80, 92, 34, 7, '#d9dfe8'); oval(c, 80, 90, 34, 6, SUSHI_PLATE[k]); oval(c, 80, 89, 30, 5, '#ffffff'); }
+  if (SU.step === 'make' && suSteps()[SU.i] === 'rice' && SU.n === 1) {
+    // nasi baru diambil: masih berupa gumpalan
+    for (const [a, b] of [[-8, -2], [0, -4], [8, -2], [-4, -7], [4, -7]]) { disc(c, 80 + a, 88 + b, 5, '#e4e0d0'); disc(c, 80 + a, 87 + b, 4, '#ffffff'); }
   }
+  if (k && done.length === suSteps().length - 1) {
+    // sushi sudah lengkap; untuk nigiri, nasi tetap di tikar selama ikannya turun
+    if (has('rice') && dy(last) && ['salmon', 'tuna', 'shrimp'].includes(k)) riceBall();
+    big(90 + dy(last), (cc, ax, ay) => drawSushi(cc, ax, ay, k));
+  } else if (k) {
+    if (k === 'cucumber') {
+      if (has('seaweed')) { px(c, 56, 86 + dy('seaweed'), 48, 7, '#1f3a2a'); px(c, 56, 86 + dy('seaweed'), 48, 1, '#35574a'); }
+      if (has('rice')) { px(c, 58, 85, 44, 4, '#e4e0d0'); px(c, 58, 85, 44, 3, '#ffffff'); }
+    } else if (k === 'tamagoroll') {
+      if (has('egg')) { oval(c, 80, 89 + dy('egg'), 22, 5, '#d9a02a'); oval(c, 80, 88 + dy('egg'), 21, 4, '#f4cf3a'); }
+    } else {
+      if (has('rice')) riceBall();
+      if (has('egg')) big(90 + dy('egg'), (cc, ax, ay) => { px(cc, ax - 6, ay - 8, 12, 3, '#f4cf3a'); px(cc, ax - 6, ay - 8, 12, 1, '#fff2a8'); px(cc, ax - 6, ay - 6, 12, 1, '#d9b02a'); });
+      if (has('seaweed') && k === 'gunkan') big(90, (cc, ax, ay) => { px(cc, ax - 6, ay - 7, 12, 7, '#1f3a2a'); px(cc, ax - 6, ay - 7, 2, 7, '#35574a'); oval(cc, ax, ay - 8, 6, 1.5, '#fbfaf2'); });
+    }
+  }
+  if (SU.step === 'make' && Math.floor(t * 2.5) % 2) drawStar(c, 114, 74, '#ffd84a');
+  if (SU.step === 'done') for (let i = 0; i < 6; i++) { const a = t * 2 + i * 1.05; drawStar(c, Math.round(80 + Math.cos(a) * 52), Math.round(62 + Math.sin(a) * 26), i % 2 ? '#ffd84a' : '#fff2a8'); }
   // sumpit di tepi meja
   px(c, 130, 80, 2, 26, '#7d5230'); px(c, 134, 80, 2, 26, '#a8743c');
   SU.ctx.drawImage(upscale4(SU.src), 0, 0);
 };
 SU.cv.addEventListener('pointerdown', () => {
-  if (SU.step === 'rice') suRice();
-  else if (SU.step === 'serve') suServe();
-  else if (SU.step === 'top') say([{ k: 'q_sushi' }]);
+  if (SU.step === 'make') suDo();
+  else if (SU.step === 'pick') say([{ k: 'q_sushi' }]);
   else say([{ k: SU.kind }]);
 });
 $('su-title').innerHTML = rubyHTML(word('makesushi').zh, word('makesushi').py);
@@ -175,7 +196,7 @@ SCENES.sushibar = (() => {
     });
   };
   // akuarium di dinding
-  S.objs.push({ x: 272, y: 72, hit: [248, 28, 48, 46], go: [272, 122], draw(c, t) { drawAquarium(c, 272, 72, t); }, tap() { say([{ k: 'fish' }]); sfx('bubbles'); } });
+  S.objs.push({ x: 272, y: 72, hit: [248, 28, 48, 46], go: [272, 122], skin: 'obj-akuarium', draw(c, t) { drawAquarium(c, 272, 72, t); }, tap() { say([{ k: 'fish' }]); sfx('bubbles'); } });
 
   sushiChef = npc('chef', 160, 84, 'down', {
     go: [160, 122],
@@ -188,7 +209,7 @@ SCENES.sushibar = (() => {
   S.objs.push(sushiChef);
 
   // meja dengan ban berjalan (digambar di depan koki, menutupi kakinya)
-  S.objs.push({ y: 100, hit: [COUNTER[0], 96, COUNTER[1] - COUNTER[0], 18], go: null,
+  S.objs.push({ y: 100, hit: [COUNTER[0], 96, COUNTER[1] - COUNTER[0], 18], go: null, skin: 'fn:sushiCounter',
     draw(c, t) {
       const [a, b] = COUNTER, w = b - a;
       px(c, a, 76, w, 3, PAL.woodL); px(c, a, 79, w, 5, PAL.wood);
@@ -241,7 +262,7 @@ SCENES.sushibar = (() => {
 
   // bangku tinggi di depan meja
   const SEATS = [66, 118, 202, 252];
-  SEATS.forEach(x => S.objs.push({ y: 121, x, hit: [x - 8, 108, 16, 14], go: [x, 124],
+  SEATS.forEach(x => S.objs.push({ y: 121, x, hit: [x - 8, 108, 16, 14], go: [x, 124], skin: 'near:obj-kursi-',
     draw(c) {
       shadow(c, x, 121, 7);
       px(c, x - 1, 112, 3, 9, RB_MD); px(c, x - 4, 120, 9, 1, RB_MD);
@@ -259,7 +280,7 @@ SCENES.sushibar = (() => {
   S.objs.push(guest);
 
   // meja kecil untuk membuat sushi
-  S.objs.push({ x: 264, y: 158, hit: [234, 128, 60, 32], go: [264, 164],
+  S.objs.push({ x: 264, y: 158, hit: [234, 128, 60, 32], go: [264, 164], skin: 'fn:sushiTable',
     draw(c, t) {
       shadow(c, 264, 158, 30);
       px(c, 238, 148, 3, 10, PAL.woodD); px(c, 287, 148, 3, 10, PAL.woodD);
@@ -272,7 +293,7 @@ SCENES.sushibar = (() => {
     arrive() { G.boy.dir = 'up'; openPanel('sushi'); suOpen(); } });
 
   // robot pelayan: memberi teh
-  S.objs.push({ x: 120, y: 150, dir: 1, t0: 0, wait: 0,
+  S.objs.push({ x: 120, y: 150, dir: 1, t0: 0, wait: 0, skin: 'fn:waiterRobot',
     get hit() { return [this.x - 9, this.y - 22, 18, 23]; }, get go() { return [this.x + (G.boy.x < this.x ? -16 : 16), this.y + 1]; },
     draw(c, t) {
       const x = Math.round(this.x), y = Math.round(this.y);

@@ -103,6 +103,7 @@ function missionDone(p) {
     } else baseTap.call(this);
   };
   momHome.receive = function (type) { if (type === EX.mission) missionDone(this); else baseReceive.call(this, type); };
+  momHome.skin = 'fn:momMission';
   momHome.draw = function (c, t) {
     baseDraw.call(this, c, t);
     if (EX.mission ? !G.bag.includes(EX.mission) : MIS.cool > 0) return;
@@ -147,7 +148,7 @@ function peekTail(c, x, y, t) {
   farm.enter = function () { if (baseEnter) baseEnter(); if (HS.on) { HS.on = false; G.dog.hiding = false; } };
   farm.objs.push({ x: 162, y: 63, get hidden() { return !(HS.on && HS.spot === 'tree'); }, draw(c, t) { peekTail(c, 164, 56, t); } });
   farm.blocks.push([208, 152, 28, 8], [262, 146, 20, 8]);
-  farm.objs.push({ x: 222, y: 160, hit: [204, 136, 36, 26], go: [222, 170],
+  farm.objs.push({ x: 222, y: 160, hit: [204, 136, 36, 26], go: [222, 170], skin: 'fn:hideTable',
     draw(c, t) {
       shadow(c, 222, 160, 19);
       px(c, 212, 146, 2, 10, '#5f3f25'); px(c, 230, 146, 2, 10, '#5f3f25');
@@ -159,7 +160,7 @@ function peekTail(c, x, y, t) {
     },
     tap() { if (!HS.on) say([{ k: 'desk' }]); },
     arrive() { hideLook('table'); } });
-  farm.objs.push({ x: 272, y: 154, hit: [260, 130, 24, 26], go: [272, 164],
+  farm.objs.push({ x: 272, y: 154, hit: [260, 130, 24, 26], go: [272, 164], skin: 'fn:hideBox',
     draw(c, t) {
       shadow(c, 272, 154, 13);
       const shake = HS.on && HS.spot === 'box' && Math.floor(t * 2) % 3 === 0 ? 1 : 0, bx = 262 + shake;
@@ -194,7 +195,7 @@ function careFeed() {
   setTimeout(() => sfx('eat'), 600); setTimeout(() => { sfx('eat'); if (!d.hidden) fx('heart', d.x, d.y - 20, 3); }, 1700);
   say([{ k: 'feeddog', by: G.boy }, { k: 'full' }, { k: 'woof' }]);
 }
-SCENES.farm.objs.push({ top: true, get hidden() { return G.dog.hidden || !(G.dog.foamT > 0 || G.dog.bowlT > 0); },
+SCENES.farm.objs.push({ top: true, skin: 'fn:dogCare', get hidden() { return G.dog.hidden || !(G.dog.foamT > 0 || G.dog.bowlT > 0); },
   draw(c, t) {
     const d = G.dog, x = Math.round(d.x), y = Math.round(d.y);
     if (d.foamT > 0) [[-6, -6], [-1, -10], [4, -7], [-3, -14], [3, -15], [8, -13], [-7, -11]].forEach(([a, b], i) => disc(c, x + a * (d.dir || 1), y + b - (Math.floor(t * 4 + i) % 2), 2, '#ffffff'));
@@ -248,7 +249,7 @@ function parrotListen() {
   });
 }
 const parrotBird = {
-  voice: 'parrot', x: 136, y: 106, hit: [124, 72, 24, 36], go: [136, 116],
+  voice: 'parrot', x: 136, y: 106, hit: [124, 72, 24, 36], go: [136, 116], skin: 'fn:parrot',
   draw(c, t) {
     const talk = PARROT.st === 'talk', listen = PARROT.st === 'listen', bob = talk ? Math.floor(t * 8) % 2 : Math.sin(t * 2) > 0.7 ? 1 : 0, y = 83 - bob;
     shadow(c, 136, 106, 6);

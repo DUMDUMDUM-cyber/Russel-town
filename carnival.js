@@ -61,7 +61,7 @@ SCENES.carnival = (() => {
 
   // ---------- Bianglala ----------
   const CAB = ['#e2483d', '#f4cf3a', '#4f86e0', '#58a84a', '#f39ac0', '#f08a32', '#9b6bd6', '#3fa0b8'];
-  const wheel = { x: 72, y: 112, a: 0, riding: false, cab: 0, rideA: 0, lastPh: 0,
+  const wheel = { x: 72, y: 112, a: 0, riding: false, cab: 0, rideA: 0, lastPh: 0, skin: 'fn:ferris',
     hit: [32, 30, 80, 82], go: [72, 120],
     pos(i) { const a = this.a + i / 8 * Math.PI * 2; return [72 + Math.cos(a) * 36, 70 + Math.sin(a) * 36]; },
     draw(c, t) {
@@ -110,7 +110,7 @@ SCENES.carnival = (() => {
 
   // ---------- Komidi putar ----------
   const HORSES = [['#ffffff', '#c9d4e0'], ['#f6c9a3', '#c08a52'], ['#fcd0e2', '#e88ab4'], ['#bfe3f2', '#7aa4ea'], ['#fff2a8', '#d9b02a'], ['#c8e8a8', '#7cc85a']];
-  const carousel = { x: 244, y: 110, a: 0, riding: false, horse: 0, rideA: 0,
+  const carousel = { x: 244, y: 110, a: 0, riding: false, horse: 0, rideA: 0, skin: 'fn:carousel',
     hit: [198, 36, 92, 76], go: [244, 120],
     pos(i) { const a = this.a + i / 6 * Math.PI * 2; return [244 + Math.cos(a) * 34, 96 + Math.sin(a) * 9, Math.sin(a), -Math.sin(a)]; },
     draw(c, t) {
@@ -179,7 +179,7 @@ SCENES.carnival = (() => {
   };
   S.objs.push(seller);
   // balon yang dipegang Russel
-  S.objs.push({ top: true, get hidden() { return !G.boy.balloon || G.boy.hidden; },
+  S.objs.push({ top: true, skin: 'fn:heldBalloon', get hidden() { return !G.boy.balloon || G.boy.hidden; },
     draw(c, t) {
       const b = G.boy, sw = Math.round(Math.sin(t * 1.6) * 2), x = Math.round(b.x) + 7, y = Math.round(b.y) - 18;
       for (let k = 0; k < 16; k++) px(c, x + Math.round(sw * k / 16), y - k, 1, 1, 'rgba(60,50,40,0.6)');
@@ -187,7 +187,7 @@ SCENES.carnival = (() => {
     } });
 
   // ---------- Memancing bebek ----------
-  S.objs.push({ x: 121, y: 158, hit: [92, 136, 58, 24], go: [121, 166],
+  S.objs.push({ x: 121, y: 158, hit: [92, 136, 58, 24], go: [121, 166], skin: 'obj-kolam-bebek',
     draw(c, t) {
       shadow(c, 121, 158, 28);
       oval(c, 121, 152, 28, 9, '#a8352b'); oval(c, 121, 150, 28, 9, '#e2483d'); oval(c, 121, 149, 25, 7, '#fff6d8');
@@ -214,7 +214,7 @@ SCENES.carnival = (() => {
     } });
 
   // ---------- Kios makanan ----------
-  const stall = (x, item, col) => ({ x, y: 168, gone: 0, hit: [x - 24, 130, 48, 38], go: [x, 174],
+  const stall = (x, item, col) => ({ x, y: 168, gone: 0, hit: [x - 24, 130, 48, 38], go: [x, 174], skin: 'fn:carnivalStall',
     draw(c) {
       shadow(c, x, 168, 24);
       px(c, x - 20, 150, 40, 18, '#c08a52'); px(c, x - 20, 150, 40, 2, '#d9a56a'); px(c, x - 20, 167, 40, 1, PAL.woodD);

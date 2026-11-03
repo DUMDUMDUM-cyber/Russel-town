@@ -339,7 +339,7 @@ SCENES.workshop = (() => {
   };
 
   // meja rakit: selama belum ada robot, kerangka robot abu-abu menunggu di atas meja
-  S.objs.push({ x: 160, y: 112, hit: [116, 54, 88, 60], go: [160, 118],
+  S.objs.push({ x: 160, y: 112, hit: [116, 54, 88, 60], go: [160, 118], skin: 'fn:workbench',
     draw(c, t) {
       shadow(c, 160, 113, 40);
       px(c, 125, 98, 4, 15, '#5f6c7a'); px(c, 191, 98, 4, 15, '#5f6c7a'); px(c, 125, 98, 1, 15, RB_M); px(c, 191, 98, 1, 15, RB_M); px(c, 129, 106, 62, 2, '#5f6c7a');
@@ -362,7 +362,7 @@ SCENES.workshop = (() => {
   S.objs.push({ flat: true, y: 0, i: 0, hit: [216, 20, 88, 40], go: [232, 72], draw() {}, tap() { say([{ k: shelfWords[this.i++ % shelfWords.length] }]); } });
 
   // ban berjalan: suku cadang lewat terus
-  S.objs.push({ flat: true, y: 0, i: 0, hit: [14, 138, 96, 28], go: [60, 170],
+  S.objs.push({ flat: true, y: 0, i: 0, hit: [14, 138, 96, 28], go: [60, 170], skin: 'bg',
     draw(c, t) {
       shadowRect(c, 14, 165, 97, 3);
       px(c, 13, 149, 98, 16, '#3a2616'); px(c, 14, 150, 96, 14, '#5f6c7a'); px(c, 14, 150, 96, 1, RB_M);
@@ -379,7 +379,7 @@ SCENES.workshop = (() => {
     tap() { say([{ k: ['screw', 'rwheel', 'head'][this.i++ % 3] }]); } });
 
   // stasiun isi daya: baterai berkedip
-  S.objs.push({ x: 273, y: 104, hit: [250, 76, 46, 30], go: [273, 112],
+  S.objs.push({ x: 273, y: 104, hit: [250, 76, 46, 30], go: [273, 112], skin: 'obj-mesin-pembuat',
     draw(c, t) {
       shadow(c, 273, 104, 22);
       px(c, 252, 92, 42, 12, '#5f6c7a'); px(c, 252, 92, 42, 2, RB_M); px(c, 256, 95, 34, 7, RB_K);
@@ -390,7 +390,7 @@ SCENES.workshop = (() => {
     tap() { say([{ k: 'battery' }]); sfx('chime'); } });
 
   // kotak perkakas
-  S.objs.push({ x: 293, y: 166, hit: [278, 148, 30, 20], go: [270, 170],
+  S.objs.push({ x: 293, y: 166, hit: [278, 148, 30, 20], go: [270, 170], skin: 'obj-kotak-perkakas',
     draw(c) {
       shadow(c, 293, 166, 14);
       px(c, 281, 154, 24, 12, '#e2483d'); px(c, 281, 154, 24, 2, '#ff8a7a'); px(c, 281, 160, 24, 1, '#a8352b'); px(c, 300, 156, 5, 10, '#a8352b');
@@ -399,7 +399,7 @@ SCENES.workshop = (() => {
     tap() { say([{ k: 'screw' }]); sfx('tap'); } });
 
   // robot penyapu kecil
-  S.objs.push({ x: 150, y: 140, dir: 1, t0: 0, top: false,
+  S.objs.push({ x: 150, y: 140, dir: 1, t0: 0, top: false, skin: 'fn:mouseBot',
     get hit() { return [this.x - 8, this.y - 9, 16, 10]; }, get go() { return [this.x + (G.boy.x < this.x ? -14 : 14), this.y + 1]; },
     draw(c, t) {
       const x = Math.round(this.x), y = Math.round(this.y);

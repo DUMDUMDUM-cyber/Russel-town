@@ -228,7 +228,7 @@ function shopOpen() { SH.tab = 'buy'; SH.sel = null; SH.paid = 0; shopRender(); 
 })();
 const VILLAGE = SCENES.village;
 VILLAGE.blocks.push([184, 108, 32, 10]);
-VILLAGE.objs.push({ x: 200, y: 118, hit: [183, 86, 34, 32], go: [200, 125],
+VILLAGE.objs.push({ x: 200, y: 118, hit: [183, 86, 34, 32], go: [200, 125], skin: 'obj-kios-buah',
   draw(c) {
     shadow(c, 200, 118, 18);
     px(c, 185, 96, 2, 22, PAL.woodD); px(c, 213, 96, 2, 22, PAL.woodD);
@@ -317,7 +317,7 @@ $('room-title').addEventListener('click', () => say([{ k: 'room' }]));
 SCENES.home.objs.push({ flat: true, y: 0, hit: [50, 12, 28, 18], go: [63, 62], draw() {},
   tap() { say([{ k: 'cook' }]); }, arrive() { openPanel('cook'); cookOpen(); } });
 SCENES.home.blocks.push([70, 98, 18, 6]);
-SCENES.home.objs.push({ x: 79, y: 104, hit: [68, 86, 22, 19], go: [79, 113],
+SCENES.home.objs.push({ x: 79, y: 104, hit: [68, 86, 22, 19], go: [79, 113], skin: 'obj-kotak-mainan',
   draw(c) {
     shadow(c, 79, 104, 10);
     px(c, 70, 93, 18, 11, '#a8743c'); px(c, 69, 91, 20, 4, '#c08a52'); px(c, 69, 91, 20, 1, '#d9a56a'); px(c, 78, 94, 2, 3, '#f4cf3a');

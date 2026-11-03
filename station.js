@@ -130,7 +130,7 @@ SCENES.station = (() => {
   };
 
   // atap peron dan tiang (berdiri di depan kereta)
-  S.objs.push({ y: 101, hit: [132, 28, 56, 16], go: [160, 108],
+  S.objs.push({ y: 101, hit: [132, 28, 56, 16], go: [160, 108], skin: 'fn:stationRoof',
     draw(c, t) {
       for (const x of [34, 284]) { shadow(c, x + 2, 104, 5); px(c, x, 16, 5, 88, '#7d8a98'); px(c, x, 16, 2, 88, '#a9b6c4'); px(c, x + 4, 16, 1, 88, '#5f6c7a'); px(c, x - 2, 100, 9, 4, '#5f6c7a'); }
       px(c, 0, 8, W, 8, '#3f6fb5'); px(c, 0, 8, W, 2, '#6c9ae6'); px(c, 0, 15, W, 1, '#2f4a7a');
@@ -148,10 +148,10 @@ SCENES.station = (() => {
     },
     tap() { say([{ k: G.ticket || 'station' }]); } });
   // jam di tiang
-  S.objs.push({ flat: false, y: 102, hit: [24, 22, 24, 24], go: [50, 108], draw(c, t) { drawClock(c, 36, 34, t); }, tap() { say([{ k: 'clock' }]); sfx('chime'); } });
+  S.objs.push({ flat: false, y: 102, hit: [24, 22, 24, 24], go: [50, 108], skin: 'obj-jam', draw(c, t) { drawClock(c, 36, 34, t); }, tap() { say([{ k: 'clock' }]); sfx('chime'); } });
 
   // mesin tiket
-  S.objs.push({ x: 44, y: 132, hit: [24, 96, 40, 38], go: [72, 134],
+  S.objs.push({ x: 44, y: 132, hit: [24, 96, 40, 38], go: [72, 134], skin: 'fn:ticketMachine',
     draw(c, t) {
       shadow(c, 44, 132, 19);
       px(c, 28, 100, 32, 32, '#4f86e0'); px(c, 28, 100, 32, 2, '#8fb4ee'); px(c, 54, 102, 6, 30, '#3a6cc0'); px(c, 28, 130, 32, 2, '#2f5bab');
@@ -170,7 +170,7 @@ SCENES.station = (() => {
     } });
 
   // bangku: duduk menunggu kereta
-  S.objs.push({ x: 244, y: 134, hit: [214, 112, 60, 24], go: [244, 138],
+  S.objs.push({ x: 244, y: 134, hit: [214, 112, 60, 24], go: [244, 138], skin: 'obj-bangku',
     draw(c) {
       shadow(c, 244, 134, 28);
       px(c, 218, 116, 52, 8, '#c9473a'); px(c, 218, 116, 52, 1, '#e8735a'); px(c, 218, 123, 52, 1, '#a8352b');
@@ -187,7 +187,7 @@ SCENES.station = (() => {
     } });
 
   // mesin minuman: susu masuk tas
-  S.objs.push({ x: 296, y: 140, gone: 0, hit: [280, 100, 32, 42], go: [270, 142],
+  S.objs.push({ x: 296, y: 140, gone: 0, hit: [280, 100, 32, 42], go: [270, 142], skin: 'obj-mesin-minuman',
     draw(c, t) {
       shadow(c, 296, 140, 15);
       px(c, 282, 106, 28, 34, '#d9483b'); px(c, 282, 106, 28, 2, '#ef7a6a'); px(c, 306, 108, 4, 32, '#a8352b');
@@ -213,7 +213,7 @@ SCENES.station = (() => {
   // kereta yang datang, berhenti, lalu berangkat lagi
   const DOOR_AT = { steam: -127, bullet: -107 };
   const tr = {
-    x: -10, y: 92, type: 'steam', st: 'wait', timer: 7, v: 0, door: 0, greeted: false, n: 0,
+    x: -10, y: 92, type: 'steam', st: 'wait', timer: 7, v: 0, door: 0, greeted: false, n: 0, skin: 'fn:stationTrain',
     get hidden() { return this.st === 'wait'; },
     get doorX() { return Math.round(this.x + (DOOR_AT[this.type] || 0)); },
     get hit() { return this.st === 'wait' ? [0, 0, 0, 0] : [this.x - TRAIN_LEN[this.type], this.y - 48, TRAIN_LEN[this.type] + 4, 48]; },
@@ -391,7 +391,7 @@ SCENES.trainride = (() => {
       px(cc, 214, 13, 16, 7, '#4f86e0'); px(cc, 214, 13, 16, 1, '#8fb4ee');
     });
   };
-  S.objs.push({ flat: true, y: 0, draw(c, t) { rideView(c, t); },
+  S.objs.push({ flat: true, y: 0, skin: 'fn:rideView', draw(c, t) { rideView(c, t); },
     hit: [RX0, RY0, RX1 - RX0, RY1 - RY0],
     tap() {
       // kata benda yang paling dekat di jendela
@@ -402,14 +402,14 @@ SCENES.trainride = (() => {
       say([{ k: best || 'window' }]);
     } });
   // bingkai jendela di atas pemandangan
-  S.objs.push({ flat: true, y: 0, draw(c) {
+  S.objs.push({ flat: true, y: 0, skin: 'fn:rideFrame', draw(c) {
     px(c, RX0 - 2, RY0 - 2, RX1 - RX0 + 4, 2, PAL.woodD); px(c, RX0 - 2, RY1, RX1 - RX0 + 4, 3, PAL.woodD); px(c, RX0 - 2, RY1, RX1 - RX0 + 4, 1, PAL.wood);
     px(c, RX0 - 2, RY0, 2, RY1 - RY0, PAL.woodD); px(c, RX1, RY0, 2, RY1 - RY0, PAL.woodD);
     for (const x of [104, 197]) { px(c, x, RY0, 4, RY1 - RY0, PAL.woodD); px(c, x, RY0, 1, RY1 - RY0, PAL.wood); }
     for (const x of [60, 150, 240]) { px(c, x, 22, 1, 8, RB_MD); disc(c, x, 33, 3, '#f4cf3a'); disc(c, x, 33, 1, RB_MD); }
   } });
   // pintu: terbuka saat sampai
-  S.objs.push({ flat: true, y: 0, hit: [294, 26, 26, 118],
+  S.objs.push({ flat: true, y: 0, hit: [294, 26, 26, 118], skin: 'fn:rideDoor',
     draw(c, t) {
       const opened = RD.st === 'stop';
       px(c, 294, 26, 22, 118, '#3a3040');
@@ -419,7 +419,7 @@ SCENES.trainride = (() => {
     },
     tap() { if (RD.st === 'stop') rideLeave(); else say([{ k: 'train' }]); } });
   // bagian depan kursi: menutupi kaki, jadi semua terlihat duduk
-  S.objs.push({ y: 133, draw(c) {
+  S.objs.push({ y: 133, skin: 'bg', draw(c) {
     px(c, 8, 128, 284, 16, '#a8352b'); px(c, 8, 128, 284, 3, '#e8735a'); px(c, 8, 131, 284, 1, '#c9473a');
     for (let x = 20; x < 290; x += 34) px(c, x, 136, 5, 8, '#8a2c22');
   },
