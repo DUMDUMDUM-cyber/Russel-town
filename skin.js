@@ -746,10 +746,13 @@ const Skin = (() => {
         if (Math.floor(t * 8) % 2) v.line('M0 -56 V-40', '#ffffff', 3);
       });
     },
-    momMission(o, t) {
+    // orang yang bisa memberi misi (Ibu, Bu Guru, Ayah, Kakak): tanda "!" kuning di atas kepala
+    missionNpc(o, t) {
       o.draw(NUL, t);
-      if (EX.mission ? !G.bag.includes(EX.mission) : MIS.cool > 0) return;
-      piece('obj-tanda-misi', o.x + 0.5, o.y - 32 - Math.abs(Math.sin(t * 3)) * 2);
+      if (!missionMark(o)) return;
+      const bob = Math.abs(Math.sin(t * 3)) * 2;
+      if (o.look === 'mom' && piece('obj-tanda-misi', o.x + 0.5, o.y - 32 - bob)) return;
+      vec(o.x + 0.5, o.hit[1] - 2 - bob, v => { v.rect(-13, -40, 26, 38, 9, '#ffd23a'); v.rect(-3.5, -33, 7, 18, 3.5, '#e5443a', false); v.ell(0, -9, 4, 4, '#e5443a', false); v.hl(-7, -34, 3, 4); });
     },
     dogCare(o, t) {
       const d = G.dog, dir = d.dir || 1;

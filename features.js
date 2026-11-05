@@ -64,11 +64,23 @@ function addCoins(n, x, y) {
   for (let i = 0; i < n; i++) Snd.tone(1320 + i * 200, 0.14, { gain: 0.08, when: i * 0.12, type: 'triangle' });
 }
 
-// ================= MISI IBU: dengar permintaan, cari barangnya, berikan =================
+// ================= MISI: dengar permintaan, cari barangnya, berikan =================
+// Ibu, Bu Guru, Ayah, dan Kakak bisa meminta barang. Satu misi berjalan pada satu waktu.
 // [kata, kata bantu bilangan, pinyin, nada 一, kata sandang English]
 const MISSION_ITEMS = [['bun', '个', 'gè', 'yí', 'a'], ['rice', '碗', 'wǎn', 'yì', 'some'], ['egg', '个', 'gè', 'yí', 'an'], ['milk', '杯', 'bēi', 'yì', 'some'], ['fish', '条', 'tiáo', 'yì', 'a'],
-  ['apple', '个', 'gè', 'yí', 'an'], ['tomato', '个', 'gè', 'yí', 'a'], ['carrot', '根', 'gēn', 'yì', 'a'], ['wool', '团', 'tuán', 'yì', 'some'], ['shell', '个', 'gè', 'yí', 'a'], ['wildflower', '朵', 'duǒ', 'yì', 'a']];
+  ['apple', '个', 'gè', 'yí', 'an'], ['tomato', '个', 'gè', 'yí', 'a'], ['carrot', '根', 'gēn', 'yì', 'a'], ['wool', '团', 'tuán', 'yì', 'some'], ['shell', '个', 'gè', 'yí', 'a'], ['wildflower', '朵', 'duǒ', 'yì', 'a'],
+  ['pencil', '支', 'zhī', 'yì', 'a'], ['crayon', '支', 'zhī', 'yì', 'a'], ['coffee', '杯', 'bēi', 'yì', 'some'], ['corn', '根', 'gēn', 'yì', 'some'], ['watermelon', '个', 'gè', 'yí', 'a'], ['starfish', '个', 'gè', 'yí', 'a']];
+// siapa meminta apa (barang yang bisa ditemukan di desa)
+const MISSION_ASK = {
+  mom: ['bun', 'rice', 'egg', 'milk', 'fish', 'apple', 'tomato', 'carrot', 'wool', 'shell', 'wildflower'],
+  teacher: ['pencil', 'crayon', 'apple', 'wildflower', 'shell'],
+  dad: ['coffee', 'milk', 'bun', 'fish', 'corn', 'watermelon'],
+  gege: ['starfish', 'shell', 'apple', 'watermelon', 'corn', 'wildflower'],
+};
 const MIS = { cool: 0 };
+if (EX.mission && !EX.missionBy) EX.missionBy = 'mom';
+// tanda "!" di atas orang: punya misi untuk diberikan, atau barang yang dimintanya sudah ada di tas
+const missionMark = p => (EX.mission ? EX.missionBy === p.look && G.bag.includes(EX.mission) : MIS.cool <= 0);
 function missionCard(k) {
   const [, m, mp, yi, art] = MISSION_ITEMS.find(x => x[0] === k), w = WORDS[k], j = WORDS_JA[k];
   return langCard('请给我一' + m + w[0], 'qǐng gěi wǒ ' + yi + ' ' + mp + ' ' + w[1], 'Tolong beri aku ' + w[2], 'Please give me ' + art + ' ' + WORDS_EN[k], [j[0] + 'を ちょうだい', j[1] + ' o chōdai']);
@@ -77,8 +89,9 @@ function missionUI() {
   const el = $('mission');
   el.hidden = !EX.mission;
   if (!EX.mission) return;
-  if (el.dataset.k !== EX.mission) { el.dataset.k = EX.mission; el.innerHTML = `<img src="${stickerCanvas(EX.mission)}" alt="">`; }
-  el.setAttribute('aria-label', 'Misi: ' + WORDS[EX.mission][2]);
+  const key = EX.missionBy + ':' + EX.mission;
+  if (el.dataset.k !== key) { el.dataset.k = key; el.innerHTML = `<img src="${stickerCanvas(EX.mission)}" alt=""><img class="who" src="${stickerCanvas(EX.missionBy)}" alt="">`; }
+  el.setAttribute('aria-label', 'Misi dari ' + WORDS[EX.missionBy][2] + ': ' + WORDS[EX.mission][2]);
   el.classList.toggle('ready', G.bag.includes(EX.mission));
 }
 const momHome = SCENES.home.objs.find(o => o.look === 'mom');
@@ -87,29 +100,34 @@ function missionAsk(p) {
   say([{ card: missionCard(EX.mission), by: p }]);
 }
 function missionDone(p) {
-  EX.mission = null; MIS.cool = 25; exSave(); missionUI();
+  EX.mission = null; EX.missionBy = null; MIS.cool = 25; exSave(); missionUI();
   p.talkT = 5; p.dir = G.boy.x < p.x ? 'left' : 'right'; doAct(p, 'wave', 1.4);
   fx('heart', p.x, p.y - 34, 3); sfx('sparkle'); addCoins(2, p.x, p.y - 30);
   say([{ k: 'giveyou', by: G.boy }, { k: 'thanks', by: p }, { k: 'great' }]);
 }
 (function missionHooks() {
-  const baseTap = momHome.tap, baseDraw = momHome.draw, baseReceive = momHome.receive;
-  momHome.tap = function () {
-    if (EX.mission) {
-      if (G.bag.includes(EX.mission)) { bagTake(EX.mission); missionDone(this); } else missionAsk(this);
-    } else if (MIS.cool <= 0) {
-      const list = MISSION_ITEMS.map(x => x[0]);
-      EX.mission = list[Math.floor(Math.random() * list.length)]; exSave(); missionUI(); missionAsk(this);
-    } else baseTap.call(this);
-  };
-  momHome.receive = function (type) { if (type === EX.mission) missionDone(this); else baseReceive.call(this, type); };
-  momHome.skin = 'fn:momMission';
-  momHome.draw = function (c, t) {
-    baseDraw.call(this, c, t);
-    if (EX.mission ? !G.bag.includes(EX.mission) : MIS.cool > 0) return;
-    const y = this.y - 42 - Math.round(Math.abs(Math.sin(t * 3)) * 2);
-    px(c, this.x - 3, y - 1, 7, 10, '#ffd84a'); px(c, this.x - 1, y + 1, 2, 4, '#a8352b'); px(c, this.x - 1, y + 6, 2, 2, '#a8352b');
-  };
+  // semua Ibu, Bu Guru, Ayah, dan Kakak di tempat mana pun (rumah, kelas, kantor, gunung, pantai)
+  const givers = [];
+  Object.values(SCENES).forEach(S => S.objs.forEach(o => { if (MISSION_ASK[o.look] && o.tap && !givers.includes(o)) givers.push(o); }));
+  givers.forEach(p => {
+    const baseTap = p.tap, baseDraw = p.draw, baseReceive = p.receive;
+    p.tap = function () {
+      if (EX.mission && EX.missionBy === this.look) {
+        if (G.bag.includes(EX.mission)) { bagTake(EX.mission); missionDone(this); } else missionAsk(this);
+      } else if (!EX.mission && MIS.cool <= 0) {
+        const list = MISSION_ASK[this.look];
+        EX.mission = list[Math.floor(Math.random() * list.length)]; EX.missionBy = this.look; exSave(); missionUI(); missionAsk(this);
+      } else baseTap.call(this);
+    };
+    p.receive = function (type) { if (EX.mission && EX.missionBy === this.look && type === EX.mission) missionDone(this); else baseReceive.call(this, type); };
+    p.skin = 'fn:missionNpc';
+    p.draw = function (c, t) {
+      baseDraw.call(this, c, t);
+      if (!missionMark(this)) return;
+      const y = this.hit[1] - 11 - Math.round(Math.abs(Math.sin(t * 3)) * 2);
+      px(c, this.x - 3, y - 1, 7, 10, '#ffd84a'); px(c, this.x - 1, y + 1, 2, 4, '#a8352b'); px(c, this.x - 1, y + 6, 2, 2, '#a8352b');
+    };
+  });
   $('mission').addEventListener('click', () => { if (EX.mission) { Snd.init(); sfx('tap'); say([{ card: missionCard(EX.mission) }]); } });
   setInterval(() => { if (MIS.cool > 0) MIS.cool--; missionUI(); }, 1000);
 })();

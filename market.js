@@ -294,7 +294,7 @@ function roomRender() {
   const box = $('room-list'); box.innerHTML = '';
   if (!EX.room.owned.length) {
     const w = word('market');
-    box.innerHTML = `<div class="tile proc-btn"><img src="${stickerCanvas('market')}" alt=""><span class="tile-zh">${rubyHTML(w.zh, w.py)}</span></div><p class="shop-empty"><small>Belum ada hiasan. Beli di pasar desa dengan koin dari misi Ibu atau jual hasil kebun.</small></p>`;
+    box.innerHTML = `<div class="tile proc-btn"><img src="${stickerCanvas('market')}" alt=""><span class="tile-zh">${rubyHTML(w.zh, w.py)}</span></div><p class="shop-empty"><small>Belum ada hiasan. Beli di pasar desa dengan koin dari misi (Ibu, Bu Guru, Ayah, Kakak) atau jual hasil kebun.</small></p>`;
     return;
   }
   EX.room.owned.forEach(k => {
