@@ -105,9 +105,11 @@
     salon: ['M6 30 a6 6 0 1 0 12 0 a6 6 0 1 0 -12 0 Z M26 30 a6 6 0 1 0 12 0 a6 6 0 1 0 -12 0 Z', '#e5443a', 'M15 25 L32 4 M29 25 L12 4'],
     sushibar: ['M8 22 a14 9 0 1 0 28 0 a14 9 0 1 0 -28 0 Z', '#ffffff', 'M14 22 a8 5 0 1 0 16 0 a8 5 0 1 0 -16 0 M8 22 V30 Q22 40 36 30 V22'],
     church: ['M8 22 H36 V40 H8 Z M4 24 L22 12 L40 24 Z M17 4 H27 V16 H17 Z', '#ffffff', 'M22 0 V4 M19 40 V32 Q22 28 25 32 V40'],
+    newstreet: ['M6 18 H22 V38 H6 Z M24 22 H38 V38 H24 Z', '#f8b0c8', 'M34 4 V22 M18 4 H36 M20 4 V10 M10 38 V30 H18 V38', '#d9a020'],
+    airport: ['M4 24 L18 20 L22 8 L26 20 L40 24 L26 28 L24 36 L20 36 L18 28 Z', '#ffffff', 'M8 40 H36'],
   };
   const ROADS = [['mountain', 'farm'], ['home', 'farm'], ['farm', 'village'], ['village', 'school'], ['school', 'office'], ['village', 'beach'],
-    ['village', 'station'], ['village', 'salon'], ['office', 'workshop'], ['beach', 'sushibar'], ['school', 'carnival'], ['mountain', 'rocketbase'], ['village', 'church'], ['carnival', 'zoo']];
+    ['village', 'station'], ['village', 'salon'], ['office', 'workshop'], ['beach', 'sushibar'], ['school', 'carnival'], ['mountain', 'rocketbase'], ['village', 'church'], ['carnival', 'zoo'], ['farm', 'newstreet'], ['newstreet', 'airport']];
   const P = new Map(), path = d => { let p = P.get(d); if (!p) { p = new Path2D(d); P.set(d, p); } return p; };
   function mapArt(c, cur, t) {
     const cv = c.canvas;
@@ -132,7 +134,7 @@
     c.lineWidth = 3.4; c.strokeStyle = '#d9a960'; c.beginPath(); ROADS.forEach(([a, b]) => { c.moveTo(...S[a]); c.lineTo(...S[b]); }); c.stroke();
     c.lineWidth = 2.4; c.strokeStyle = '#f2cb8a'; c.stroke();
     // pohon kecil
-    [[44, 68], [76, 6], [118, 6], [44, 82], [78, 74], [154, 28], [8, 46]].forEach(([a, b]) => {
+    [[36, 72], [76, 6], [118, 6], [78, 74], [154, 28], [8, 46]].forEach(([a, b]) => {
       c.fillStyle = 'rgba(58,38,22,0.18)'; c.beginPath(); c.ellipse(a, b + 0.4, 2.6, 0.8, 0, 0, 7); c.fill();
       fill(`M${a - 0.6} ${b} V${b - 2.5} H${a + 0.6} V${b} Z`, '#9a5a2c', 0.15);
       const crown = new Path2D(); crown.arc(a, b - 4, 3, 0, 7); fill(crown, '#3fa83a', 0.2);

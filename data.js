@@ -446,6 +446,8 @@ const WORDS = {
   tamagoroll: ['玉子烧', 'yù zǐ shāo', 'telur gulung'],
   // Stasiun roket & bulan
   rocketbase: ['火箭站', 'huǒ jiàn zhàn', 'stasiun roket'],
+  newstreet: ['新街', 'xīn jiē', 'jalan baru'],
+  airport: ['机场', 'jī chǎng', 'bandara'],
   rocket: ['火箭', 'huǒ jiàn', 'roket'],
   astronaut: ['宇航员', 'yǔ háng yuán', 'astronot'],
   helmet: ['头盔', 'tóu kuī', 'helm'],

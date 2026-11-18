@@ -28,7 +28,7 @@ let SHADOW_TO = null;
 function shadow(c, x, y, rx) {
   const t = SHADOW_TO || c, ry = rx < 9 ? 1 : rx < 18 ? 2 : 3, cx = Math.round(x), cy = Math.round(y) - 1;
   t.fillStyle = 'rgba(30,45,20,0.24)';
-  for (let dy = -ry; dy <= ry; dy++) { const w = Math.round(rx * Math.sqrt(1 - (dy / (ry + 0.6)) ** 2)); t.fillRect(cx - w, cy + dy, w * 2 + 1, 1); }
+  for (let dy = -ry; dy <= ry; dy++) { const w = Math.round(rx * Math.sqrt(1 - (dy / (ry + 0.6)) ** 2)); t.fillRect((cx - w) * PX, (cy + dy) * PX, (w * 2 + 1) * PX, PX); }
 }
 function shadowRect(c, x, y, w, h) { const t = SHADOW_TO || c; t.fillStyle = 'rgba(30,45,20,0.2)'; t.fillRect(Math.round(x), Math.round(y), w, h); }
 function rng(seed) {

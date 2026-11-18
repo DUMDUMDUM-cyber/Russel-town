@@ -409,12 +409,14 @@ SCENES.home = (() => {
       px(c, 10, 100, 54, 6, PAL.woodD); px(c, 10, 100, 54, 1, PAL.wood);
     },
     tap() { sfx('tap'); },
-    arrive() {
-      if (G.boy.inBed) return;
-      G.boy.inBed = true; G.boy.hidden = true; G.sleepT = 0; G.sleepStep = 0;
-      sfx('yawn');
-      say([{ k: 'sleepy' }, { k: 'sleep' }, { k: 'goodnight', by: mom }]);
-    },
+    // rutinitas mandi → sikat gigi → piyama → cerita → lampu → selamat malam (care.js), lalu tidur sungguhan
+    arrive() { if (G.boy.inBed) return; if (window.bdOpen && BUILD.bedtime) bdOpen('bedtime'); else homeSleep(); },
+  };
+  window.homeSleep = () => {
+    if (G.boy.inBed || G.scene !== S) return;
+    G.boy.inBed = true; G.boy.hidden = true; G.sleepT = 0; G.sleepStep = 0;
+    sfx('yawn');
+    say([{ k: 'sleepy' }, { k: 'sleep' }, { k: 'goodnight', by: mom }]);
   };
   S.objs.push(bed);
   S.update = dt => {

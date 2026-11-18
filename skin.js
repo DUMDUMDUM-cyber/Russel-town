@@ -137,7 +137,9 @@ const Skin = (() => {
   const INHERIT = ['fill', 'fill-opacity', 'fill-rule', 'stroke', 'stroke-width', 'stroke-opacity', 'stroke-linejoin', 'stroke-linecap', 'stroke-dasharray'];
 
   const X = { on: true, ctx: null, K: 4, RS: 1, drew: false, missing: new Set() };
-  try { X.on = localStorage.getItem('anan-skin-off') !== '1'; } catch (e) {}
+  // bawaan: gambar kotak-kotak lama (Russel lebih suka); gaya baru hanya bila dinyalakan di Pengaturan
+  X.on = false;
+  try { X.on = localStorage.getItem('anan-skin2') === '1'; } catch (e) {}
 
   // ---------- Konteks kosong: gambar piksel lama tidak muncul, tapi ketahuan kalau ada ----------
   let pxHit = false;
@@ -1638,6 +1640,6 @@ const Skin = (() => {
       X.waitT = (X.waitT || 0) + 1;
       return X.waitT < 90;
     },
-    set(on) { X.on = !!on; try { localStorage.setItem('anan-skin-off', on ? '0' : '1'); } catch (e) {} G.bgDirty = true; },
+    set(on) { X.on = !!on; try { localStorage.setItem('anan-skin2', on ? '1' : '0'); } catch (e) {} G.bgDirty = true; },
   });
 })();

@@ -28,7 +28,7 @@ function panelFrame(dt) {
   if (G.panel === 'flower') flowerDraw(dt);
   if (G.panel === 'mirror') mirrorDraw(dt);
   if (G.panel === 'count') countDraw(dt);
-  if (G.panel === 'map') { PX = 2; try { drawMap(MP.ctx, { classroom: 'school', barn: 'farm', trainride: 'station', moon: 'rocketbase' }[G.scene.id] || G.scene.id, G.t); if (window.mapExtra) mapExtra(MP.ctx, G.t); } finally { PX = 1; } }
+  if (G.panel === 'map') { PX = 2; try { drawMap(MP.ctx, { classroom: 'school', barn: 'farm', trainride: 'station', moon: 'rocketbase', garage: 'newstreet', carpentry: 'newstreet', toyshop: 'newstreet', vet: 'zoo' }[G.scene.id] || G.scene.id, G.t); if (window.mapExtra) mapExtra(MP.ctx, G.t); } finally { PX = 1; } }
 }
 function cvPoint(c, e) { const r = c.getBoundingClientRect(); return [(e.clientX - r.left) / r.width * c.width, (e.clientY - r.top) / r.height * c.height]; }
 function tile(key, opts = {}) {
