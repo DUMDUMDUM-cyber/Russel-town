@@ -10,7 +10,9 @@ const Snd = {
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return;
     // iPhone/iPad: tanpa ini musik ikut dibisukan oleh tombol senyap, padahal suara tokoh (TTS) tetap terdengar
-    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; else this.unlockIOS(); } catch (e) {}
+    // Dua cara sekaligus: audioSession (iOS 17+) dan audio HTML senyap (iOS lama, juga menjaga sesi tetap "playback" setelah TTS)
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+    try { this.unlockIOS(); } catch (e) {}
     const c = this.ctx = new AC();
     c.onstatechange = () => { if (c.state !== 'running' && !document.hidden) setTimeout(() => this.wake(), 300); };
     this.master = c.createGain(); this.master.gain.value = 0.9; this.master.connect(c.destination);
@@ -61,9 +63,25 @@ const Snd = {
   },
 
   // Lanjutkan suara yang berhenti sendiri (iOS menghentikannya setelah telepon, notifikasi, atau suara TTS)
-  wake() {
+  // gesture = dipanggil dari sentuhan; iPhone hanya mengizinkan menyalakan suara dari sentuhan
+  wake(gesture) {
     const c = this.ctx;
-    if (c && c.state !== 'running' && !document.hidden) c.resume().catch(() => {});
+    if (!c || document.hidden) return;
+    try { if (navigator.audioSession && navigator.audioSession.type !== 'playback') navigator.audioSession.type = 'playback'; } catch (e) {}
+    if (gesture && this.keepAlive && this.keepAlive.paused) this.keepAlive.play().catch(() => {});
+    if (c.state === 'running') { this.tryT = 0; return; }
+    const now = performance.now(), speaking = window.speechSynthesis && speechSynthesis.speaking;
+    // iPhone kadang macet "interrupted" setelah TTS: bila sentuhan sebelumnya (>1 dtk lalu) gagal, buat ulang mesin suaranya
+    if (gesture && this.tryT && now - this.tryT > 1000 && !speaking) { this.tryT = 0; this.rebuild(); return; }
+    if (gesture && !this.tryT) this.tryT = now;
+    c.resume().then(() => { if (c.state === 'running') this.tryT = 0; }).catch(() => {});
+  },
+  rebuild() {
+    const old = this.ctx;
+    clearTimeout(this.timer);
+    this.ctx = null;
+    try { old.onstatechange = null; old.close(); } catch (e) {}
+    this.init();
   },
   // iOS lama (belum punya navigator.audioSession): audio HTML senyap yang diputar berulang
   // membuat iPhone memperlakukan game seperti pemutar musik, jadi tombol senyap tidak membisukannya
@@ -225,7 +243,7 @@ const VOICE_ROLE = {
 const MALE_VOICE = /\bmale\b|yunxi|yunyang|yunjian|yunxia|kangkang|keita|daichi|naoki|ichiro|otoya|hattori|guy|david|mark|davis|tony|andrew|brian|christopher|eric|roger|steffan|alex|daniel|fred|aaron|arthur/i;
 
 // Setiap sentuhan menghidupkan lagi musik yang dihentikan iPhone/iPad (setelah telepon, notifikasi, atau TTS)
-['pointerup', 'touchend', 'keydown'].forEach(ev => document.addEventListener(ev, () => Snd.wake(), { capture: true, passive: true }));
+['pointerdown', 'pointerup', 'touchend', 'click', 'keydown'].forEach(ev => document.addEventListener(ev, () => Snd.wake(ev !== 'pointerdown'), { capture: true, passive: true }));
 
 // Suara Mandarin / English / Jepang memakai mesin suara perangkat (Web Speech).
 const Talk = {
@@ -292,7 +310,7 @@ const Talk = {
 
   one(text, lang, tok, done, who) {
     let fired = false, tm;
-    const fin = () => { if (fired) return; fired = true; clearTimeout(tm); if (tok === this.token) setTimeout(done, 220); };
+    const fin = () => { if (fired) return; fired = true; clearTimeout(tm); Snd.wake(); if (tok === this.token) setTimeout(done, 220); };
     const est = 600 + text.length * ({ zh: 430, en: 75, ja: 230 }[lang] || 90);
     if (this.supported && !this.main) this.pick();
     const role = (lang !== 'id' && VOICE_ROLE[who]) || {};

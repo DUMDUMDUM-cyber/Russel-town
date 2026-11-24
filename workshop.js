@@ -410,7 +410,7 @@ SCENES.workshop = (() => {
     },
     update(dt) {
       this.t0 += dt * 0.35;
-      const nx = 190 + Math.sin(this.t0) * 66;
+      const nx = 160 + Math.sin(this.t0) * 36;
       this.dir = nx > this.x ? 1 : -1; this.x = nx; this.y = 142 + Math.sin(this.t0 * 2.3) * 8;
     },
     tap() { sfx('chime'); say([{ k: 'robot' }]); fx('note', this.x, this.y - 12, 1); } });
