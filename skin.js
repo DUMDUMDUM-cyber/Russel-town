@@ -1296,12 +1296,13 @@ const Skin = (() => {
     const s = G.scene, t = G.t, c = X.ctx, K = X.K;
     const b = cur = build(s.id);
     G.bgDirty = false;
-    c.setTransform(1, 0, 0, 1, 0, 0);
+    // kamera (game.js): perbesar z kali dan geser ke bagian yang terlihat
+    const kz = K * CAM.z, ox = -CAM.x * kz, oy = -CAM.y * kz;
+    c.setTransform(kz, 0, 0, kz, ox, oy);
     c.imageSmoothingEnabled = true;
-    if (b.bg.ok) { c.drawImage(b.bg.img, 0, 0, cv.width, cv.height); lastBg = { id: s.id, e: b.bg }; }
-    else if (lastBg && lastBg.id === s.id) c.drawImage(lastBg.e.img, 0, 0, cv.width, cv.height);
-    else { c.fillStyle = '#62c24a'; c.fillRect(0, 0, cv.width, cv.height); }
-    c.setTransform(K, 0, 0, K, 0, 0);
+    if (b.bg.ok) { c.drawImage(b.bg.img, 0, 0, W, H); lastBg = { id: s.id, e: b.bg }; }
+    else if (lastBg && lastBg.id === s.id) c.drawImage(lastBg.e.img, 0, 0, W, H);
+    else { c.fillStyle = '#62c24a'; c.fillRect(0, 0, W, H); }
     SHADOW_TO = null;
     late = [];
     for (const o of s.objs) if (o.flat && !o.hidden) drawObj(o, t);
