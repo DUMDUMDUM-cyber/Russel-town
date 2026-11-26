@@ -10,16 +10,16 @@ const G = {
 const SAVE_KEY = 'anan-village-v1';
 G.bag = []; G.giving = null; G.hd = true; G.cardPos = null; G.hudOff = false; G.cardOff = false;
 // smooth: 2 = halus (xBR), 1 = dihaluskan sedikit (seperti dulu), 0 = kotak-kotak asli. zoomLv: indeks ZOOMS.
-G.smooth = 2; G.zoomLv = 2;
+G.smooth = 2; G.zoomLv = 2; G.eco = false;
 const ZOOMS = [1, 1.25, 1.5];
-function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ outfit: G.outfit, music: Snd.on, alsoId: Talk.alsoId, bag: G.bag, hd: G.hd, smooth: G.smooth, zoomLv: G.zoomLv, cardPos: G.cardPos, hudOff: G.hudOff, cardOff: G.cardOff, lang: LANG })); } catch (e) {} }
+function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ outfit: G.outfit, music: Snd.on, alsoId: Talk.alsoId, bag: G.bag, hd: G.hd, smooth: G.smooth, zoomLv: G.zoomLv, eco: G.eco, cardPos: G.cardPos, hudOff: G.hudOff, cardOff: G.cardOff, lang: LANG })); } catch (e) {} }
 (function load() {
   try {
     const d = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null');
     if (d) {
       Object.assign(G.outfit, d.outfit || {}); Snd.on = d.music !== false; Talk.alsoId = !!d.alsoId;
       G.bag = (d.bag || []).filter(k => ITEMS[k]).slice(0, 8); G.hd = d.hd !== false;
-      G.smooth = d.smooth != null ? d.smooth : (G.hd ? 2 : 0); G.zoomLv = d.zoomLv != null ? d.zoomLv : 2; G.cardPos = d.cardPos || null; G.hudOff = !!d.hudOff; G.cardOff = !!d.cardOff;
+      G.smooth = d.smooth != null ? d.smooth : (G.hd ? 2 : 0); G.zoomLv = d.zoomLv != null ? d.zoomLv : 2; G.eco = !!d.eco; G.cardPos = d.cardPos || null; G.hudOff = !!d.hudOff; G.cardOff = !!d.cardOff;
     }
   } catch (e) {}
 })();
@@ -42,20 +42,31 @@ let hdLevel = 2, perfN = 0, perfSum = 0;
 // ---------- Kamera ----------
 // Layar memperlihatkan sebagian tempat (W/z × H/z) yang bergeser pelan mengikuti Russel.
 // Saat Russel tidak terlihat (tidur, menyetir, terbang) kamera mundur memperlihatkan seluruh tempat.
-const CAM = { z: 1, x: 0, y: 0, snap: true };
+// Kamera selalu berhenti di piksel bulat dan bergeser bersama Russel (bukan menyusul pelan-pelan),
+// jadi Russel dan latar bergerak serempak tanpa getar. Selama Russel di area tengah, kamera diam.
+const CAM = { z: 1, x: 0, y: 0, snap: true, fx: 0, fy: 0, want: 1 };
 function camUpdate(dt) {
   const b = G.boy, s = G.scene;
-  const want = (b.hidden || (s && s.noZoom)) ? 1 : ZOOMS[G.zoomLv] || 1;
-  CAM.z = CAM.snap ? want : CAM.z + (want - CAM.z) * (1 - Math.exp(-dt * 3));
-  if (Math.abs(CAM.z - want) < 0.002) CAM.z = want;
-  const vw = W / CAM.z, vh = H / CAM.z;
-  // sedikit condong ke tengah tempat supaya benda tinggi (jerapah, rumah) tidak terpotong
-  const fy = (b.y - 14) * 0.7 + H / 2 * 0.3;
-  const tx = Math.max(0, Math.min(W - vw, b.x - vw / 2)), ty = Math.max(0, Math.min(H - vh, fy - vh / 2));
-  if (CAM.snap) { CAM.x = tx; CAM.y = ty; CAM.snap = false; return; }
-  const k = 1 - Math.exp(-dt * 3.2);
-  CAM.x += (tx - CAM.x) * k; CAM.y += (ty - CAM.y) * k;
-  CAM.x = Math.max(0, Math.min(W - vw, CAM.x)); CAM.y = Math.max(0, Math.min(H - vh, CAM.y));
+  const want = CAM.want = (b.hidden || (s && s.noZoom)) ? 1 : ZOOMS[G.zoomLv] || 1;
+  CAM.z = CAM.snap ? want : CAM.z + (want - CAM.z) * (1 - Math.exp(-dt * 4));
+  if (Math.abs(CAM.z - want) < 0.004) CAM.z = want;
+  const vw = W / CAM.z, vh = H / CAM.z, mx = Math.max(0, Math.floor(W - vw)), my = Math.max(0, Math.floor(H - vh));
+  // titik yang diikuti: posisi Russel yang digambar, sedikit condong ke tengah tempat supaya benda tinggi tidak terpotong
+  const bx = Math.round(b.x), by = Math.round((b.y - 14) * 0.7 + H / 2 * 0.3);
+  if (CAM.snap) { CAM.fx = bx - vw / 2; CAM.fy = by - vh / 2; CAM.snap = false; }
+  else if (CAM.z !== want) {
+    // sedang mendekat/menjauh: titik tengah meluncur halus ke Russel
+    const k = 1 - Math.exp(-dt * 5);
+    CAM.fx += (bx - vw / 2 - CAM.fx) * k; CAM.fy += (by - vh / 2 - CAM.fy) * k;
+  } else {
+    const dx = vw * 0.12, dy = vh * 0.1, cx = CAM.fx + vw / 2, cy = CAM.fy + vh / 2;
+    if (bx > cx + dx) CAM.fx = bx - dx - vw / 2; else if (bx < cx - dx) CAM.fx = bx + dx - vw / 2;
+    if (by > cy + dy) CAM.fy = by - dy - vh / 2; else if (by < cy - dy) CAM.fy = by + dy - vh / 2;
+  }
+  CAM.fx = Math.max(0, Math.min(W - vw, CAM.fx)); CAM.fy = Math.max(0, Math.min(H - vh, CAM.fy));
+  // saat zoom sudah tetap, posisi dibulatkan ke piksel dunia
+  if (CAM.z === want) { CAM.x = Math.min(mx, Math.round(CAM.fx)); CAM.y = Math.min(my, Math.round(CAM.fy)); }
+  else { CAM.x = CAM.fx; CAM.y = CAM.fy; }
 }
 // titik dunia → titik layar (satuan 0..W, 0..H)
 function camPt(x, y) { return [(x - CAM.x) * CAM.z, (y - CAM.y) * CAM.z]; }
@@ -107,9 +118,15 @@ function xbrFrame(src) {
 }
 function present() {
   const z = CAM.z, vx = CAM.x, vy = CAM.y, vw = W / z, vh = H / z, OW = cv.width, OH = cv.height;
-  document.documentElement.classList.toggle('px-raw', G.smooth === 0);
-  if (G.smooth === 0) { outCtx.imageSmoothingEnabled = false; outCtx.drawImage(lo, vx, vy, vw, vh, 0, 0, OW, OH); return; }
-  const t0 = performance.now();
+  const raw = G.smooth === 0 || hdLevel === 0;
+  if (present.raw !== raw) { present.raw = raw; document.documentElement.classList.toggle('px-raw', raw); }
+  if (raw) {
+    outCtx.imageSmoothingEnabled = false; outCtx.drawImage(lo, vx, vy, vw, vh, 0, 0, OW, OH);
+    // perangkat sangat lambat yang sudah turun ke gambar asli: sesekali dicoba naik lagi
+    if (G.smooth && ++perfN >= 600 && hdUps < 2) { hdLevel = 1; hdUps++; perfN = 0; perfSum = 0; }
+    return;
+  }
+  const t0 = performance.now(), wasAll = G.smooth === 2 && xb.all;
   const src = new Uint32Array(ctx.getImageData(0, 0, W, H).data.buffer);
   if (G.smooth === 1) {
     xb.all = true;
@@ -120,30 +137,34 @@ function present() {
       const k = hdLevel === 2 ? 4 : 2;
       let c = midCv;
       if (hdLevel === 2) { hiSize(W * 4, H * 4); hiCtx.putImageData(outImg, 0, 0); c = hiCv; } else midCtx.putImageData(midImg, 0, 0);
-      outCtx.imageSmoothingEnabled = z !== 1; outCtx.imageSmoothingQuality = 'high';
+      outCtx.imageSmoothingEnabled = z !== 1; outCtx.imageSmoothingQuality = 'low';
       outCtx.drawImage(c, vx * k, vy * k, vw * k, vh * k, 0, 0, OW, OH);
     }
   } else {
     // xBR dua kali (4×) lalu bagian yang terlihat diperbesar halus ke layar
     const k = xbrFrame(src);
-    outCtx.imageSmoothingEnabled = true; outCtx.imageSmoothingQuality = 'high';
+    outCtx.imageSmoothingEnabled = true; outCtx.imageSmoothingQuality = 'low';
     outCtx.drawImage(hiCv, vx * k, vy * k, vw * k, vh * k, 0, 0, OW, OH);
   }
-  perfSum += performance.now() - t0;
-  // perangkat lambat turun ke 2×; bila ternyata cepat, dicoba naik lagi (paling banyak 2 kali)
-  if (++perfN === 90) {
+  const dtp = performance.now() - t0;
+  perfSum += dtp;
+  // Bila penghalus terlalu berat, turun: 4× → 2× → gambar asli. Bila ternyata ringan, dicoba naik lagi (paling banyak 2 kali).
+  // Satu bingkai yang sangat lama (bukan karena pindah tempat) langsung dihitung juga.
+  if (dtp > 50 && !wasAll && perfN > 5) { perfSum = 1e9; perfN = 59; }
+  if (++perfN >= 60) {
     const a = perfSum / perfN;
-    if (hdLevel === 2 && a > 12) hdLevel = 1;
-    else if (hdLevel === 1 && a < 3 && hdUps < 2) { hdLevel = 2; hdUps++; }
+    if (a > 7 && hdLevel > 0) { hdLevel--; xb.all = true; }
+    else if (a < 2.5 && hdLevel < 2 && hdUps < 2) { hdLevel++; hdUps++; xb.all = true; }
     perfN = 0; perfSum = 0;
   }
 }
 const bgCv = document.createElement('canvas'); bgCv.width = W; bgCv.height = H;
-const bgCtx = bgCv.getContext('2d');
+// kanvas kecil dunia semuanya di memori biasa (bukan kartu grafis) supaya tidak bolak-balik dibaca tiap bingkai
+const bgCtx = bgCv.getContext('2d', { willReadFrequently: true });
 const layer = document.createElement('canvas'); layer.width = W; layer.height = H;
-const lctx = layer.getContext('2d');
+const lctx = layer.getContext('2d', { willReadFrequently: true });
 const sil = document.createElement('canvas'); sil.width = W; sil.height = H;
-const sctx = sil.getContext('2d');
+const sctx = sil.getContext('2d', { willReadFrequently: true });
 const $ = id => document.getElementById(id);
 
 // ---------- Ān'ān & Dòudou ----------
@@ -493,10 +514,11 @@ function updateBubbles() {
     if (G.t > b.until || G.panel) { b.el.remove(); bubbles.splice(i, 1); continue; }
     const tall = b.who === G.boy || (b.who.look && LOOKS[b.who.look].kid) ? 29 : 36;
     const [sx, sy] = camPt(b.who.x, b.who.y - tall);
-    b.el.style.left = (sx / W * 100) + '%';
-    b.el.style.top = (sy / H * 100) + '%';
+    const l = (sx / W * 100).toFixed(2) + '%', tp = (sy / H * 100).toFixed(2) + '%';
+    if (b.l !== l) { b.el.style.left = b.l = l; }
+    if (b.tp !== tp) { b.el.style.top = b.tp = tp; }
   }
-  placeChoice();
+  if (!$('choice').hidden) placeChoice();
 }
 
 // list: [{ k: kunci kata } | { card, zh } , opsional by: siapa yang bicara]
@@ -680,7 +702,11 @@ function render(dt) {
   present();
 }
 
+// Supaya HP tidak cepat panas: paling banyak 60 gambar/detik saat ada yang bergerak (Russel berjalan, kamera, pindah tempat),
+// dan 30 gambar/detik saat Russel diam. Mode "Hemat baterai" selalu 30 gambar/detik.
 function frame(now) {
+  const b0 = G.boy, busy = !G.eco && (b0.moving || b0.ride || G.fadeDir || G.panel || CAM.z !== CAM.want || b0.jumpH);
+  if (frame.last && now - frame.last < (busy ? 1000 / 60 : 1000 / 30) - 3) { requestAnimationFrame(frame); return; }
   const dt = Math.min(0.05, (now - (frame.last || now)) / 1000);
   frame.last = now;
   G.t += dt;

@@ -434,14 +434,15 @@ function joinPy(py) {
   });
   $('word-total').textContent = Object.keys(WORDS).length;
 })();
-function syncParentSettings() { $('set-music').checked = Snd.on; $('set-id').checked = Talk.alsoId; $('set-zoom').value = String(G.zoomLv); $('set-smooth').value = String(G.smooth); $('set-lang').value = LANG; $('set-skin').checked = typeof Skin !== 'undefined' && Skin.on; $('set-card').checked = !G.cardOff; }
+function syncParentSettings() { $('set-music').checked = Snd.on; $('set-id').checked = Talk.alsoId; $('set-zoom').value = String(G.zoomLv); $('set-eco').checked = !!G.eco; $('set-smooth').value = String(G.smooth); $('set-lang').value = LANG; $('set-skin').checked = typeof Skin !== 'undefined' && Skin.on; $('set-card').checked = !G.cardOff; }
 // ganti bahasa: simpan lalu muat ulang supaya semua kata, tombol, lagu, dan cerita ikut berganti
 $('set-lang').addEventListener('change', e => {
   LANG = ['en', 'ja'].includes(e.target.value) ? e.target.value : 'zh'; save();
   Talk.cancel(); location.reload();
 });
 $('set-zoom').addEventListener('change', e => { G.zoomLv = +e.target.value; save(); });
-$('set-smooth').addEventListener('change', e => { G.smooth = +e.target.value; G.hd = G.smooth > 0; hdLevel = 2; perfN = 0; perfSum = 0; save(); });
+$('set-eco').addEventListener('change', e => { G.eco = e.target.checked; save(); });
+$('set-smooth').addEventListener('change', e => { G.smooth = +e.target.value; G.hd = G.smooth > 0; hdLevel = 2; hdUps = 0; perfN = 0; perfSum = 0; xb.all = true; save(); });
 $('set-skin').addEventListener('change', e => { if (typeof Skin !== 'undefined') Skin.set(e.target.checked); });
 $('set-card').addEventListener('change', e => { G.cardOff = !e.target.checked; if (G.cardOff) $('card').hidden = true; save(); });
 $('card-reset').addEventListener('click', () => { G.cardPos = null; placeCard(); save(); sfx('pop'); });
