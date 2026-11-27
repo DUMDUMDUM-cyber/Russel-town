@@ -42,7 +42,7 @@ refit();
   document.querySelector('#p-parent .settings').appendChild(p);
   const show = () => {
     const b = $('box').getBoundingClientRect(), vv = window.visualViewport;
-    p.textContent = `Versi d386931f01 · layar ${innerWidth}×${innerHeight}` + (vv ? ` · terlihat ${Math.round(vv.width)}×${Math.round(vv.height)}` : '') +
+    p.textContent = `Versi 66a6eb2ece · layar ${innerWidth}×${innerHeight}` + (vv ? ` · terlihat ${Math.round(vv.width)}×${Math.round(vv.height)}` : '') +
       ` · game ${Math.round(b.width)}×${Math.round(b.height)} mulai y ${Math.round(b.top)}`;
   };
   setInterval(() => { if (G.panel === 'parent') show(); }, 1000);

@@ -841,7 +841,7 @@ function fitPlace() {
 
 // ---------- Mulai ----------
 function start() {
-  Snd.init(); Talk.pick();
+  Snd.init(); Talk.pick(); Talk.warm();
   $('title').hidden = true;
   G.started = true;
   setTimeout(() => {

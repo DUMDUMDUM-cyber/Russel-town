@@ -291,7 +291,11 @@ const Talk = {
   // items: [{ zh, id, onStart }]
   say(items, done) {
     const tok = ++this.token;
-    if (this.supported) speechSynthesis.cancel();
+    // iPhone: memanggil cancel() saat tidak ada yang bicara, lalu langsung speak(), kadang membuat suara telat.
+    // Jadi cancel hanya bila memang sedang bicara, dan kalau tidak ada yang dihentikan, kalimat pertama langsung dimulai
+    // (masih di dalam sentuhan, jadi iPhone tidak menahannya).
+    const busy = this.supported && (speechSynthesis.speaking || speechSynthesis.pending);
+    if (busy) speechSynthesis.cancel();
     if (this.audio) { this.audio.pause(); this.audio = null; }
     let i = 0;
     const next = () => {
@@ -305,7 +309,16 @@ const Talk = {
       else this.one(it.zh, LANG, tok, after, it.who);
     };
     Snd.duck(true);
-    setTimeout(next, this.supported ? 60 : 0);
+    if (busy || !items.length) setTimeout(next, 60); else next();
+  },
+  // Pemanasan saat tombol main ditekan: suara utama & suara laki-laki dimuat sekali dengan kalimat senyap,
+  // supaya saat Russel menyapa Paman suaranya tidak telat karena baru dimuat.
+  warm() {
+    if (!this.supported || this.warmed) return;
+    if (!this.main) this.pick();
+    const vs = [this.main, this.male && this.male[LANG]].filter((v, i, a) => v && a.indexOf(v) === i);
+    this.warmed = vs.length > 0;
+    vs.forEach(v => { const u = new SpeechSynthesisUtterance(' '); u.voice = v; u.lang = v.lang; u.volume = 0; u.rate = 2; speechSynthesis.speak(u); });
   },
 
   one(text, lang, tok, done, who) {
@@ -324,7 +337,20 @@ const Talk = {
     u.rate = ({ zh: 0.78, en: 0.82, ja: 0.85 }[lang] || 0.95) * (role.rate || 1);
     u.pitch = role.pitch || 1.1;
     u.onend = fin; u.onerror = fin;
+    // iPhone kadang menahan antrean suara (macet "paused"): resume dulu, dan bila suara belum mulai
+    // dalam 1,2 detik, antrean dibersihkan lalu kalimat diucapkan ulang sekali.
+    let started = false;
+    u.onstart = () => { started = true; };
+    try { speechSynthesis.resume(); } catch (e) {}
     speechSynthesis.speak(u);
+    setTimeout(() => {
+      if (started || fired || tok !== this.token) return;
+      u.onend = u.onerror = u.onstart = null;
+      try { speechSynthesis.cancel(); } catch (e) {}
+      const u2 = new SpeechSynthesisUtterance(text);
+      u2.lang = u.lang; u2.voice = v; u2.rate = u.rate; u2.pitch = u.pitch; u2.onend = fin; u2.onerror = fin;
+      speechSynthesis.speak(u2);
+    }, 1200);
   },
 };
 
