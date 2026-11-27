@@ -50,8 +50,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid var(--sun); outli
   background: radial-gradient(ellipse at 50% 40%, var(--bg2), var(--bg) 70%);
 }
 #box { position: relative; width: 320px; height: 180px; border-radius: calc(var(--u) * 0.8); overflow: hidden; box-shadow: 0 0 0 calc(var(--u) * 0.5) var(--wood-d), 0 calc(var(--u) * 1.5) calc(var(--u) * 4) rgba(0,0,0,0.5); }
-#game { display: block; width: 100%; height: 100%; image-rendering: auto; touch-action: none; }
-:root.px-raw #game { image-rendering: pixelated; image-rendering: crisp-edges; }
+#game { display: block; width: 100%; height: 100%; image-rendering: pixelated; image-rendering: crisp-edges; touch-action: none; }
 canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
 
 /* Tombol papan kayu */
@@ -921,21 +920,7 @@ ruby.ja rt { font-family: var(--lat); font-weight: 700; letter-spacing: 0; }
           <label><input type="checkbox" id="set-id"> Ucapkan juga arti dalam Bahasa Indonesia</label>
           <label><input type="checkbox" id="set-card"> Tampilkan kartu kata (tulisan, pinyin, dan arti di bawah layar)</label>
           <label><input type="checkbox" id="set-skin"> Gambar gaya baru seperti buku cerita (matikan untuk kembali ke gambar kotak-kotak lama)</label>
-          <label><input type="checkbox" id="set-eco"> Hemat baterai: HP tidak cepat panas (gerakan sedikit kurang mulus)</label>
-          <label>Kamera
-            <select id="set-zoom">
-              <option value="2">Dekat: gambar besar, kamera mengikuti Russel</option>
-              <option value="1">Sedang</option>
-              <option value="0">Jauh: seluruh tempat terlihat (seperti dulu)</option>
-            </select>
-          </label>
-          <label>Kehalusan gambar kotak-kotak
-            <select id="set-smooth">
-              <option value="2">Halus: tepi bulat dan rapi</option>
-              <option value="1">Sedikit dihaluskan (seperti dulu)</option>
-              <option value="0">Kotak-kotak asli (paling ringan untuk perangkat lambat)</option>
-            </select>
-          </label>
+          <label><input type="checkbox" id="set-hd"> Gambar kotak-kotak lama dihaluskan (matikan jika perangkat terasa lambat)</label>
           <button id="card-reset" type="button" class="link-btn">Kembalikan kartu kata ke posisi awal</button>
           <label>Hari raya
             <select id="set-fest">

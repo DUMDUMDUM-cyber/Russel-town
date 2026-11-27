@@ -101,63 +101,6 @@ function epx(s, d, w, h) {
     }
   }
 }
-// xBR 2× (algoritme Hyllian): garis miring & lengkung dihaluskan dengan campuran warna,
-// sudut kotak tetap rapi. d berukuran 2w × 2h; bisa hanya mengolah sebagian (rx, ry, rw, rh) lalu menulis di tempatnya.
-let XB_Y = null, XB_U = null, XB_V = null, XB_CX = new Int32Array(64);
-const XB_O = [0, 0, 0, 0];
-function xbrDf(a, b) { return 48 * Math.abs(XB_Y[a] - XB_Y[b]) + 7 * Math.abs(XB_U[a] - XB_U[b]) + 6 * Math.abs(XB_V[a] - XB_V[b]); }
-function xbrMix(a, b, w) {
-  const iw = 256 - w;
-  return ((((a >>> 24) * iw + (b >>> 24) * w) >> 8) << 24) | (((((a >>> 16) & 255) * iw + ((b >>> 16) & 255) * w) >> 8) << 16)
-    | (((((a >>> 8) & 255) * iw + ((b >>> 8) & 255) * w) >> 8) << 8) | (((a & 255) * iw + (b & 255) * w) >> 8);
-}
-function xbrCorner(s, E, I, H, F, G, C, D, B, F4, I4, H5, I5, n3, n2, n1) {
-  const pe = s[E], ph = s[H], pf = s[F];
-  if (pe === ph || pe === pf) return;
-  const e = xbrDf(E, C) + xbrDf(E, G) + xbrDf(I, H5) + xbrDf(I, F4) + 4 * xbrDf(H, F);
-  const i = xbrDf(H, D) + xbrDf(H, I5) + xbrDf(F, I4) + xbrDf(F, B) + 4 * xbrDf(E, I);
-  const pi = s[I], pb = s[B], pd = s[D], pg = s[G], pc = s[C];
-  if (e < i && ((pf !== pb && ph !== pd) || (pe === pi && pf !== s[I4] && ph !== s[I5]) || pe === pg || pe === pc)) {
-    const ke = xbrDf(F, G), ki = xbrDf(H, C);
-    const px = xbrDf(E, F) <= xbrDf(E, H) ? pf : ph;
-    const L = ke * 2 <= ki && pe !== pg && pd !== pg, U = ke >= ki * 2 && pe !== pc && pb !== pc;
-    if (L && U) { XB_O[n3] = xbrMix(XB_O[n3], px, 224); XB_O[n2] = xbrMix(XB_O[n2], px, 64); XB_O[n1] = XB_O[n2]; }
-    else if (L) { XB_O[n3] = xbrMix(XB_O[n3], px, 192); XB_O[n2] = xbrMix(XB_O[n2], px, 64); }
-    else if (U) { XB_O[n3] = xbrMix(XB_O[n3], px, 192); XB_O[n1] = xbrMix(XB_O[n1], px, 64); }
-    else XB_O[n3] = xbrMix(XB_O[n3], px, 128);
-  } else if (e <= i) XB_O[n3] = xbrMix(XB_O[n3], xbrDf(E, F) <= xbrDf(E, H) ? pf : ph, 64);
-}
-function xbr2x(s, d, w, h, rx = 0, ry = 0, rw = w, rh = h) {
-  if (!XB_Y || XB_Y.length < w * h) { XB_Y = new Float32Array(w * h); XB_U = new Float32Array(w * h); XB_V = new Float32Array(w * h); }
-  const x0 = Math.max(0, rx - 2), x1 = Math.min(w - 1, rx + rw + 1), y0 = Math.max(0, ry - 2), y1 = Math.min(h - 1, ry + rh + 1);
-  for (let y = y0; y <= y1; y++) for (let x = x0, k = y * w + x0; x <= x1; x++, k++) {
-    const v = s[k], r = v & 255, g = (v >>> 8) & 255, b = (v >>> 16) & 255;
-    XB_Y[k] = 0.299 * r + 0.587 * g + 0.114 * b; XB_U[k] = -0.169 * r - 0.331 * g + 0.5 * b; XB_V[k] = 0.5 * r - 0.419 * g - 0.081 * b;
-  }
-  if (XB_CX.length < rw + 4) XB_CX = new Int32Array(rw + 4);
-  const cx = XB_CX, dw = w * 2, cl = (v, m) => v < 0 ? 0 : v > m ? m : v;
-  for (let k = 0; k < rw + 4; k++) cx[k] = cl(rx + k - 2, w - 1);
-  for (let y = 0; y < rh; y++) {
-    const yy = ry + y, rm2 = cl(yy - 2, h - 1) * w, rm1 = cl(yy - 1, h - 1) * w, r0 = yy * w, r1 = cl(yy + 1, h - 1) * w, r2 = cl(yy + 2, h - 1) * w;
-    const o0 = yy * 2 * dw + rx * 2, o1 = o0 + dw;
-    for (let x = 0; x < rw; x++) {
-      const xm2 = cx[x], xm1 = cx[x + 1], xc = cx[x + 2], xp1 = cx[x + 3], xp2 = cx[x + 4];
-      const E = r0 + xc, pe = s[E];
-      XB_O[0] = XB_O[1] = XB_O[2] = XB_O[3] = pe;
-      const A = rm1 + xm1, B = rm1 + xc, C = rm1 + xp1, D = r0 + xm1, F = r0 + xp1, G = r1 + xm1, H = r1 + xc, I = r1 + xp1;
-      if (pe !== s[B] || pe !== s[D] || pe !== s[F] || pe !== s[H] || pe !== s[A] || pe !== s[C] || pe !== s[G] || pe !== s[I]) {
-        const A1 = rm2 + xm1, B1 = rm2 + xc, C1 = rm2 + xp1, A0 = rm1 + xm2, C4 = rm1 + xp2, D0 = r0 + xm2, F4 = r0 + xp2;
-        const G0 = r1 + xm2, I4 = r1 + xp2, G5 = r2 + xm1, H5 = r2 + xc, I5 = r2 + xp1;
-        xbrCorner(s, E, I, H, F, G, C, D, B, F4, I4, H5, I5, 3, 2, 1);
-        xbrCorner(s, E, C, F, B, I, A, H, D, B1, C1, F4, C4, 1, 3, 0);
-        xbrCorner(s, E, A, B, D, C, G, F, H, D0, A0, B1, A1, 0, 1, 2);
-        xbrCorner(s, E, G, D, H, A, I, B, F, H5, G5, D0, G0, 2, 0, 3);
-      }
-      const o = x * 2;
-      d[o0 + o] = XB_O[0]; d[o0 + o + 1] = XB_O[1]; d[o1 + o] = XB_O[2]; d[o1 + o + 1] = XB_O[3];
-    }
-  }
-}
 function scale2xCanvas(src) {
   const w = src.width, h = src.height, out = document.createElement('canvas');
   out.width = w * 2; out.height = h * 2;
